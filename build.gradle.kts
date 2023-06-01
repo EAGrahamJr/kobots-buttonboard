@@ -58,7 +58,7 @@ tasks {
     create("deployApp") {
         dependsOn("shadowJar")
         doLast {
-            val sshTarget = System.getProperty("remote", "marvin.local")
+            val sshTarget = System.getProperty("remote", "useless.local")
             val name = JAR_NAME
 
             println("Sending $name to $sshTarget")
@@ -73,3 +73,5 @@ tasks {
         }
     }
 }
+
+defaultTasks("build","deployApp")

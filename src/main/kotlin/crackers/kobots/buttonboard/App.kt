@@ -41,8 +41,8 @@ const val USELESS = "useless.local"
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
 fun main() {
-//    System.setProperty(REMOTE_PI, USELESS)
-    val screen: BBScreen = SmallScreen
+    System.setProperty(REMOTE_PI, USELESS)
+    val screen: BBScreen = Screen
     screen.startupSequence()
 
     var running = true

@@ -43,7 +43,7 @@ internal object Menu {
         MenuItem("Morning", special = loadImage("/morning2.png")),
         MenuItem("Daytime", special = loadImage("/daytime2.png")),
         NEXT_ITEM,
-        MenuItem("Exit", EXIT)
+        MenuItem("Exit", EXIT, "/close2.png")
     )
     private val secondMenu = listOf(
         MenuItem("Bed Time", special = loadImage("/bedtime2.png")),
