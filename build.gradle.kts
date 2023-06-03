@@ -20,7 +20,7 @@ dependencies {
     dependencies {
         implementation("com.diozero:diozero-core:$DIOZERO_VER")
         implementation("crackers.kobots:kobots-devices:0.0.1")
-        implementation("com.diozero:diozero-provider-pigpio:$DIOZERO_VER")
+//        implementation("com.diozero:diozero-provider-pigpio:$DIOZERO_VER")
 //    implementation("com.diozero:diozero-provider-remote:$DIOZERO_VER")
         implementation("crackers.automation:hassk:0.0.1")
         implementation("com.typesafe:config:1.4.2")
@@ -41,6 +41,11 @@ kotlinter {
 }
 
 tasks {
+    check {
+//        dependsOn("installKotlinterPrePushHook")
+        dependsOn("formatKotlin")
+    }
+
     /**
      * Build a "shadow jar" for single-runnable deployment
      */

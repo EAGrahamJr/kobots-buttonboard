@@ -16,10 +16,8 @@
 
 package crackers.kobots.buttonboard
 
-import com.typesafe.config.ConfigFactory
 import crackers.hassk.Constants.off
 import crackers.hassk.Constants.on
-import crackers.hassk.HAssKClient
 import crackers.kobots.buttonboard.Menu.ItemType.*
 import crackers.kobots.utilities.loadImage
 
@@ -43,7 +41,7 @@ internal object Menu {
         MenuItem("Morning", special = loadImage("/morning2.png")),
         MenuItem("Daytime", special = loadImage("/daytime2.png")),
         NEXT_ITEM,
-        MenuItem("Exit", EXIT, "/close2.png")
+        MenuItem("Exit", EXIT, special = loadImage("/close2.png"))
     )
     private val secondMenu = listOf(
         MenuItem("Bed Time", special = loadImage("/bedtime2.png")),
@@ -59,9 +57,6 @@ internal object Menu {
     )
 
     private var current = emptyList<MenuItem>()
-    private val hasskClient = with(ConfigFactory.load()) {
-        HAssKClient(getString("ha.token"), getString("ha.server"), getInt("ha.port"))
-    }
 
     /**
      * Evaluates the button vs which menu is showing

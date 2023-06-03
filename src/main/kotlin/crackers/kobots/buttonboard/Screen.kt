@@ -43,7 +43,6 @@ internal object Screen : BBScreen {
 
     private val screen: GrayOled by lazy { SSD1327(SSD1327.ADAFRUIT_STEMMA) }
 
-    private val okStatusImage = loadImage("/smiley.png")
     private var lastDisplayed = Instant.now()
     const val MAX_TIME = 30
 
@@ -81,7 +80,8 @@ internal object Screen : BBScreen {
             clearScreen()
             color = FOREGROUND
             font = menuFont
-            drawImage(okStatusImage, 0, 0, 128, 128, null)
+            val smileyImage = loadImage("/smiley.png")
+            drawImage(smileyImage, 0, 0, 128, 128, null)
         }
 
         lastDisplayed = Instant.now()

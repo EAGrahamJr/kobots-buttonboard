@@ -17,6 +17,8 @@
 package crackers.kobots.buttonboard
 
 import com.diozero.util.SleepUtil
+import com.typesafe.config.ConfigFactory
+import crackers.hassk.HAssKClient
 import crackers.kobots.devices.lighting.NeoKey
 import crackers.kobots.utilities.GOLDENROD
 import crackers.kobots.utilities.PURPLE
@@ -30,44 +32,42 @@ private val keyboard by lazy {
 }
 
 // just to keep from spinning in a stupid tight loop
-private val ACTIVE_DELAY = Duration.ofMillis(50).toNanos()
+private val ACTIVE_DELAY = Duration.ofMillis(20).toNanos()
 private val SLEEP_DELAY = Duration.ofSeconds(1).toNanos()
 
 // TODO temporary while testing
 const val REMOTE_PI = "diozero.remote.hostname"
 const val USELESS = "useless.local"
 
+internal val hasskClient = with(ConfigFactory.load()) {
+    HAssKClient(getString("ha.token"), getString("ha.server"), getInt("ha.port"))
+}
+
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
 fun main() {
-    System.setProperty(REMOTE_PI, USELESS)
+//    System.setProperty(REMOTE_PI, USELESS)
     val screen: BBScreen = Screen
     screen.startupSequence()
 
-    var running = true
     keyboard[3] = Color.RED
     var lastButtonsRead: List<Boolean> = listOf(false, false, false, false)
-    var currentMenu: List<Menu.MenuItem> = emptyList()
 
-    var lastCurrent: List<Menu.MenuItem>? = null
-
-    while (running) {
+    EnvironmentDisplay.start()
+    while (true) {
         try {
             brightness() // adjust per time of day
+            if (!screen.on) buttonColors()
+
             /*
              * This is purely button driven, so use the buttons - try to "debounce" by only detecting changes between
              * iterations. This is because humans are slow
              */
             val currentButtons = keyboard.read()
-            var whichButtonsPressed: List<Int> = emptyList()
-
-            // no change, don't anything, otherwise figure out what was asked for
-            if (currentButtons == lastButtonsRead) {
-                if (!screen.on) buttonsWait()
-            } else {
+            val whichButtonsPressed = if (currentButtons != lastButtonsRead) {
                 lastButtonsRead = currentButtons
-                whichButtonsPressed = currentButtons.mapIndexedNotNull { index, b ->
+                currentButtons.mapIndexedNotNull { index, b ->
                     if (b) {
                         keyboard[index] = Color.YELLOW
                         index
@@ -75,42 +75,39 @@ fun main() {
                         null
                     }
                 }
-
-                // only do anything if the screen is on
-                currentMenu = if (screen.on) {
-                    Menu.execute(whichButtonsPressed).mapIndexed { index, item ->
-                        keyboard[index] = when (item.type) {
-                            Menu.ItemType.NOOP -> Color.BLACK
-                            Menu.ItemType.ACTION -> Color.GREEN
-                            Menu.ItemType.NEXT -> Color.CYAN
-                            Menu.ItemType.PREV -> Color.BLUE
-                            Menu.ItemType.EXIT -> Color.RED
-                        }
-                        item
-                    }
-                } else {
-                    buttonsWait()
-                    emptyList()
-                }
-            }
-
-            if (currentMenu != lastCurrent) {
-                lastCurrent = currentMenu
-            }
-
-            if (currentMenu.isEmpty() && whichButtonsPressed.contains(3)) {
-                running = false
             } else {
-                val buttonWasPressed = whichButtonsPressed.isNotEmpty()
-                screen.execute(buttonWasPressed, currentMenu)
+                emptyList()
             }
+
+            // only do anything if the screen is on
+            val currentMenu = if (screen.on) {
+                Menu.execute(whichButtonsPressed).mapIndexed { index, item ->
+                    keyboard[index] = when (item.type) {
+                        Menu.ItemType.NOOP -> Color.BLACK
+                        Menu.ItemType.ACTION -> Color.GREEN
+                        Menu.ItemType.NEXT -> Color.CYAN
+                        Menu.ItemType.PREV -> Color.BLUE
+                        Menu.ItemType.EXIT -> Color.RED
+                    }
+                    item
+                }
+            } else {
+                emptyList()
+            }
+
+            // exit called for
+            if (currentMenu.isEmpty() && whichButtonsPressed.contains(3)) break
+
+            // update the screen and do the wait bit
+            screen.execute(whichButtonsPressed.isNotEmpty(), currentMenu)
             SleepUtil.busySleep(if (screen.on) ACTIVE_DELAY else SLEEP_DELAY)
         } catch (e: Throwable) {
             LoggerFactory.getLogger("ButtonBox").error("Error found - continuing", e)
         }
     }
+    LoggerFactory.getLogger("ButtonBox").warn("Exiting ")
     keyboard[3] = GOLDENROD
-
+    EnvironmentDisplay.stop()
     screen.close()
     keyboard.close()
 }
@@ -118,7 +115,7 @@ fun main() {
 /**
  * Set "sleeping" colors on the buttons.
  */
-private fun buttonsWait() {
+private fun buttonColors() {
     if ((keyboard color 0).color != PURPLE) {
         (0..2).forEach { keyboard[it] = PURPLE }
         keyboard[3] = Color.RED
@@ -130,9 +127,7 @@ private fun buttonsWait() {
  */
 private fun brightness() {
     LocalTime.now().also { t ->
-        if (t.minute == 0) {
-            val b = if (t.hour >= 22 || t.hour < 8) .01f else .05f
-            if (b != keyboard.pixels.brightness) keyboard.pixels.brightness = b
-        }
+        val b = if (t.hour >= 22 || t.hour < 8) .01f else .05f
+        if (b != keyboard.pixels.brightness) keyboard.pixels.brightness = b
     }
 }
