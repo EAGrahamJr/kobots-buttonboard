@@ -3,7 +3,7 @@
 The world's most expensive remote control for HomeAssistant. Uses
 
 - [HAssK client](https://github.com/EAGrahamJr/HAssK)
-- [kobots=-devices](https://github.com/EAGrahamJr/kobots-devices)
+- [kobots-devices](https://github.com/EAGrahamJr/kobots-devices)
   - and by extension [diozero](https://www.diozero.com/)
 - Lightbend's [Typesafe config](https://github.com/lightbend/config) for the configuration.
 
