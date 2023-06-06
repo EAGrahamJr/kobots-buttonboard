@@ -43,13 +43,14 @@ internal val hasskClient = with(ConfigFactory.load()) {
     HAssKClient(getString("ha.token"), getString("ha.server"), getInt("ha.port"))
 }
 
+internal val mainScreen: BBScreen = Screen
+
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
 fun main() {
 //    System.setProperty(REMOTE_PI, USELESS)
-    val screen: BBScreen = Screen
-    screen.startupSequence()
+    mainScreen.startupSequence()
 
     keyboard[3] = Color.RED
     var lastButtonsRead: List<Boolean> = listOf(false, false, false, false)
@@ -58,7 +59,7 @@ fun main() {
     while (true) {
         try {
             brightness() // adjust per time of day
-            if (!screen.on) buttonColors()
+            if (!mainScreen.on) buttonColors()
 
             /*
              * This is purely button driven, so use the buttons - try to "debounce" by only detecting changes between
@@ -80,7 +81,7 @@ fun main() {
             }
 
             // only do anything if the screen is on
-            val currentMenu = if (screen.on) {
+            val currentMenu = if (mainScreen.on) {
                 Menu.execute(whichButtonsPressed).mapIndexed { index, item ->
                     keyboard[index] = when (item.type) {
                         Menu.ItemType.NOOP -> Color.BLACK
@@ -99,8 +100,8 @@ fun main() {
             if (currentMenu.isEmpty() && whichButtonsPressed.contains(3)) break
 
             // update the screen and do the wait bit
-            screen.execute(whichButtonsPressed.isNotEmpty(), currentMenu)
-            SleepUtil.busySleep(if (screen.on) ACTIVE_DELAY else SLEEP_DELAY)
+            mainScreen.execute(whichButtonsPressed.isNotEmpty(), currentMenu)
+            SleepUtil.busySleep(if (mainScreen.on) ACTIVE_DELAY else SLEEP_DELAY)
         } catch (e: Throwable) {
             LoggerFactory.getLogger("ButtonBox").error("Error found - continuing", e)
         }
@@ -108,7 +109,7 @@ fun main() {
     LoggerFactory.getLogger("ButtonBox").warn("Exiting ")
     keyboard[3] = GOLDENROD
     EnvironmentDisplay.stop()
-    screen.close()
+    mainScreen.close()
     keyboard.close()
 }
 

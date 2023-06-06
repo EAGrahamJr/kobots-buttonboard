@@ -81,6 +81,17 @@ object EnvironmentDisplay : Runnable {
 
     override fun run() {
         try {
+            if (mainScreen.on) {
+                screen.setDisplayOn(true)
+            } else {
+                with(hasskClient) {
+                    if (light("cabinets").state().state == "off") {
+                        screen.setDisplayOn(false)
+                        return
+                    }
+                }
+            }
+
             with(screenGraphics) {
                 color = Color.BLACK
                 fillRect(0, 0, MW, MH)
@@ -156,8 +167,9 @@ object EnvironmentDisplay : Runnable {
 
         font = tempFont
         color = Color.WHITE
-        if (temp == 0)
+        if (temp == 0) {
             scaleImageAt(eekImage, TLOC, 0, MH)
+        }
         drawString("$temp\u2109", TLOC, tempFontMetrics.ascent)
     }
 
