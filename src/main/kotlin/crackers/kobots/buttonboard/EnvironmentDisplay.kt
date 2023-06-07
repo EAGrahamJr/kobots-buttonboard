@@ -20,10 +20,7 @@ import java.util.concurrent.TimeUnit
  * TODO fill this in
  */
 object EnvironmentDisplay : Runnable {
-    private val screen by lazy {
-        val channel = SsdOledCommunicationChannel.I2cCommunicationChannel(I2CDevice(1, SSD1306.DEFAULT_I2C_ADDRESS))
-        SSD1306(channel, SSD1306.Height.SHORT)
-    }
+    private lateinit var screen: SSD1306
     private val screenGraphics: Graphics2D
     private val image: BufferedImage
 
@@ -49,21 +46,24 @@ object EnvironmentDisplay : Runnable {
                 smallFontMetrics = it.getFontMetrics(smallFont)
             }
         }
-
-        screen.clear()
-        screen.setDisplayOn(true)
-        screen.setContrast(0x20.toByte())
     }
 
     private val centerLine = smallFontMetrics.ascent + (MH - smallFontMetrics.height) / 2
 
     fun start() {
+        val channel = SsdOledCommunicationChannel.I2cCommunicationChannel(I2CDevice(1, SSD1306.DEFAULT_I2C_ADDRESS))
+        screen = SSD1306(channel, SSD1306.Height.SHORT).apply {
+            clear()
+            setDisplayOn(true)
+            setContrast(0x20.toByte())
+        }
+
         future = executor.scheduleAtFixedRate(this, 1, 10, TimeUnit.SECONDS)
     }
 
     fun stop() {
         screen.setDisplayOn(false)
-        future.cancel(true)
+        future.cancel(false)
         executor.shutdownNow()
     }
 

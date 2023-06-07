@@ -56,6 +56,7 @@ fun main() {
     var lastButtonsRead: List<Boolean> = listOf(false, false, false, false)
 
     EnvironmentDisplay.start()
+    TheStrip.start()
     while (true) {
         try {
             brightness() // adjust per time of day
@@ -109,6 +110,7 @@ fun main() {
     LoggerFactory.getLogger("ButtonBox").warn("Exiting ")
     keyboard[3] = GOLDENROD
     EnvironmentDisplay.stop()
+    TheStrip.stop()
     mainScreen.close()
     keyboard.close()
 }
