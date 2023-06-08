@@ -41,7 +41,6 @@ object TheStrip {
                 when {
                     now.hour < 7 || now.hour >= 23 -> {
                         if (lastMode != Mode.NIGHT) {
-                            strip.autoWrite = true
                             strip.fill(Color.BLACK)
                             lastMode = Mode.NIGHT
                         }
@@ -49,7 +48,6 @@ object TheStrip {
 
                     now.hour < 8 -> {
                         if (lastMode != Mode.MORNING) {
-                            strip.autoWrite = true
                             strip.brightness = 0.03f
                             strip.fill(GOLDENROD)
                             lastMode = Mode.MORNING
@@ -66,7 +64,6 @@ object TheStrip {
 
                     now.hour >= 21 -> {
                         if (lastMode != Mode.EVENING) {
-                            strip.autoWrite = true
                             strip.brightness = 0.03f
                             strip.fill(Color.RED)
                             lastMode = Mode.EVENING
@@ -75,9 +72,8 @@ object TheStrip {
 
                     else -> {
                         if (lastMode != Mode.PARTY) {
-                            strip.autoWrite = false
                             if (lastMode != Mode.MORNING) {
-                                strip.brightness = 0.5f
+                                strip.brightness = 0.2f
                                 lastMode = Mode.PARTY
                             }
                         }
@@ -102,6 +98,7 @@ object TheStrip {
         }
 
         strip.brightness = 0.1f
+        strip.autoWrite = true
 
         future = executor.submit(runnable)
     }
@@ -110,6 +107,7 @@ object TheStrip {
         running = false
         future.get()
         executor.shutdownNow()
+        strip.fill(Color.BLACK)
     }
 
     private fun showRainbow() {
