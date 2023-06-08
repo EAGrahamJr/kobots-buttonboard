@@ -6,6 +6,7 @@ import crackers.kobots.devices.expander.AdafruitSeeSaw
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.utilities.GOLDENROD
 import crackers.kobots.utilities.colorIntervalFromHSB
+import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.Duration
 import java.time.LocalTime
@@ -76,7 +77,7 @@ object TheStrip {
                         if (lastMode != Mode.PARTY) {
                             strip.autoWrite = false
                             if (lastMode != Mode.MORNING) {
-                                strip.brightness = 0.1f
+                                strip.brightness = 0.5f
                                 lastMode = Mode.PARTY
                             }
                         }
@@ -92,7 +93,14 @@ object TheStrip {
     }
 
     fun start() {
-        strip = NeoPixel(AdafruitSeeSaw(I2CDevice(1, 0x60)), 30, 15)
+        for (i in 0 until 100) try {
+            strip = NeoPixel(AdafruitSeeSaw(I2CDevice(1, 0x60)), 30, 15)
+            LoggerFactory.getLogger(this::class.java).warn("Took $i tries to initialize")
+            break
+        } catch (_: Throwable) {
+            SleepUtil.busySleep(50)
+        }
+
         strip.brightness = 0.1f
 
         future = executor.submit(runnable)
