@@ -17,6 +17,7 @@ import java.util.concurrent.Future
  * Run pretty stuff on the Neopixel strip.
  */
 object TheStrip {
+    private lateinit var seeSaw: AdafruitSeeSaw
     private lateinit var strip: NeoPixel
 
     // 0 and 360 are the same, so back off (and the 30 makes this even easier)
@@ -78,7 +79,6 @@ object TheStrip {
                             }
                         }
                         showRainbow()
-                        strip.show()
                     }
                 }
             } catch (e: Exception) {
@@ -90,7 +90,8 @@ object TheStrip {
 
     fun start() {
         for (i in 0 until 100) try {
-            strip = NeoPixel(AdafruitSeeSaw(I2CDevice(1, 0x60)), 30, 15)
+            seeSaw = AdafruitSeeSaw(I2CDevice(1, 0x60))
+            strip = NeoPixel(seeSaw, 30, 15)
             LoggerFactory.getLogger(this::class.java).warn("Took $i tries to initialize")
             break
         } catch (_: Throwable) {
@@ -108,6 +109,7 @@ object TheStrip {
         future.get()
         executor.shutdownNow()
         strip.fill(Color.BLACK)
+        seeSaw.close()
     }
 
     private fun showRainbow() {
