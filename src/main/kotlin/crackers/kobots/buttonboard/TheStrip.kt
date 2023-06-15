@@ -5,6 +5,7 @@ import com.diozero.util.SleepUtil
 import crackers.kobots.devices.expander.AdafruitSeeSaw
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.utilities.GOLDENROD
+import crackers.kobots.utilities.KobotSleep
 import crackers.kobots.utilities.colorIntervalFromHSB
 import org.slf4j.LoggerFactory
 import java.awt.Color
@@ -109,6 +110,7 @@ object TheStrip {
         future.get()
         executor.shutdownNow()
         strip.fill(Color.BLACK)
+        seeSaw.softwareReset()
         seeSaw.close()
     }
 
@@ -116,6 +118,7 @@ object TheStrip {
         for (count in 0..29) {
             strip[count] = rainbowColors[lastRainbowColorIndex++]
             if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
+            KobotSleep.millis(10)
         }
         lastRainbowColorIndex++
         if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0

@@ -45,6 +45,8 @@ internal val hasskClient = with(ConfigFactory.load()) {
 
 internal val mainScreen: BBScreen = Screen
 
+private val logger = LoggerFactory.getLogger("ButtonBox")
+
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
@@ -104,10 +106,10 @@ fun main() {
             mainScreen.execute(whichButtonsPressed.isNotEmpty(), currentMenu)
             SleepUtil.busySleep(if (mainScreen.on) ACTIVE_DELAY else SLEEP_DELAY)
         } catch (e: Throwable) {
-            LoggerFactory.getLogger("ButtonBox").error("Error found - continuing", e)
+            logger.error("Error found - continuing", e)
         }
     }
-    LoggerFactory.getLogger("ButtonBox").warn("Exiting ")
+    logger.warn("Exiting ")
     keyboard[3] = GOLDENROD
     EnvironmentDisplay.stop()
     TheStrip.stop()
@@ -120,6 +122,7 @@ fun main() {
  */
 private fun buttonColors() {
     if ((keyboard color 0).color != PURPLE) {
+        logger.warn("Updating button colors")
         (0..2).forEach { keyboard[it] = PURPLE }
         keyboard[3] = Color.RED
     }
@@ -131,6 +134,9 @@ private fun buttonColors() {
 private fun brightness() {
     LocalTime.now().also { t ->
         val b = if (t.hour >= 22 || t.hour < 8) .01f else .05f
-        if (b != keyboard.pixels.brightness) keyboard.pixels.brightness = b
+        if (b != keyboard.pixels.brightness) {
+            keyboard.pixels.brightness = b
+            logger.warn("Updating brightness")
+        }
     }
 }
