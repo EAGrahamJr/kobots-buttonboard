@@ -13,6 +13,7 @@ import java.time.Duration
 import java.time.LocalTime
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Run pretty stuff on the Neopixel strip.
@@ -33,10 +34,10 @@ object TheStrip {
 
     private lateinit var future: Future<*>
     private val executor = Executors.newSingleThreadScheduledExecutor()
-    private var running = true
+    private val running = AtomicBoolean(true)
     private val runnable = Runnable {
-        val pause = Duration.ofSeconds(3).toNanos()
-        while (running) {
+        val pause = Duration.ofSeconds(5).toNanos()
+        while (running.get()) {
             try {
                 // check the time of day vs mode
                 val now = LocalTime.now()
@@ -87,6 +88,9 @@ object TheStrip {
             }
             SleepUtil.busySleep(pause)
         }
+
+        strip.fill(Color.BLACK)
+        seeSaw.softwareReset()
     }
 
     fun start() {
@@ -106,11 +110,9 @@ object TheStrip {
     }
 
     fun stop() {
-        running = false
+        running.set(false)
         future.get()
         executor.shutdownNow()
-        strip.fill(Color.BLACK)
-        seeSaw.softwareReset()
         seeSaw.close()
     }
 
@@ -118,7 +120,7 @@ object TheStrip {
         for (count in 0..29) {
             strip[count] = rainbowColors[lastRainbowColorIndex++]
             if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
-            KobotSleep.millis(10)
+            KobotSleep.millis(50)
         }
         lastRainbowColorIndex++
         if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0

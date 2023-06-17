@@ -20,5 +20,7 @@ JAVA="/home/crackers/java"
 JAR="/home/crackers/bb-app.jar"
 RUNTHIS="-jar $JAR"
 
-#echo $RUNTHIS
+# run the python script to clear the seesaw driver
+python $HOME/seesaw.py
+
 sudo $JAVA -ea -agentlib:jdwp=transport=dt_socket,server=y,suspend=$SUSPEND,address=*:5005 $RUNTHIS
