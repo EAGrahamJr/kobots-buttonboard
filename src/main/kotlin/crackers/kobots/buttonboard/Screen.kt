@@ -28,11 +28,15 @@ import java.awt.image.BufferedImage
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalTime
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 /**
  * Displays some system info for a while, before sleeping, and then going dark.
  */
 internal object Screen : BBScreen {
+    private lateinit var blankFuture: ScheduledFuture<*>
     private val screenGraphics: Graphics2D
     private val image: BufferedImage
     private val menuFont = Font(Font.SANS_SERIF, Font.PLAIN, 12)
@@ -70,7 +74,10 @@ internal object Screen : BBScreen {
             screen.displayOn = b
         }
 
-    override fun close() = screen.close()
+    override fun close() {
+        blankFuture.cancel(true)
+        screen.close()
+    }
 
     /**
      * Dumb thing for the fun of it
@@ -85,6 +92,16 @@ internal object Screen : BBScreen {
         }
 
         lastDisplayed = Instant.now()
+        // start a background timer to turn off the screen on inactivity
+        blankFuture = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate({
+            if (screen.displayOn && runFlag.get()) {
+                Duration.between(lastDisplayed, Instant.now()).toSeconds().toInt().also { elapsed ->
+                    if (elapsed >= MAX_TIME) {
+                        screen.displayOn = false
+                    }
+                }
+            }
+        }, 5, 5, TimeUnit.SECONDS)
     }
 
     /**
@@ -97,20 +114,14 @@ internal object Screen : BBScreen {
         if (buttonsPressed) {
             lastDisplayed = now
             screen.displayOn = true
-            lastMenu = null
+//            lastMenu = null
         }
 
         // check the timer - turn the screen off if on too long
         if (screen.displayOn) {
-            Duration.between(lastDisplayed, now).toSeconds().toInt().also { elapsed ->
-                if (elapsed >= MAX_TIME) {
-                    screen.displayOn = false
-                } else {
-                    showMenu(currentMenu)
-                    if (currentMenu.isNotEmpty()) showTime()
-                    showIt()
-                }
-            }
+            showMenu(currentMenu)
+            if (currentMenu.isNotEmpty()) showTime()
+            showIt()
         }
     }
 

@@ -118,6 +118,7 @@ object TheStrip {
 
     private fun showRainbow() {
         for (count in 0..29) {
+            runFlag.get() && return
             strip[count] = rainbowColors[lastRainbowColorIndex++]
             if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
             KobotSleep.millis(50)

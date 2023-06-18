@@ -26,13 +26,15 @@ import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.Duration
 import java.time.LocalTime
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.system.exitProcess
 
 private val keyboard by lazy {
     NeoKey().apply { pixels.brightness = 0.05f }
 }
 
 // just to keep from spinning in a stupid tight loop
-private val ACTIVE_DELAY = Duration.ofMillis(20).toNanos()
+private val ACTIVE_DELAY = Duration.ofMillis(10).toNanos()
 private val SLEEP_DELAY = Duration.ofSeconds(1).toNanos()
 
 // TODO temporary while testing
@@ -47,6 +49,8 @@ internal val mainScreen: BBScreen = Screen
 
 private val logger = LoggerFactory.getLogger("ButtonBox")
 
+internal val runFlag = AtomicBoolean(true)
+
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
@@ -59,7 +63,7 @@ fun main() {
 
     EnvironmentDisplay.start()
     TheStrip.start()
-    while (true) {
+    while (runFlag.get()) {
         try {
             brightness() // adjust per time of day
             if (!mainScreen.on) buttonColors()
@@ -85,26 +89,34 @@ fun main() {
 
             // only do anything if the screen is on
             val currentMenu = if (mainScreen.on) {
-                Menu.execute(whichButtonsPressed).mapIndexed { index, item ->
-                    keyboard[index] = when (item.type) {
-                        Menu.ItemType.NOOP -> Color.BLACK
-                        Menu.ItemType.ACTION -> Color.GREEN
-                        Menu.ItemType.NEXT -> Color.CYAN
-                        Menu.ItemType.PREV -> Color.BLUE
-                        Menu.ItemType.EXIT -> Color.RED
-                    }
-                    item
-                }
+                Menu.execute(whichButtonsPressed)
             } else {
                 emptyList()
             }
 
             // exit called for
-            if (currentMenu.isEmpty() && whichButtonsPressed.contains(3)) break
-
-            // update the screen and do the wait bit
-            mainScreen.execute(whichButtonsPressed.isNotEmpty(), currentMenu)
-            SleepUtil.busySleep(if (mainScreen.on) ACTIVE_DELAY else SLEEP_DELAY)
+            if (currentMenu.isEmpty() && whichButtonsPressed.contains(3)) {
+                runFlag.set(false)
+            } else {
+                // update the screen and do the wait bit
+                mainScreen.execute(whichButtonsPressed.isNotEmpty(), currentMenu)
+                val pollDelay =
+                    if (whichButtonsPressed.isNotEmpty()) {
+                        currentMenu.forEachIndexed { index, item ->
+                            keyboard[index] = when (item.type) {
+                                Menu.ItemType.NOOP -> Color.BLACK
+                                Menu.ItemType.ACTION -> Color.GREEN
+                                Menu.ItemType.NEXT -> Color.CYAN
+                                Menu.ItemType.PREV -> Color.BLUE
+                                Menu.ItemType.EXIT -> Color.RED
+                            }
+                        }
+                        0L
+                    } else {
+                        ACTIVE_DELAY
+                    }
+                SleepUtil.busySleep(if (mainScreen.on) pollDelay else SLEEP_DELAY)
+            }
         } catch (e: Throwable) {
             logger.error("Error found - continuing", e)
         }
@@ -115,6 +127,7 @@ fun main() {
     TheStrip.stop()
     mainScreen.close()
     keyboard.close()
+    exitProcess(0)
 }
 
 /**
