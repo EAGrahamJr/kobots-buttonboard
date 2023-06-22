@@ -4,6 +4,7 @@ import com.diozero.api.I2CDevice
 import com.diozero.devices.oled.SSD1306
 import com.diozero.devices.oled.SsdOledCommunicationChannel
 import com.diozero.sbc.LocalSystemInfo
+import crackers.kobots.buttonboard.TheActions.hasskClient
 import crackers.kobots.utilities.loadImage
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
@@ -81,16 +82,16 @@ object EnvironmentDisplay : Runnable {
 
     override fun run() {
         try {
-            if (mainScreen.on) {
-                screen.setDisplayOn(true)
-            } else {
-                with(hasskClient) {
-                    if (light("cabinets").state().state == "off") {
-                        screen.setDisplayOn(false)
-                        return
-                    }
-                }
-            }
+//            if (mainScreen.on) {
+//                screen.setDisplayOn(true)
+//            } else {
+//                with(hasskClient) {
+//                    if (light("cabinets").state().state == "off") {
+//                        screen.setDisplayOn(false)
+//                        return
+//                    }
+//                }
+//            }
 
             with(screenGraphics) {
                 color = Color.BLACK

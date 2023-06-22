@@ -93,20 +93,23 @@ object TheStrip {
         seeSaw.softwareReset()
     }
 
-    fun start() {
+    fun start(): Boolean {
+        val logger = LoggerFactory.getLogger(this::class.java)
         for (i in 0 until 100) try {
             seeSaw = AdafruitSeeSaw(I2CDevice(1, 0x60))
             strip = NeoPixel(seeSaw, 30, 15)
-            LoggerFactory.getLogger(this::class.java).warn("Took $i tries to initialize")
-            break
+            logger.warn("Took $i tries to initialize")
+
+            strip.brightness = 0.1f
+            strip.autoWrite = true
+
+            future = executor.submit(runnable)
+            return true
         } catch (_: Throwable) {
             SleepUtil.busySleep(50)
         }
-
-        strip.brightness = 0.1f
-        strip.autoWrite = true
-
-        future = executor.submit(runnable)
+        logger.error("Failed to initialize")
+        return false
     }
 
     fun stop() {
@@ -118,7 +121,7 @@ object TheStrip {
 
     private fun showRainbow() {
         for (count in 0..29) {
-            runFlag.get() && return
+            runFlag.get() || return
             strip[count] = rainbowColors[lastRainbowColorIndex++]
             if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
             KobotSleep.millis(50)

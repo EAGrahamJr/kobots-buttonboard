@@ -23,7 +23,7 @@ The world's most expensive remote control for HomeAssistant. Uses
 | Extra long STEMMA cables                  |      $10.00 |
 | **TOTAL**                                 | **$286.00** |
 
-### Mk 2
+### V1, Mk 2
 
 ![Holy cow!](most-expensive.jpg)
 
@@ -31,3 +31,19 @@ The world's most expensive remote control for HomeAssistant. Uses
 - Each button corresponds to a menu selection on the larger screen (next/prev buttons on others)
 - Also has a "sleep" mode to prevent screen burn in (from Mk 1)<br/>![Snooze](sleeping.jpg)
   - Exit button is active, others just "wake up" the menu
+
+### V2
+
+There were some timing issues, as well as the buttons not responding quickly. This was also a case of trying to do too
+much for no real reason.
+
+![Smaller](V2.png)
+
+- Mode defined for time of day
+- Single icon display for each button based on mode/action
+- Button colors corespond to icons (more or less)
+- Button actions based on mode
+- Neopixel strip just runs on its own
+  - shutdown actually works now (?)
+- App exit on multiple buttons pressed
+- Snazzy minifig to help hold the I2C cable

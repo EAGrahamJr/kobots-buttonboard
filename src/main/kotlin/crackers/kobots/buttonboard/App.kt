@@ -16,57 +16,58 @@
 
 package crackers.kobots.buttonboard
 
-import com.diozero.util.SleepUtil
-import com.typesafe.config.ConfigFactory
-import crackers.hassk.HAssKClient
+import crackers.kobots.buttonboard.TheScreen.showIcons
 import crackers.kobots.devices.lighting.NeoKey
-import crackers.kobots.utilities.GOLDENROD
-import crackers.kobots.utilities.PURPLE
+import crackers.kobots.utilities.KobotSleep
 import org.slf4j.LoggerFactory
 import java.awt.Color
-import java.time.Duration
 import java.time.LocalTime
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 
 private val keyboard by lazy {
     NeoKey().apply { pixels.brightness = 0.05f }
 }
 
-// just to keep from spinning in a stupid tight loop
-private val ACTIVE_DELAY = Duration.ofMillis(10).toNanos()
-private val SLEEP_DELAY = Duration.ofSeconds(1).toNanos()
-
 // TODO temporary while testing
 const val REMOTE_PI = "diozero.remote.hostname"
 const val USELESS = "useless.local"
-
-internal val hasskClient = with(ConfigFactory.load()) {
-    HAssKClient(getString("ha.token"), getString("ha.server"), getInt("ha.port"))
-}
-
-internal val mainScreen: BBScreen = Screen
 
 private val logger = LoggerFactory.getLogger("ButtonBox")
 
 internal val runFlag = AtomicBoolean(true)
 
+internal val currentMode = AtomicReference(Mode.NIGHT)
+
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
 fun main() {
+    val isRemote = false
 //    System.setProperty(REMOTE_PI, USELESS)
-    mainScreen.startupSequence()
 
     keyboard[3] = Color.RED
     var lastButtonsRead: List<Boolean> = listOf(false, false, false, false)
 
-    EnvironmentDisplay.start()
-    TheStrip.start()
+    if (!isRemote) TheStrip.start()
     while (runFlag.get()) {
         try {
-            brightness() // adjust per time of day
-            if (!mainScreen.on) buttonColors()
+            // adjust per time of day
+            val hour = LocalTime.now().hour
+            val mode = when {
+                hour <= 6 -> Mode.NIGHT
+                hour <= 8 -> Mode.MORNING
+                hour <= 20 -> Mode.DAYTIME
+                else -> Mode.EVENING
+            }
+            if (mode != currentMode.getAndSet(mode)) {
+                keyboard.brightness = mode.brightness
+                showIcons(mode)
+                mode.colors.forEachIndexed { index, color ->
+                    keyboard[index] = color
+                }
+            }
 
             /*
              * This is purely button driven, so use the buttons - try to "debounce" by only detecting changes between
@@ -86,70 +87,23 @@ fun main() {
             } else {
                 emptyList()
             }
-
-            // only do anything if the screen is on
-            val currentMenu = if (mainScreen.on) {
-                Menu.execute(whichButtonsPressed)
-            } else {
-                emptyList()
-            }
-
-            // exit called for
-            if (currentMenu.isEmpty() && whichButtonsPressed.contains(3)) {
+            if (whichButtonsPressed.size > 1) {
                 runFlag.set(false)
             } else {
-                // update the screen and do the wait bit
-                mainScreen.execute(whichButtonsPressed.isNotEmpty(), currentMenu)
-                val pollDelay =
-                    if (whichButtonsPressed.isNotEmpty()) {
-                        currentMenu.forEachIndexed { index, item ->
-                            keyboard[index] = when (item.type) {
-                                Menu.ItemType.NOOP -> Color.BLACK
-                                Menu.ItemType.ACTION -> Color.GREEN
-                                Menu.ItemType.NEXT -> Color.CYAN
-                                Menu.ItemType.PREV -> Color.BLUE
-                                Menu.ItemType.EXIT -> Color.RED
-                            }
-                        }
-                        0L
-                    } else {
-                        ACTIVE_DELAY
-                    }
-                SleepUtil.busySleep(if (mainScreen.on) pollDelay else SLEEP_DELAY)
+                whichButtonsPressed.firstOrNull()?.let { button ->
+                    TheActions.doStuff(button, mode)
+                    keyboard[button] = mode.colors[button]
+                }
             }
         } catch (e: Throwable) {
             logger.error("Error found - continuing", e)
         }
+        KobotSleep.millis(50)
     }
+    keyboard.fill(Color.RED)
     logger.warn("Exiting ")
-    keyboard[3] = GOLDENROD
-    EnvironmentDisplay.stop()
-    TheStrip.stop()
-    mainScreen.close()
+    if (!isRemote) TheStrip.stop()
+    TheScreen.close()
     keyboard.close()
     exitProcess(0)
-}
-
-/**
- * Set "sleeping" colors on the buttons.
- */
-private fun buttonColors() {
-    if ((keyboard color 0).color != PURPLE) {
-        logger.warn("Updating button colors")
-        (0..2).forEach { keyboard[it] = PURPLE }
-        keyboard[3] = Color.RED
-    }
-}
-
-/**
- * Adjust brightness according to the hour of day.
- */
-private fun brightness() {
-    LocalTime.now().also { t ->
-        val b = if (t.hour >= 22 || t.hour < 8) .01f else .05f
-        if (b != keyboard.pixels.brightness) {
-            keyboard.pixels.brightness = b
-            logger.warn("Updating brightness")
-        }
-    }
 }
