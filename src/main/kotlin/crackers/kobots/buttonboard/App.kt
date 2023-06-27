@@ -56,7 +56,7 @@ fun main() {
             // adjust per time of day
             val hour = LocalTime.now().hour
             val mode = when {
-                hour <= 6 -> Mode.NIGHT
+                hour in (1..6) -> Mode.NIGHT
                 hour <= 8 -> Mode.MORNING
                 hour <= 20 -> Mode.DAYTIME
                 else -> Mode.EVENING

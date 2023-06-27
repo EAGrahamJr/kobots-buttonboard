@@ -18,7 +18,7 @@ internal enum class Mode(
     NIGHT(
         listOf(Actions.TOP, Actions.MORNING, Actions.OFFICE, Actions.BEDROOM),
         listOf(Images.LIGHTBULB, Images.SUN, Images.PRINTER, Images.BED),
-        listOf(Color.GREEN, GOLDENROD, Color.ORANGE, Color.PINK),
+        listOf(Color.GREEN, GOLDENROD, Color.BLUE, Color.PINK),
         .01f
     ),
     MORNING(
@@ -35,7 +35,7 @@ internal enum class Mode(
     EVENING(
         listOf(Actions.BEDTIME, Actions.LATE_NIGHT, Actions.NOT_ALL, Actions.TOP),
         listOf(Images.BED, Images.MOON, Images.EXIT, Images.LIGHTBULB),
-        listOf(Color.PINK, Color.RED, Color.BLUE, Color.GREEN),
+        listOf(Color.PINK, Color.RED, Color.DARK_GRAY, Color.GREEN),
         .05f
     )
 }
