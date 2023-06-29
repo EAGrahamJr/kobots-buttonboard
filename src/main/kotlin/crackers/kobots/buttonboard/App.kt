@@ -26,10 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 
-private val keyboard by lazy {
-    NeoKey().apply { pixels.brightness = 0.05f }
-}
-
 // TODO temporary while testing
 const val REMOTE_PI = "diozero.remote.hostname"
 const val USELESS = "useless.local"
@@ -40,17 +36,29 @@ internal val runFlag = AtomicBoolean(true)
 
 internal val currentMode = AtomicReference(Mode.NIGHT)
 
+private var _remote: Boolean = false
+
+internal val isRemote: Boolean
+    get() = _remote
+
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
-fun main() {
-    val isRemote = false
-//    System.setProperty(REMOTE_PI, USELESS)
+fun main(args: Array<String>) {
+    _remote = if (args.isNotEmpty()) {
+        System.setProperty(REMOTE_PI, args[0])
+        true
+    } else {
+        false
+    }
+
+    val keyboard = NeoKey().apply { pixels.brightness = 0.05f }
 
     keyboard[3] = Color.RED
     var lastButtonsRead: List<Boolean> = listOf(false, false, false, false)
 
-    if (!isRemote) TheStrip.start()
+    TheStrip.start()
+    EnvironmentDisplay.start()
     while (runFlag.get()) {
         try {
             // adjust per time of day
@@ -102,6 +110,7 @@ fun main() {
     }
     keyboard.fill(Color.RED)
     logger.warn("Exiting ")
+    EnvironmentDisplay.stop()
     if (!isRemote) TheStrip.stop()
     TheScreen.close()
     keyboard.close()

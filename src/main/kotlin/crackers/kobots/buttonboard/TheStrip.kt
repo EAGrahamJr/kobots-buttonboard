@@ -2,18 +2,16 @@ package crackers.kobots.buttonboard
 
 import com.diozero.api.I2CDevice
 import com.diozero.util.SleepUtil
-import crackers.kobots.devices.expander.AdafruitSeeSaw
 import crackers.kobots.devices.lighting.NeoPixel
+import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
 import crackers.kobots.utilities.GOLDENROD
 import crackers.kobots.utilities.KobotSleep
 import crackers.kobots.utilities.colorIntervalFromHSB
 import org.slf4j.LoggerFactory
 import java.awt.Color
-import java.time.Duration
 import java.time.LocalTime
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Run pretty stuff on the Neopixel strip.
@@ -33,11 +31,10 @@ object TheStrip {
     private var lastMode: Mode? = null
 
     private lateinit var future: Future<*>
-    private val executor = Executors.newSingleThreadScheduledExecutor()
-    private val running = AtomicBoolean(true)
+    private val executor = Executors.newSingleThreadExecutor()
+
     private val runnable = Runnable {
-        val pause = Duration.ofSeconds(5).toNanos()
-        while (running.get()) {
+        while (runFlag.get()) {
             try {
                 // check the time of day vs mode
                 val now = LocalTime.now()
@@ -86,7 +83,7 @@ object TheStrip {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            SleepUtil.busySleep(pause)
+            KobotSleep.seconds(5)
         }
 
         strip.fill(Color.BLACK)
@@ -94,6 +91,8 @@ object TheStrip {
     }
 
     fun start(): Boolean {
+        if (isRemote) return true
+
         val logger = LoggerFactory.getLogger(this::class.java)
         for (i in 0 until 100) try {
             seeSaw = AdafruitSeeSaw(I2CDevice(1, 0x60))
@@ -113,10 +112,11 @@ object TheStrip {
     }
 
     fun stop() {
-        running.set(false)
-        future.get()
-        executor.shutdownNow()
-        seeSaw.close()
+        if (::future.isInitialized) {
+            future.get()
+            executor.shutdownNow()
+            seeSaw.close()
+        }
     }
 
     private fun showRainbow() {
