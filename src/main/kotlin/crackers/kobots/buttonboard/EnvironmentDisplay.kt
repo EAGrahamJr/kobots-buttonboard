@@ -85,7 +85,7 @@ object EnvironmentDisplay : Runnable {
     override fun run() {
         // leave it off at night
         val now = LocalDateTime.now()
-        if (now.let { it.hour >= 0 && it.hour <= 6 }) {
+        if (now.let { it.hour >= 23 && it.hour <= 6 }) {
             screen.displayOn = false
             return
         }
