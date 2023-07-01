@@ -1,6 +1,6 @@
 plugins {
     application
-    kotlin("jvm") version "1.8.21"
+    kotlin("jvm") version "1.8.22"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.jmailen.kotlinter") version "3.12.0"
 }
@@ -17,8 +17,9 @@ val DIOZERO_VER = "1.4.0"
 val JAR_NAME = "bb-app"
 
 dependencies {
+    implementation("com.apptasticsoftware:rssreader:3.4.5")
     implementation("com.diozero:diozero-core:$DIOZERO_VER")
-    implementation("crackers.kobots:kobots-devices:0.0.6")
+    implementation("crackers.kobots:kobots-devices:0.1.0")
 //    implementation("com.diozero:diozero-provider-pigpio:$DIOZERO_VER")
 //    implementation("com.diozero:diozero-provider-remote:$DIOZERO_VER")
     implementation("crackers.automation:hassk:0.0.1")

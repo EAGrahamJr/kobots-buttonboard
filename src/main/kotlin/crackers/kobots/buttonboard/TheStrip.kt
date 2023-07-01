@@ -87,7 +87,6 @@ object TheStrip {
         }
 
         strip.fill(Color.BLACK)
-        seeSaw.softwareReset()
     }
 
     fun start(): Boolean {

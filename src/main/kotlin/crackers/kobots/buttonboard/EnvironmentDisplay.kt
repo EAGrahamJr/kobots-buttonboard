@@ -1,5 +1,6 @@
 package crackers.kobots.buttonboard
 
+import com.apptasticsoftware.rssreader.RssReader
 import crackers.kobots.buttonboard.TheActions.hasskClient
 import crackers.kobots.devices.display.SSD1327
 import crackers.kobots.utilities.center
@@ -15,6 +16,7 @@ import java.time.LocalDateTime
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
+import java.util.stream.Collectors
 import kotlin.properties.Delegates
 
 /**
@@ -39,7 +41,7 @@ object EnvironmentDisplay : Runnable {
     private const val MW = 128
     private const val MH = 128
     private const val TEMP_HEIGHT = 40
-    private var startAgendaAt: Int by Delegates.notNull()
+    private var bottomStartsAt: Int by Delegates.notNull()
 
     init {
         image = BufferedImage(MW, MH, BufferedImage.TYPE_BYTE_GRAY).also { img: BufferedImage ->
@@ -71,7 +73,7 @@ object EnvironmentDisplay : Runnable {
             displayOn = false
             clear()
         }
-        future = executor.scheduleAtFixedRate(this, 1, 300, TimeUnit.SECONDS)
+        future = executor.scheduleAtFixedRate(this, 1, 600, TimeUnit.SECONDS)
     }
 
     fun stop() {
@@ -85,7 +87,7 @@ object EnvironmentDisplay : Runnable {
     override fun run() {
         // leave it off at night
         val now = LocalDateTime.now()
-        if (now.let { it.hour >= 23 && it.hour <= 6 }) {
+        if (now.let { it.hour >= 23 || it.hour <= 6 }) {
             screen.displayOn = false
             return
         }
@@ -96,7 +98,8 @@ object EnvironmentDisplay : Runnable {
                 screenGraphics.showDate(now)
             }
             screenGraphics.showOutside()
-            screenGraphics.showAgenda(now)
+//            screenGraphics.showAgenda(now)
+            screenGraphics.showNews()
 
             with(screen) {
                 display(image)
@@ -117,7 +120,7 @@ object EnvironmentDisplay : Runnable {
         val date = "${now.dayOfWeek.name.substring(0, 3)}  ${now.month} ${now.dayOfMonth}"
         val x = fm.center(date, MW)
         drawString(date, x, TEMP_HEIGHT + fm.height)
-        startAgendaAt = TEMP_HEIGHT + fm.height + 2
+        bottomStartsAt = TEMP_HEIGHT + fm.height + 2
     }
 
     private var lastState: String? = null
@@ -158,18 +161,22 @@ object EnvironmentDisplay : Runnable {
         drawImage(image, x, y, width, height, null)
     }
 
-    private fun Graphics2D.showAgenda(now: LocalDateTime) {
-        // TODO at this font size, we can display 5 lines
-        val agenda =
-            "13:00 - Casey\n14:30 - Ed\n15:00 - Casey\n16:00 - Ed\n17:00 - Casey\n18:00 - Ed\n19:00 - Casey\n20:00 - Ed\n21:00 - Casey\n22:00 - Ed\n23:00 - Casey\n24:00 - Ed"
-        val agendaLines = agenda.split("\n")
+    private const val RSS_FEED = "http://feeds.washingtonpost.com/rss/national?itid=lk_inline_manual_32"
+    private val reader = RssReader()
+
+    private fun Graphics2D.showNews() {
+        val feed = reader.read(RSS_FEED).collect(Collectors.toList()).map { "* ${it.title.get()}" }
+        showBottom(feed)
+    }
+
+    private fun Graphics2D.showBottom(lines: List<String>) {
         color = Color.BLACK
-        fillRect(0, startAgendaAt, MW, MH)
+        fillRect(0, bottomStartsAt, MW, MH)
 
         color = Color.WHITE
         font = agendaFont
-        agendaLines.forEachIndexed { index, line ->
-            drawString(line, 0, startAgendaAt + (index + 1) * agendaLineHeight)
+        lines.forEachIndexed { index, line ->
+            drawString(line, 0, bottomStartsAt + (index + 1) * agendaLineHeight)
         }
     }
 }
