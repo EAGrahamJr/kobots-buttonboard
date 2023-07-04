@@ -4,6 +4,7 @@ import com.typesafe.config.ConfigFactory
 import crackers.hassk.Constants.off
 import crackers.hassk.Constants.on
 import crackers.hassk.HAssKClient
+import org.tinylog.Logger
 
 /**
  * What to do when a button is pressed.
@@ -25,6 +26,7 @@ object TheActions {
     }
 
     private fun doAction(action: Actions) {
+        Logger.warn("Doing action {}", action)
         with(hasskClient) {
             when (action) {
                 Actions.TOP -> scene("top_button") turn on

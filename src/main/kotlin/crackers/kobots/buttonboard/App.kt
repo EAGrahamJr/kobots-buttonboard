@@ -17,7 +17,7 @@
 package crackers.kobots.buttonboard
 
 import crackers.kobots.buttonboard.TheScreen.showIcons
-import crackers.kobots.devices.lighting.NeoKey
+import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.utilities.KobotSleep
 import org.slf4j.LoggerFactory
 import java.awt.Color

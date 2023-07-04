@@ -3,7 +3,9 @@ package crackers.kobots.buttonboard
 import com.apptasticsoftware.rssreader.RssReader
 import crackers.kobots.buttonboard.TheActions.hasskClient
 import crackers.kobots.devices.display.SSD1327
+import crackers.kobots.utilities.KobotSleep
 import crackers.kobots.utilities.center
+import crackers.kobots.utilities.elapsed
 import crackers.kobots.utilities.loadImage
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
@@ -12,12 +14,13 @@ import java.awt.Font
 import java.awt.FontMetrics
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
+import java.time.Duration
+import java.time.Instant
 import java.time.LocalDateTime
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
-import kotlin.properties.Delegates
 
 /**
  * Weather and agenda display.
@@ -34,24 +37,29 @@ object EnvironmentDisplay : Runnable {
 
     private val tempFont = Font(Font.SANS_SERIF, Font.PLAIN, 32)
     private val tempFontMetrics: FontMetrics
-    private val agendaFont = Font(Font.SANS_SERIF, Font.PLAIN, 9)
-    private val agentaFontMetrics: FontMetrics
+    private val dateFont = Font(Font.SANS_SERIF, Font.BOLD, 14)
+    private val dateFontMetrics: FontMetrics
+    private val agendaFont = Font(Font.SANS_SERIF, Font.PLAIN, 11)
+    private val agendaFontMetrics: FontMetrics
     private val agendaLineHeight: Int
 
-    private const val MW = 128
-    private const val MH = 128
+    private const val MAX_W = 128
+    private const val MAX_H = 128
     private const val TEMP_HEIGHT = 40
-    private var bottomStartsAt: Int by Delegates.notNull()
 
     init {
-        image = BufferedImage(MW, MH, BufferedImage.TYPE_BYTE_GRAY).also { img: BufferedImage ->
+        image = BufferedImage(MAX_W, MAX_H, BufferedImage.TYPE_BYTE_GRAY).also { img: BufferedImage ->
             screenGraphics = (img.graphics as Graphics2D).also {
                 tempFontMetrics = it.getFontMetrics(tempFont)
-                agentaFontMetrics = it.getFontMetrics(agendaFont)
-                agendaLineHeight = agentaFontMetrics.height + 1
+                agendaFontMetrics = it.getFontMetrics(agendaFont)
+                agendaLineHeight = agendaFontMetrics.height + 1
+                dateFontMetrics = it.getFontMetrics(dateFont)
             }
         }
     }
+
+    private val dateBottom = TEMP_HEIGHT + dateFontMetrics.height
+    private val newsStartsAt = dateBottom + 5
 
     private val images by lazy {
         mapOf(
@@ -68,12 +76,15 @@ object EnvironmentDisplay : Runnable {
         )
     }
 
+    private const val SLEEP_SECONDS = 600L
+    private const val HEADLINE_PAUSE = 15L
+
     fun start() {
         screen = SSD1327(SSD1327.ADAFRUIT_STEMMA).apply {
             displayOn = false
             clear()
         }
-        future = executor.scheduleAtFixedRate(this, 1, 600, TimeUnit.SECONDS)
+        future = executor.scheduleAtFixedRate(this, 1, SLEEP_SECONDS, TimeUnit.SECONDS)
     }
 
     fun stop() {
@@ -86,8 +97,8 @@ object EnvironmentDisplay : Runnable {
 
     override fun run() {
         // leave it off at night
-        val now = LocalDateTime.now()
-        if (now.let { it.hour >= 23 || it.hour <= 6 }) {
+        val localNow = LocalDateTime.now()
+        if (localNow.hour >= 22 || localNow.hour <= 6) {
             screen.displayOn = false
             return
         }
@@ -95,15 +106,16 @@ object EnvironmentDisplay : Runnable {
             if (!screen.displayOn) {
                 screen.displayOn = true
                 // assuming this happens once a day, update the date
-                screenGraphics.showDate(now)
+                screenGraphics.showDate(localNow)
             }
             screenGraphics.showOutside()
-//            screenGraphics.showAgenda(now)
-            screenGraphics.showNews()
 
-            with(screen) {
-                display(image)
-                show()
+            // 5 minutes to show headlines, so run a loop for slightly less than 5 minutes
+            val now = Instant.now()
+            val stopAt = SLEEP_SECONDS - 10L
+            val feed = retrieveNewsHeadlines()
+            while (now.elapsed() < Duration.ofSeconds(stopAt)) {
+                screenGraphics.showNews(feed)
             }
         } catch (t: Throwable) {
             LoggerFactory.getLogger(this::class.java).error("Unable to display", t)
@@ -114,13 +126,14 @@ object EnvironmentDisplay : Runnable {
      * Shows the date in the top line for the agenda block.
      */
     private fun Graphics2D.showDate(now: LocalDateTime) {
+        color = Color.BLACK
+        fillRect(0, 0, MAX_W, MAX_H)
+
         color = Color.WHITE
-        font = Font(Font.SANS_SERIF, Font.BOLD, 12)
-        val fm = getFontMetrics(font)
+        font = dateFont
         val date = "${now.dayOfWeek.name.substring(0, 3)}  ${now.month} ${now.dayOfMonth}"
-        val x = fm.center(date, MW)
-        drawString(date, x, TEMP_HEIGHT + fm.height)
-        bottomStartsAt = TEMP_HEIGHT + fm.height + 2
+        val x = dateFontMetrics.center(date, MAX_W)
+        drawString(date, x, dateBottom)
     }
 
     private var lastState: String? = null
@@ -140,7 +153,7 @@ object EnvironmentDisplay : Runnable {
 
         // clear the top area
         color = Color.BLACK
-        fillRect(0, 0, MW, TEMP_HEIGHT)
+        fillRect(0, 0, MAX_W, TEMP_HEIGHT)
 
         val icon = images[state] ?: images["default"].also {
             logger.warn("Unknown weather state: $state")
@@ -164,19 +177,50 @@ object EnvironmentDisplay : Runnable {
     private const val RSS_FEED = "http://feeds.washingtonpost.com/rss/national?itid=lk_inline_manual_32"
     private val reader = RssReader()
 
-    private fun Graphics2D.showNews() {
-        val feed = reader.read(RSS_FEED).collect(Collectors.toList()).map { "* ${it.title.get()}" }
-        showBottom(feed)
+    private fun Graphics2D.showNews(feed: List<String>) {
+        // the top headlines are shown for 10 seconds each, wrapping the text as needed to fit the screen
+        feed.forEach { headline ->
+            val lines = headline.wrap()
+            showBottom(lines)
+            with(screen) {
+                display(image)
+                show()
+            }
+            KobotSleep.seconds(HEADLINE_PAUSE)
+        }
     }
+
+    private fun retrieveNewsHeadlines() = reader.read(RSS_FEED).collect(Collectors.toList()).map { it.title.get() }
 
     private fun Graphics2D.showBottom(lines: List<String>) {
         color = Color.BLACK
-        fillRect(0, bottomStartsAt, MW, MH)
+        fillRect(0, newsStartsAt, MAX_W, MAX_H)
 
         color = Color.WHITE
         font = agendaFont
         lines.forEachIndexed { index, line ->
-            drawString(line, 0, bottomStartsAt + (index + 1) * agendaLineHeight)
+            drawString(line, 0, newsStartsAt + (index + 1) * agendaLineHeight)
         }
+    }
+
+    /**
+     * Wraps the text to fit the screen by splitting on spaces and hyphens.
+     */
+    private fun String.wrap(): List<String> {
+        val words = split(" ")
+        val lines = mutableListOf<String>()
+        // assume the first word fits
+        var line = words[0]
+        for (i in 1 until words.size) {
+            val word = words[i]
+            val w = agendaFontMetrics.stringWidth(line + " " + word)
+            if (w > MAX_W) {
+                lines.add(line)
+                line = word
+            } else {
+                line += " " + word
+            }
+        }
+        return lines
     }
 }
