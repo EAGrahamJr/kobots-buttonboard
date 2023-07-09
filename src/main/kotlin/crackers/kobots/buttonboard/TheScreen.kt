@@ -56,6 +56,7 @@ object TheScreen {
                 }
             }
             screen.display(image)
+            screen.setContrast((if (mode == Mode.NIGHT) 0x05 else 0x20).toByte())
         }
     }
 
