@@ -106,7 +106,7 @@ fun main(args: Array<String>) {
         } catch (e: Throwable) {
             logger.error("Error found - continuing", e)
         }
-        KobotSleep.millis(50)
+        KobotSleep.millis(100)
     }
     keyboard.fill(Color.RED)
     logger.warn("Exiting ")

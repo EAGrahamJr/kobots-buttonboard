@@ -83,7 +83,7 @@ object TheStrip {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            KobotSleep.seconds(5)
+            KobotSleep.seconds(10)
         }
 
         strip.fill(Color.BLACK)
@@ -123,7 +123,7 @@ object TheStrip {
             runFlag.get() || return
             strip[count] = rainbowColors[lastRainbowColorIndex++]
             if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
-            KobotSleep.millis(15)
+            KobotSleep.millis(150)
         }
         lastRainbowColorIndex++
         if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0

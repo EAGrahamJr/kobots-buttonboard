@@ -19,24 +19,24 @@ _MID_TEMP = 45
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 try:
-    last_temp = 0
+    last_dc = 0
     while True:
         temp = subprocess.getoutput("vcgencmd measure_temp|sed 's/[^0-9.]//g'")
         if round(float(temp)) >= _MAX_TEMP:
             dc = 100
             nap = 180
-        if round(float(temp)) >= _MID_TEMP:
+        elif round(float(temp)) >= _MID_TEMP:
             dc = 70
             nap = 120.0
         else:
             dc = 50
             nap = 60.00
 
-        if temp != last_temp:
+        if dc != last_dc:
             pwm.ChangeDutyCycle(dc)
             logging.warning(f"CPU Temp: {float(temp)} Fan duty cycle: {dc}")
             time.sleep(nap)
-            last_temp = temp
+            last_dc = dc
 
 except KeyboardInterrupt:
     pwm.stop()
