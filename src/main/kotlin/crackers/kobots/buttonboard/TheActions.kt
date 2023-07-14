@@ -34,8 +34,8 @@ object TheActions {
                 Actions.OFFICE -> group("office_group") turn checkAndToggleState("paper")
                 Actions.BEDROOM -> group("bedroom_group") turn checkAndToggleState("shelf_lamp")
                 Actions.KITCHEN -> light("kitchen_lights") turn checkAndToggleState("kitchen_lights")
-                Actions.TV -> scene("tv") turn on
-                Actions.MOVIE -> scene("movie") turn on
+                Actions.TV -> scene("daytime_tv") turn on
+                Actions.MOVIE -> scene("movie_time") turn on
                 Actions.BEDTIME -> scene("bed_time") turn on
                 Actions.LATE_NIGHT -> scene("late_night") turn on
                 Actions.NOT_ALL -> group("not_bedroom_group") turn off

@@ -13,8 +13,8 @@ print("\nPress Ctrl+C to quit \n")
 dc = 0
 pwm.start(dc)
 
-_MAX_TEMP = 65
-_MID_TEMP = 45
+_MAX_TEMP = 83
+_MID_TEMP = 60
 
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
@@ -26,7 +26,7 @@ try:
             dc = 100
             nap = 180
         elif round(float(temp)) >= _MID_TEMP:
-            dc = 70
+            dc = 80
             nap = 120.0
         else:
             dc = 50
