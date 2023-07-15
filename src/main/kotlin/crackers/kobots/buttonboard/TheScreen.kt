@@ -38,7 +38,8 @@ object TheScreen {
         PRINTER(loadImage("/printer.png")),
         RESTAURANT(loadImage("/restaurant.png")),
         SUN(loadImage("/sun.png")),
-        TV(loadImage("/tv.png"))
+        TV(loadImage("/tv.png")),
+        FAN(loadImage("/fan.png"))
     }
 
     /**

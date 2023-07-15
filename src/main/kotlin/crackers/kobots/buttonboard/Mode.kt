@@ -18,24 +18,24 @@ internal enum class Mode(
     NIGHT(
         listOf(Actions.TOP, Actions.MORNING, Actions.OFFICE, Actions.BEDROOM),
         listOf(Images.LIGHTBULB, Images.SUN, Images.PRINTER, Images.BED),
-        listOf(Color.GREEN, GOLDENROD, Color.BLUE, Color.PINK),
+        listOf(Color.GREEN, GOLDENROD, Color.DARK_GRAY, Color.PINK),
         .01f
     ),
     MORNING(
-        listOf(Actions.MORNING, Actions.TOP, Actions.KITCHEN, Actions.BEDROOM),
-        listOf(Images.SUN, Images.LIGHTBULB, Images.RESTAURANT, Images.BED),
-        listOf(GOLDENROD, Color.GREEN, Color.CYAN, Color.PINK),
+        listOf(Actions.MORNING, Actions.TOP, Actions.KITCHEN, Actions.OFFICE_FAN),
+        listOf(Images.SUN, Images.LIGHTBULB, Images.RESTAURANT, Images.FAN),
+        listOf(GOLDENROD, Color.GREEN, Color.CYAN, Color.BLUE),
         .05f
     ),
     DAYTIME(
-        listOf(Actions.TOP, Actions.TV, Actions.MOVIE, Actions.BEDROOM),
-        listOf(Images.LIGHTBULB, Images.TV, Images.MOVIE, Images.BED),
-        listOf(Color.GREEN, PURPLE, Color.RED, Color.PINK)
+        listOf(Actions.TOP, Actions.TV, Actions.MOVIE, Actions.OFFICE_FAN),
+        listOf(Images.LIGHTBULB, Images.TV, Images.MOVIE, Images.FAN),
+        listOf(Color.GREEN, PURPLE, Color.RED, Color.BLUE)
     ),
     EVENING(
-        listOf(Actions.BEDTIME, Actions.LATE_NIGHT, Actions.NOT_ALL, Actions.TOP),
-        listOf(Images.BED, Images.MOON, Images.EXIT, Images.LIGHTBULB),
-        listOf(Color.PINK, Color.RED, Color.DARK_GRAY, Color.GREEN),
+        listOf(Actions.BEDTIME, Actions.LATE_NIGHT, Actions.NOT_ALL, Actions.OFFICE_FAN),
+        listOf(Images.BED, Images.MOON, Images.EXIT, Images.FAN),
+        listOf(Color.PINK, Color.RED, Color.DARK_GRAY, Color.BLUE),
         .05f
     )
 }

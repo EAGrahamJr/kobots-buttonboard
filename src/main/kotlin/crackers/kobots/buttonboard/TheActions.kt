@@ -15,7 +15,7 @@ object TheActions {
     }
 
     internal enum class Actions {
-        TOP, MORNING, OFFICE, BEDROOM, KITCHEN, TV, MOVIE, BEDTIME, LATE_NIGHT, NOT_ALL
+        TOP, MORNING, OFFICE, BEDROOM, KITCHEN, TV, MOVIE, BEDTIME, LATE_NIGHT, NOT_ALL, OFFICE_FAN
     }
 
     /**
@@ -31,17 +31,20 @@ object TheActions {
             when (action) {
                 Actions.TOP -> scene("top_button") turn on
                 Actions.MORNING -> scene("early_morning") turn on
-                Actions.OFFICE -> group("office_group") turn checkAndToggleState("paper")
-                Actions.BEDROOM -> group("bedroom_group") turn checkAndToggleState("shelf_lamp")
-                Actions.KITCHEN -> light("kitchen_lights") turn checkAndToggleState("kitchen_lights")
+                Actions.OFFICE -> group("office_group") turn toggleOnLight("paper")
+                Actions.BEDROOM -> group("bedroom_group") turn toggleOnLight("shelf_lamp")
+                Actions.KITCHEN -> light("kitchen_lights") turn toggleOnLight("kitchen_lights")
                 Actions.TV -> scene("daytime_tv") turn on
                 Actions.MOVIE -> scene("movie_time") turn on
                 Actions.BEDTIME -> scene("bed_time") turn on
                 Actions.LATE_NIGHT -> scene("late_night") turn on
                 Actions.NOT_ALL -> group("not_bedroom_group") turn off
+                Actions.OFFICE_FAN -> switch("small_fan") turn toggleOnSwitch("small_fan")
             }
         }
     }
 
-    private fun HAssKClient.checkAndToggleState(name: String) = if (light(name).state().state == "off") on else off
+    private fun HAssKClient.toggleOnSwitch(name: String) = if (switch(name).state().state == "off") on else off
+
+    private fun HAssKClient.toggleOnLight(name: String) = if (light(name).state().state == "off") on else off
 }
