@@ -16,9 +16,9 @@ internal enum class Mode(
     val brightness: Float = 0.1f
 ) {
     NIGHT(
-        listOf(Actions.TOP, Actions.MORNING, Actions.OFFICE, Actions.BEDROOM),
-        listOf(Images.LIGHTBULB, Images.SUN, Images.PRINTER, Images.BED),
-        listOf(Color.GREEN, GOLDENROD, Color.DARK_GRAY, Color.PINK),
+        listOf(Actions.NOT_ALL, Actions.TOP, Actions.MORNING, Actions.BEDROOM),
+        listOf(Images.EXIT, Images.LIGHTBULB, Images.SUN, Images.BED),
+        listOf(Color.DARK_GRAY, Color.GREEN, GOLDENROD, Color.PINK),
         .01f
     ),
     MORNING(
