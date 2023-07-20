@@ -174,7 +174,7 @@ object EnvironmentDisplay : Runnable {
         drawImage(image, x, y, width, height, null)
     }
 
-    private const val RSS_FEED = "http://feeds.washingtonpost.com/rss/national?itid=lk_inline_manual_32"
+    private const val RSS_FEED = "http://feeds.washingtonpost.com/rss/politics?itid=lk_inline_manual_32"
     private val reader = RssReader()
 
     private fun Graphics2D.showNews(feed: List<String>) {
