@@ -69,12 +69,13 @@ fun main(args: Array<String>) {
                 hour <= 20 -> Mode.DAYTIME
                 else -> Mode.EVENING
             }
-            if (mode != currentMode.getAndSet(mode)) {
+            if (mode != currentMode.get()) {
                 keyboard.brightness = mode.brightness
                 showIcons(mode)
                 mode.colors.forEachIndexed { index, color ->
                     keyboard[index] = color
                 }
+                currentMode.set(mode)
             }
 
             /*
