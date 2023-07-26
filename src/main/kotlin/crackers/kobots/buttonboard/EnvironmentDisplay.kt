@@ -1,11 +1,9 @@
 package crackers.kobots.buttonboard
 
-import com.apptasticsoftware.rssreader.RssReader
+import crackers.hassk.EntityState
 import crackers.kobots.buttonboard.TheActions.hasskClient
 import crackers.kobots.devices.display.SSD1327
-import crackers.kobots.utilities.KobotSleep
 import crackers.kobots.utilities.center
-import crackers.kobots.utilities.elapsed
 import crackers.kobots.utilities.loadImage
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
@@ -14,13 +12,11 @@ import java.awt.Font
 import java.awt.FontMetrics
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
-import java.time.Duration
-import java.time.Instant
 import java.time.LocalDateTime
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
-import java.util.stream.Collectors
+import kotlin.math.roundToInt
 
 /**
  * Weather and agenda display.
@@ -39,9 +35,9 @@ object EnvironmentDisplay : Runnable {
     private val tempFontMetrics: FontMetrics
     private val dateFont = Font(Font.SANS_SERIF, Font.BOLD, 14)
     private val dateFontMetrics: FontMetrics
-    private val agendaFont = Font(Font.SANS_SERIF, Font.PLAIN, 11)
-    private val agendaFontMetrics: FontMetrics
-    private val agendaLineHeight: Int
+    private val bottomFont = Font(Font.SANS_SERIF, Font.PLAIN, 12)
+    private val bottomFontMetrics: FontMetrics
+    private val bottomLineHeight: Int
 
     private const val MAX_W = 128
     private const val MAX_H = 128
@@ -51,15 +47,15 @@ object EnvironmentDisplay : Runnable {
         image = BufferedImage(MAX_W, MAX_H, BufferedImage.TYPE_BYTE_GRAY).also { img: BufferedImage ->
             screenGraphics = (img.graphics as Graphics2D).also {
                 tempFontMetrics = it.getFontMetrics(tempFont)
-                agendaFontMetrics = it.getFontMetrics(agendaFont)
-                agendaLineHeight = agendaFontMetrics.height + 1
+                bottomFontMetrics = it.getFontMetrics(bottomFont)
+                bottomLineHeight = bottomFontMetrics.height + 1
                 dateFontMetrics = it.getFontMetrics(dateFont)
             }
         }
     }
 
     private val dateBottom = TEMP_HEIGHT + dateFontMetrics.height
-    private val newsStartsAt = dateBottom + 5
+    private val bottomStartsAt = dateBottom + 10
 
     private val images by lazy {
         mapOf(
@@ -68,7 +64,7 @@ object EnvironmentDisplay : Runnable {
             "fog" to loadImage("/weather/fog.png"),
             "mixed" to loadImage("/weather/mixed.png"),
             "partlycloudy" to loadImage("/weather/partly-cloudy.png"),
-            "rain" to loadImage("/weather/rain.png"),
+            "rainy" to loadImage("/weather/rain.png"),
             "snow" to loadImage("/weather/snow.png"),
             "sunny" to loadImage("/weather/sunny.png"),
             "windy" to loadImage("/weather/windy.png"),
@@ -109,13 +105,10 @@ object EnvironmentDisplay : Runnable {
                 screenGraphics.showDate(localNow)
             }
             screenGraphics.showOutside()
-
-            // 5 minutes to show headlines, so run a loop for slightly less than 5 minutes
-            val now = Instant.now()
-            val stopAt = SLEEP_SECONDS - 10L
-            val feed = retrieveNewsHeadlines()
-            while (now.elapsed() < Duration.ofSeconds(stopAt)) {
-                screenGraphics.showNews(feed)
+            screenGraphics.showInsideTemps()
+            with(screen) {
+                display(image)
+                show()
             }
         } catch (t: Throwable) {
             LoggerFactory.getLogger(this::class.java).error("Unable to display", t)
@@ -136,91 +129,68 @@ object EnvironmentDisplay : Runnable {
         drawString(date, x, dateBottom)
     }
 
-    private var lastState: String? = null
-    private var lastTemp: Int? = null
-
     /**
-     * Show the outside temperature and weather icon when it changes.
+     * Show the outside temperature and weather icon.
      */
     private fun Graphics2D.showOutside() {
         val outsideTemp = hasskClient.getState("weather.home")
-        val state = outsideTemp.state
-        val temp = JSONObject(outsideTemp.attributes).getInt("temperature")
-
-        if (state == lastState && temp == lastTemp) return
-        lastState = state
-        lastTemp = temp
+        val temp = outsideTemp.temperature()
 
         // clear the top area
         color = Color.BLACK
         fillRect(0, 0, MAX_W, TEMP_HEIGHT)
 
-        val icon = images[state] ?: images["default"].also {
-            logger.warn("Unknown weather state: $state")
-        }
-        scaleImageAt(icon!!, 0, 0, TEMP_HEIGHT)
-
+        scaleImageAt(outsideTemp.icon()!!, 0, 0, TEMP_HEIGHT)
         font = tempFont
-        color = when {
-            temp > 79 -> Color.YELLOW
-            temp > 50 -> Color.GREEN
-            temp > 40 -> Color.CYAN
-            else -> Color.BLUE
-        }
+        color = temperatureColor(temp)
         drawString("$temp\u2109", 50, tempFontMetrics.ascent)
+    }
+
+    private val insideSensors = listOf(
+        "sensor.cube_air_temperature",
+        "sensor.trisensor_air_temperature",
+        "sensor.bedroom_temperature"
+    )
+
+    /**
+     * Show the inside temperatures.
+     */
+    private fun Graphics2D.showInsideTemps() {
+        // clear the bottom area
+        color = Color.BLACK
+        fillRect(0, bottomStartsAt, MAX_W, MAX_H - bottomStartsAt)
+
+        font = bottomFont
+
+        insideSensors.forEachIndexed { index, sensor ->
+            val y = bottomStartsAt + (bottomLineHeight * index) + bottomFontMetrics.ascent
+
+            val state = hasskClient.getState(sensor)
+            val temp = state.state.toFloat().roundToInt()
+
+            color = Color.WHITE
+            val name = JSONObject(state.attributes!!).getString("friendly_name")?.removeSuffix(" Temperature")
+                ?: state.entityId.removeSuffix("_temperature")
+            drawString(name, 0, y)
+
+            color = temperatureColor(temp)
+            drawString("$temp\u2109", 110, y)
+        }
+    }
+
+    private fun EntityState.temperature() = JSONObject(attributes).getInt("temperature")
+    private fun EntityState.icon() = images[state] ?: images["default"].also {
+        logger.warn("Unknown weather state: $state")
     }
 
     private fun Graphics2D.scaleImageAt(image: BufferedImage, x: Int, y: Int, width: Int, height: Int = width) {
         drawImage(image, x, y, width, height, null)
     }
 
-    private const val RSS_FEED = "http://feeds.washingtonpost.com/rss/politics?itid=lk_inline_manual_32"
-    private val reader = RssReader()
-
-    private fun Graphics2D.showNews(feed: List<String>) {
-        // the top headlines are shown for 10 seconds each, wrapping the text as needed to fit the screen
-        feed.forEach { headline ->
-            val lines = headline.wrap()
-            showBottom(lines)
-            with(screen) {
-                display(image)
-                show()
-            }
-            KobotSleep.seconds(HEADLINE_PAUSE)
-        }
-    }
-
-    private fun retrieveNewsHeadlines() = reader.read(RSS_FEED).collect(Collectors.toList()).map { it.title.get() }
-
-    private fun Graphics2D.showBottom(lines: List<String>) {
-        color = Color.BLACK
-        fillRect(0, newsStartsAt, MAX_W, MAX_H)
-
-        color = Color.WHITE
-        font = agendaFont
-        lines.forEachIndexed { index, line ->
-            drawString(line, 0, newsStartsAt + (index + 1) * agendaLineHeight)
-        }
-    }
-
-    /**
-     * Wraps the text to fit the screen by splitting on spaces and hyphens.
-     */
-    private fun String.wrap(): List<String> {
-        val words = split(" ")
-        val lines = mutableListOf<String>()
-        // assume the first word fits
-        var line = words[0]
-        for (i in 1 until words.size) {
-            val word = words[i]
-            val w = agendaFontMetrics.stringWidth(line + " " + word)
-            if (w > MAX_W) {
-                lines.add(line)
-                line = word
-            } else {
-                line += " " + word
-            }
-        }
-        return lines
+    private fun temperatureColor(temp: Int): Color = when {
+        temp > 79 -> Color.YELLOW
+        temp > 50 -> Color.GREEN
+        temp > 40 -> Color.CYAN
+        else -> Color.BLUE
     }
 }

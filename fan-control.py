@@ -14,18 +14,20 @@ dc = 0
 pwm.start(dc)
 
 _MAX_TEMP = 83
-_MID_TEMP = 60
+_MID_TEMP = 75
 
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 try:
     last_dc = 0
+
     while True:
-        temp = subprocess.getoutput("vcgencmd measure_temp|sed 's/[^0-9.]//g'")
-        if round(float(temp)) >= _MAX_TEMP:
+        reading = subprocess.getoutput("vcgencmd measure_temp")[5:9]
+        temp = round(float(reading))
+        if temp >= _MAX_TEMP:
             dc = 100
             nap = 180
-        elif round(float(temp)) >= _MID_TEMP:
+        elif temp >= _MID_TEMP:
             dc = 80
             nap = 120.0
         else:
