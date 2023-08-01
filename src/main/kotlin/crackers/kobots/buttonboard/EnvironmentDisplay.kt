@@ -124,7 +124,7 @@ object EnvironmentDisplay : Runnable {
 
         color = Color.WHITE
         font = dateFont
-        val date = "${now.dayOfWeek.name.substring(0, 3)}  ${now.month} ${now.dayOfMonth}"
+        val date = "${now.dayOfWeek.name.substring(0, 3)}  ${now.month.name.substring(0, 3)} ${now.dayOfMonth}"
         val x = dateFontMetrics.center(date, MAX_W)
         drawString(date, x, dateBottom)
     }

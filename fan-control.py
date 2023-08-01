@@ -15,6 +15,7 @@ pwm.start(dc)
 
 _MAX_TEMP = 83
 _MID_TEMP = 75
+_LOW_TEMP = 65
 
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
@@ -30,6 +31,9 @@ try:
         elif temp >= _MID_TEMP:
             dc = 80
             nap = 120.0
+        elif temp >= _LOW_TEMP:
+            dc = 65
+            nap = 90.0
         else:
             dc = 50
             nap = 60.00
