@@ -59,6 +59,7 @@ fun main(args: Array<String>) {
 
     TheStrip.start()
     EnvironmentDisplay.start()
+    startAliveCheckSub()
     while (runFlag.get()) {
         try {
             // adjust per time of day
@@ -111,6 +112,7 @@ fun main(args: Array<String>) {
     }
     keyboard.fill(Color.RED)
     logger.warn("Exiting ")
+    stopAliveCheckSub()
     EnvironmentDisplay.stop()
     if (!isRemote) TheStrip.stop()
     TheScreen.close()

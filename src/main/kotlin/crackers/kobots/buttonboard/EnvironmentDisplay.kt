@@ -178,7 +178,13 @@ object EnvironmentDisplay : Runnable {
         }
     }
 
-    private fun EntityState.temperature() = JSONObject(attributes).getInt("temperature")
+    private fun EntityState.temperature() =
+        try {
+            JSONObject(attributes).optInt("temperature", 66)
+        } catch (_: Exception) {
+            66
+        }
+
     private fun EntityState.icon() = images[state] ?: images["default"].also {
         logger.warn("Unknown weather state: $state")
     }

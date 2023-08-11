@@ -18,8 +18,10 @@ val JAR_NAME = "bb-app"
 
 dependencies {
     implementation("com.diozero:diozero-core:$DIOZERO_VER")
-    implementation("crackers.kobots:kobots-devices:0.1.0")
+    implementation("org.tinylog:slf4j-tinylog:2.6.2")
+    implementation("crackers.kobots:kobots-devices:0.1.2")
 //    implementation("com.diozero:diozero-provider-remote:$DIOZERO_VER")
+    implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
     implementation("crackers.automation:hassk:0.0.1")
     implementation("com.typesafe:config:1.4.2")
 }

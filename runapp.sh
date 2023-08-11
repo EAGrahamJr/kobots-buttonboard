@@ -15,13 +15,23 @@
 # permissions and limitations under the License.
 #
 
-[ "$1" = "-s" ] && SUSPEND="y" || SUSPEND="n"
+if [ "$1" = "-s" ]; then
+  SUSPEND="y"
+  shift
+else
+  SUSPEND="n"
+fi
+
 JAVA="/home/crackers/java"
-JAR="/home/crackers/bb-app.jar"
+JAR="/home/crackers/$1.jar"
+LOG="/home/crackers/$1.log"
 RUNTHIS="-jar $JAR"
 
-# run the python script to clear the seesaw driver
-# TODO this doesn't work
-# python $HOME/seesaw.py
-
-sudo $JAVA -ea -agentlib:jdwp=transport=dt_socket,server=y,suspend=$SUSPEND,address=*:5005 $RUNTHIS
+# make sure no java process is running
+killall -9 java 2>/dev/null
+echo "Waiting 5 seconds for any previous Java app to exit..."
+sleep 5
+# starting the java app
+echo "Starting Java app $JAR"
+rm -f nohup.out
+nohup $JAVA -ea -agentlib:jdwp=transport=dt_socket,server=y,suspend=$SUSPEND,address=*:5005 $RUNTHIS > $LOG 2>&1 &
