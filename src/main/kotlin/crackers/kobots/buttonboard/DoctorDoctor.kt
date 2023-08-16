@@ -9,6 +9,7 @@ import java.time.Duration
 import java.time.LocalTime
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Contains MQTT shite and maintains the "alive-check" subscription for all Kobots systems.
@@ -20,6 +21,13 @@ object DoctorDoctor {
 
     private val client by lazy { KobotsMQTT("buttonboard", BROKER, MemoryPersistence()) }
     private val executor by lazy { Executors.newSingleThreadScheduledExecutor() }
+
+    private val _error = AtomicReference<String>()
+    var error: String?
+        get() = _error.get()
+        private set(value) {
+            _error.set(value)
+        }
 
     fun start() {
         with(client) {
@@ -34,8 +42,13 @@ object DoctorDoctor {
 
     private val aliveChecker = Runnable {
         val now = LocalTime.now()
+        var hasErrors = false
         lastCheckIn.forEach { host, timeCheck ->
-            if (Duration.between(timeCheck, now).toSeconds() > 90) logger.error("$host last seen $timeCheck")
+            if (Duration.between(timeCheck, now).toSeconds() > 90) {
+                logger.error("$host last seen $timeCheck")
+                hasErrors = true
+            }
         }
+        error = if (hasErrors) "MQTT Error" else null
     }
 }

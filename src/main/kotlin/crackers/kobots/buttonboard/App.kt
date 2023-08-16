@@ -60,23 +60,33 @@ fun main(args: Array<String>) {
     TheStrip.start()
     EnvironmentDisplay.start()
     DoctorDoctor.start()
+
+    var wasError = false
     while (runFlag.get()) {
         try {
-            // adjust per time of day
-            val hour = LocalTime.now().hour
-            val mode = when {
-                hour in (1..6) -> Mode.NIGHT
-                hour <= 8 -> Mode.MORNING
-                hour <= 20 -> Mode.DAYTIME
-                else -> Mode.EVENING
-            }
-            if (mode != currentMode.get()) {
-                keyboard.brightness = mode.brightness
-                showIcons(mode)
-                mode.colors.forEachIndexed { index, color ->
-                    keyboard[index] = color
+            // if there's an error, display it for a while
+            if (DoctorDoctor.error != null) {
+                TheScreen.showText(DoctorDoctor.error!!)
+                wasError = true
+            } else {
+                // adjust per time of day
+                val hour = LocalTime.now().hour
+                val mode = when {
+                    hour in (1..6) -> Mode.NIGHT
+                    hour <= 8 -> Mode.MORNING
+                    hour <= 20 -> Mode.DAYTIME
+                    else -> Mode.EVENING
                 }
-                currentMode.set(mode)
+                // mode change or error cleared
+                if (mode != currentMode.get() || wasError) {
+                    keyboard.brightness = mode.brightness
+                    showIcons(mode)
+                    mode.colors.forEachIndexed { index, color ->
+                        keyboard[index] = color
+                    }
+                    currentMode.set(mode)
+                }
+                wasError = false
             }
 
             /*
@@ -101,6 +111,7 @@ fun main(args: Array<String>) {
                 runFlag.set(false)
             } else {
                 whichButtonsPressed.firstOrNull()?.let { button ->
+                    val mode = currentMode.get()
                     TheActions.doStuff(button, mode)
                     keyboard[button] = mode.colors[button]
                 }
