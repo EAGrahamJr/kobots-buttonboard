@@ -41,12 +41,16 @@ object DoctorDoctor {
     private val aliveChecker = Runnable {
         val now = ZonedDateTime.now()
         var hasErrors = false
-        lastCheckIn.forEach { host, timeCheck ->
-            if (Duration.between(timeCheck, now).toSeconds() > 90) {
+        lastCheckIn.toMap().forEach { host, timeCheck ->
+            val lastTimeSeen = Duration.between(timeCheck, now).toSeconds()
+            if (lastTimeSeen > 300) {
+                logger.error("$host apparently dead - removing from list")
+                lastCheckIn.remove(host)
+            } else if (lastTimeSeen > 90) {
                 logger.error("$host last seen $timeCheck")
                 hasErrors = true
             }
         }
-        error = if (hasErrors) "MQTT Error" else null
+//        error = if (hasErrors) "MQTT Error" else null
     }
 }

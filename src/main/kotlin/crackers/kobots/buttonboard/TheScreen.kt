@@ -3,6 +3,7 @@ package crackers.kobots.buttonboard
 import com.diozero.api.I2CDevice
 import com.diozero.devices.oled.SSD1306
 import com.diozero.devices.oled.SsdOledCommunicationChannel
+import crackers.kobots.utilities.center
 import crackers.kobots.utilities.loadImage
 import java.awt.Color
 import java.awt.Font
@@ -24,9 +25,15 @@ object TheScreen {
     private val screenGraphics: Graphics2D
     private val HT = 32
 
+    private val textHeight: Int
+    private val textBaseline: Int
+    private val imageSize: Int
     private val image = BufferedImage(128, HT, BufferedImage.TYPE_BYTE_GRAY).also { img ->
         screenGraphics = (img.graphics as Graphics2D).apply {
-            font = Font(Font.SERIF, Font.BOLD, 16)
+            font = Font(Font.SANS_SERIF, Font.PLAIN, 9)
+            textHeight = fontMetrics.height
+            textBaseline = HT - fontMetrics.descent
+            imageSize = HT - textHeight
         }
     }
 
@@ -52,8 +59,13 @@ object TheScreen {
             color = Color.BLACK
             fillRect(0, 0, 128, HT)
             // draw and scale the icons
+            color = Color.WHITE
             mode.images.forEachIndexed { index, icon ->
-                drawImage(icon.image, index * HT, 0, HT, HT, null)
+                val offset = index * HT
+                val imageX = offset + textHeight / 2
+                drawImage(icon.image, imageX, 0, imageSize, imageSize, null)
+                val textX = offset + fontMetrics.center(mode.text[index], HT)
+                drawString(mode.text[index], textX, textBaseline)
             }
         }
         screen.display(image)
@@ -61,13 +73,13 @@ object TheScreen {
     }
 
     internal fun showText(text: String) {
-        with(screenGraphics) {
-            color = Color.BLACK
-            fillRect(0, 0, 128, HT)
-            color = Color.WHITE
-            drawString(text, 0, HT - 4)
-        }
-        screen.display(image)
+//        with(screenGraphics) {
+//            color = Color.BLACK
+//            fillRect(0, 0, 128, HT)
+//            color = Color.WHITE
+//            drawString(text, 0, HT - 4)
+//        }
+//        screen.display(image)
     }
 
     fun close() {
