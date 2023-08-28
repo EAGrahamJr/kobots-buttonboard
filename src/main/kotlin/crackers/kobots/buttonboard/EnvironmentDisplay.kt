@@ -166,7 +166,11 @@ object EnvironmentDisplay : Runnable {
             val y = bottomStartsAt + (bottomLineHeight * index) + bottomFontMetrics.ascent
 
             val state = hasskClient.getState(sensor)
-            val temp = state.state.toFloat().roundToInt()
+            val temp = try {
+                state.state.toFloat().roundToInt()
+            } catch (_: Exception) {
+                0
+            }
 
             color = Color.WHITE
             val name = JSONObject(state.attributes!!).getString("friendly_name")?.removeSuffix(" Temperature")
@@ -174,15 +178,17 @@ object EnvironmentDisplay : Runnable {
             drawString(name, 0, y)
 
             color = temperatureColor(temp)
-            drawString("$temp\u2109", 110, y)
+            val tempText = "$temp\u2109"
+            val left = bottomFontMetrics.stringWidth(tempText) + 2
+            drawString(tempText, MAX_W - left, y)
         }
     }
 
     private fun EntityState.temperature() =
         try {
-            JSONObject(attributes).optInt("temperature", 66)
+            JSONObject(attributes).optInt("temperature", 0)
         } catch (_: Exception) {
-            66
+            0
         }
 
     private fun EntityState.icon() = images[state] ?: images["default"].also {
@@ -197,6 +203,6 @@ object EnvironmentDisplay : Runnable {
         temp > 79 -> Color.YELLOW
         temp > 50 -> Color.GREEN
         temp > 40 -> Color.CYAN
-        else -> Color.BLUE
+        else -> Color.RED
     }
 }
