@@ -125,7 +125,7 @@ fun main(args: Array<String>) {
     keyboard.fill(Color.RED)
     logger.warn("Exiting ")
 
-    client.close()
+//    client.close()
     EnvironmentDisplay.stop()
     if (!isRemote) TheStrip.stop()
     TheScreen.close()

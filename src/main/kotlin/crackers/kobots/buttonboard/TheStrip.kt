@@ -87,6 +87,7 @@ object TheStrip {
     fun stop() {
         if (::future.isInitialized) {
             future.cancel(true)
+            strip.fill(Color.BLACK)
             seeSaw.close()
         }
     }
