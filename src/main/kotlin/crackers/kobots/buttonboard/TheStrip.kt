@@ -9,14 +9,13 @@ import crackers.kobots.utilities.KobotSleep
 import crackers.kobots.utilities.colorIntervalFromHSB
 import org.slf4j.LoggerFactory
 import java.awt.Color
-import java.time.LocalTime
-import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
 /**
  * Run pretty stuff on the Neopixel strip.
  */
 object TheStrip {
+    private val logger = LoggerFactory.getLogger("TheStrip")
     private lateinit var seeSaw: AdafruitSeeSaw
     private lateinit var strip: NeoPixel
 
@@ -24,75 +23,16 @@ object TheStrip {
     private val rainbowColors = colorIntervalFromHSB(0f, 348f, 30)
     private var lastRainbowColorIndex: Int = 0
 
-    private enum class Mode {
-        MORNING, DAYTIME, EVENING, NIGHT, PARTY
-    }
-
     private var lastMode: Mode? = null
 
     private lateinit var future: Future<*>
-    private val executor = Executors.newSingleThreadExecutor()
 
-    private val runnable = Runnable {
-        while (runFlag.get()) {
-            try {
-                // check the time of day vs mode
-                val now = LocalTime.now()
-                when {
-                    now.hour < 7 || now.hour >= 23 -> {
-                        if (lastMode != Mode.NIGHT) {
-                            strip.fill(Color.BLACK)
-                            lastMode = Mode.NIGHT
-                        }
-                    }
-
-                    now.hour < 8 -> {
-                        if (lastMode != Mode.MORNING) {
-                            strip.brightness = 0.03f
-                            strip.fill(GOLDENROD)
-                            lastMode = Mode.MORNING
-                        }
-                    }
-
-                    //                now.hour < 12 -> {
-                    //                    if (lastMode != Mode.DAYTIME) {
-                    //                        strip.brightness = 0.05f
-                    //                        strip.fill(PURPLE)
-                    //                        lastMode = Mode.DAYTIME
-                    //                    }
-                    //                }
-
-                    now.hour >= 21 -> {
-                        if (lastMode != Mode.EVENING) {
-                            strip.brightness = 0.03f
-                            strip.fill(Color.RED)
-                            lastMode = Mode.EVENING
-                        }
-                    }
-
-                    else -> {
-                        if (lastMode != Mode.PARTY) {
-                            if (lastMode != Mode.MORNING) {
-                                strip.brightness = 0.2f
-                                lastMode = Mode.PARTY
-                            }
-                        }
-                        showRainbow()
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            KobotSleep.seconds(10)
-        }
-
-        strip.fill(Color.BLACK)
-    }
+    private val stripOffset = 0
+    private val stripLast = stripOffset + 29
 
     fun start(): Boolean {
         if (isRemote) return true
 
-        val logger = LoggerFactory.getLogger(this::class.java)
         for (i in 0 until 100) try {
             seeSaw = AdafruitSeeSaw(I2CDevice(1, 0x60))
             strip = NeoPixel(seeSaw, 30, 15)
@@ -110,20 +50,53 @@ object TheStrip {
         return false
     }
 
+    private val runnable = Runnable {
+        while (runFlag) {
+            if (currentMode != lastMode) {
+                try {
+                    lastMode = currentMode
+                    // check the time of day vs mode
+
+                    when (currentMode) {
+                        Mode.NIGHT -> strip[stripOffset, stripLast] = Color.BLACK
+                        Mode.MORNING -> {
+                            strip.brightness = 0.03f
+                            strip[stripOffset, stripLast] = GOLDENROD
+                        }
+
+                        Mode.DAYTIME -> {
+                            strip.brightness = 0.2f
+                        }
+
+                        Mode.EVENING -> {
+                            strip.brightness = 0.03f
+                            strip[stripOffset, stripLast] = Color.RED
+                        }
+                    }
+                } catch (e: Exception) {
+                    logger.error("Cannot display strip", e)
+                }
+            }
+            if (currentMode == Mode.DAYTIME) showRainbow()
+            KobotSleep.seconds(10)
+        }
+        // turn off the strip
+        strip.fill(Color.BLACK)
+    }
+
     fun stop() {
         if (::future.isInitialized) {
-            future.get()
-            executor.shutdownNow()
+            future.cancel(true)
             seeSaw.close()
         }
     }
 
     private fun showRainbow() {
-        for (count in 0..29) {
-            runFlag.get() || return
+        for (count in stripOffset..stripLast) {
+            runFlag || return
             strip[count] = rainbowColors[lastRainbowColorIndex++]
             if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
-            KobotSleep.millis(150)
+            KobotSleep.millis(50)
         }
         lastRainbowColorIndex++
         if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0

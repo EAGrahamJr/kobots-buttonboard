@@ -18,26 +18,34 @@ package crackers.kobots.buttonboard
 
 import crackers.kobots.buttonboard.TheScreen.showIcons
 import crackers.kobots.devices.io.NeoKey
+import crackers.kobots.mqtt.KobotsMQTT
 import crackers.kobots.utilities.KobotSleep
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.LocalTime
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 
-// TODO temporary while testing
 const val REMOTE_PI = "diozero.remote.hostname"
-const val USELESS = "useless.local"
 
 private val logger = LoggerFactory.getLogger("ButtonBox")
 
-internal val runFlag = AtomicBoolean(true)
+// set up an executor that everyone can share
+internal val executor = Executors.newScheduledThreadPool(5)
 
-internal val currentMode = AtomicReference(Mode.NIGHT)
+private val _runFlag = AtomicBoolean(true)
+internal var runFlag: Boolean
+    get() = _runFlag.get()
+    private set(b) = _runFlag.set(b)
+
+private val _currentMode = AtomicReference(Mode.NIGHT)
+internal var currentMode: Mode
+    get() = _currentMode.get()
+    private set(m) = _currentMode.set(m)
 
 private var _remote: Boolean = false
-
 internal val isRemote: Boolean
     get() = _remote
 
@@ -53,40 +61,34 @@ fun main(args: Array<String>) {
     }
 
     val keyboard = NeoKey().apply { pixels.brightness = 0.05f }
+    val client = KobotsMQTT("useless", "tcp://192.168.1.4:1883").apply {
+        startAliveCheck()
+    }
 
     keyboard[3] = Color.RED
     var lastButtonsRead: List<Boolean> = listOf(false, false, false, false)
 
     TheStrip.start()
     EnvironmentDisplay.start()
-    DoctorDoctor.start()
 
-    var wasError = false
-    while (runFlag.get()) {
+    while (runFlag) {
         try {
-            // if there's an error, display it for a while
-            if (DoctorDoctor.error != null) {
-                TheScreen.showText(DoctorDoctor.error!!)
-                wasError = true
-            } else {
-                // adjust per time of day
-                val hour = LocalTime.now().hour
-                val mode = when {
-                    hour in (1..6) -> Mode.NIGHT
-                    hour <= 8 -> Mode.MORNING
-                    hour <= 20 -> Mode.DAYTIME
-                    else -> Mode.EVENING
+            // adjust per time of day
+            val hour = LocalTime.now().hour
+            val mode = when {
+                hour in (1..6) -> Mode.NIGHT
+                hour <= 8 -> Mode.MORNING
+                hour <= 20 -> Mode.DAYTIME
+                else -> Mode.EVENING
+            }
+            // mode change or error cleared
+            if (mode != currentMode) {
+                keyboard.brightness = mode.brightness
+                showIcons(mode)
+                mode.colors.forEachIndexed { index, color ->
+                    keyboard[index] = color
                 }
-                // mode change or error cleared
-                if (mode != currentMode.get() || wasError) {
-                    keyboard.brightness = mode.brightness
-                    showIcons(mode)
-                    mode.colors.forEachIndexed { index, color ->
-                        keyboard[index] = color
-                    }
-                    currentMode.set(mode)
-                }
-                wasError = false
+                currentMode = mode
             }
 
             /*
@@ -108,12 +110,11 @@ fun main(args: Array<String>) {
                 emptyList()
             }
             if (whichButtonsPressed.size > 1) {
-                runFlag.set(false)
+                runFlag = false
             } else {
                 whichButtonsPressed.firstOrNull()?.let { button ->
-                    val mode = currentMode.get()
-                    TheActions.doStuff(button, mode)
-                    keyboard[button] = mode.colors[button]
+                    TheActions.doStuff(button, currentMode)
+                    keyboard[button] = currentMode.colors[button]
                 }
             }
         } catch (e: Throwable) {
@@ -123,10 +124,12 @@ fun main(args: Array<String>) {
     }
     keyboard.fill(Color.RED)
     logger.warn("Exiting ")
-    DoctorDoctor.stop()
+
+    client.close()
     EnvironmentDisplay.stop()
     if (!isRemote) TheStrip.stop()
     TheScreen.close()
     keyboard.close()
+    executor.shutdownNow()
     exitProcess(0)
 }

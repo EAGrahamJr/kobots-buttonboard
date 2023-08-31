@@ -13,7 +13,6 @@ import java.awt.FontMetrics
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.time.LocalDateTime
-import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
@@ -25,7 +24,6 @@ object EnvironmentDisplay : Runnable {
     val logger = LoggerFactory.getLogger(this::class.java)
 
     private lateinit var future: Future<*>
-    private val executor = Executors.newSingleThreadScheduledExecutor()
 
     private lateinit var screen: SSD1327
     private val screenGraphics: Graphics2D
@@ -88,7 +86,6 @@ object EnvironmentDisplay : Runnable {
 
         screen.displayOn = false
         screen.close()
-        executor.shutdownNow()
     }
 
     override fun run() {
