@@ -27,21 +27,22 @@ object TheStrip {
 
     private lateinit var future: Future<*>
 
-    private val stripOffset = 0
+    private val stripOffset = 8
     private val stripLast = stripOffset + 29
 
     fun start(): Boolean {
         if (isRemote) return true
 
-        for (i in 0 until 100) try {
+        for (i in 0 until 10) try {
             seeSaw = AdafruitSeeSaw(I2CDevice(1, 0x60))
-            strip = NeoPixel(seeSaw, 30, 15)
+            strip = NeoPixel(seeSaw, 38, 15)
             logger.warn("Took $i tries to initialize")
 
             strip.brightness = 0.1f
             strip.autoWrite = true
 
             future = executor.submit(runnable)
+            RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
             return true
         } catch (_: Throwable) {
             SleepUtil.busySleep(50)
@@ -76,6 +77,8 @@ object TheStrip {
                 } catch (e: Exception) {
                     logger.error("Cannot display strip", e)
                 }
+
+                RosetteStatus.goToSleep.set(currentMode == Mode.NIGHT)
             }
             if (currentMode == Mode.DAYTIME) showRainbow()
             KobotSleep.seconds(10)

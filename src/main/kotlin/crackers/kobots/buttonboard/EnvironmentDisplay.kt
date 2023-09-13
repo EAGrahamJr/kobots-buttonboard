@@ -25,7 +25,12 @@ object EnvironmentDisplay : Runnable {
 
     private lateinit var future: Future<*>
 
-    private lateinit var screen: SSD1327
+    private val screen by lazy {
+        SSD1327(SSD1327.ADAFRUIT_STEMMA).apply {
+            displayOn = false
+            clear()
+        }
+    }
     private val screenGraphics: Graphics2D
     private val image: BufferedImage
 
@@ -74,28 +79,26 @@ object EnvironmentDisplay : Runnable {
     private const val HEADLINE_PAUSE = 15L
 
     fun start() {
-        screen = SSD1327(SSD1327.ADAFRUIT_STEMMA).apply {
-            displayOn = false
-            clear()
-        }
         future = executor.scheduleAtFixedRate(this, 1, SLEEP_SECONDS, TimeUnit.SECONDS)
     }
 
     fun stop() {
         future.cancel(false)
-
-        screen.displayOn = false
-        screen.close()
+        try {
+            screen.displayOn = false
+            screen.close()
+        } catch (_: Exception) {
+        }
     }
 
     override fun run() {
-        // leave it off at night
-        val localNow = LocalDateTime.now()
-        if (localNow.hour >= 22 || localNow.hour <= 6) {
-            screen.displayOn = false
-            return
-        }
         try {
+            // leave it off at night
+            val localNow = LocalDateTime.now()
+            if (localNow.hour >= 22 || localNow.hour <= 6) {
+                screen.displayOn = false
+                return
+            }
             if (!screen.displayOn) {
                 screen.displayOn = true
                 // assuming this happens once a day, update the date

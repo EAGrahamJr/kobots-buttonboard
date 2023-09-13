@@ -49,6 +49,8 @@ private var _remote: Boolean = false
 internal val isRemote: Boolean
     get() = _remote
 
+val mqttClient by lazy { KobotsMQTT("useless", "tcp://192.168.1.4:1883") }
+
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
@@ -61,9 +63,7 @@ fun main(args: Array<String>) {
     }
 
     val keyboard = NeoKey().apply { pixels.brightness = 0.05f }
-    val client = KobotsMQTT("useless", "tcp://192.168.1.4:1883").apply {
-        startAliveCheck()
-    }
+    mqttClient.startAliveCheck()
 
     keyboard[3] = Color.RED
     var lastButtonsRead: List<Boolean> = listOf(false, false, false, false)

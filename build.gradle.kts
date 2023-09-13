@@ -19,7 +19,7 @@ val JAR_NAME = "bboard"
 dependencies {
     implementation("com.diozero:diozero-core:$DIOZERO_VER")
     implementation("org.tinylog:slf4j-tinylog:2.6.2")
-    implementation("crackers.kobots:kobots-devices:0.1.3")
+    implementation("crackers.kobots:kobots-devices:0.1.4")
 //    implementation("com.diozero:diozero-provider-remote:$DIOZERO_VER")
     implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
     implementation("crackers.automation:hassk:0.0.1")
