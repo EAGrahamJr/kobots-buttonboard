@@ -62,8 +62,10 @@ object RosetteStatus {
                 }
             }
             hostList.forEachIndexed { i, host ->
-                if (!lastCheckIn.containsKey(host)) pixelStatus[i + offset] =
-                    WS2811.PixelColor(Color.BLUE, brightness = 0.005f)
+                if (!lastCheckIn.containsKey(host)) {
+                    pixelStatus[i + offset] =
+                        WS2811.PixelColor(Color.BLUE, brightness = 0.005f)
+                }
             }
         }
         aliveCheckExecutor.scheduleAtFixedRate(runner, 15, 15, TimeUnit.SECONDS)
