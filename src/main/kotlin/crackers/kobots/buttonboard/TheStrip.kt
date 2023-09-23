@@ -1,7 +1,24 @@
+/*
+ * Copyright 2022-2023 by E. A. Graham, Jr.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
 package crackers.kobots.buttonboard
 
 import com.diozero.api.I2CDevice
 import com.diozero.util.SleepUtil
+import crackers.kobots.buttonboard.TheActions.mqttClient
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
 import crackers.kobots.utilities.GOLDENROD
@@ -58,20 +75,26 @@ object TheStrip {
                     lastMode = currentMode
                     // check the time of day vs mode
 
-                    when (currentMode) {
-                        Mode.NIGHT -> strip[stripOffset, stripLast] = Color.BLACK
+                    strip.autoWrite = when (currentMode) {
+                        Mode.NIGHT -> {
+                            strip[stripOffset, stripLast] = Color.BLACK
+                            true
+                        }
                         Mode.MORNING -> {
                             strip.brightness = 0.03f
                             strip[stripOffset, stripLast] = GOLDENROD
+                            true
                         }
 
                         Mode.DAYTIME -> {
                             strip.brightness = 0.2f
+                            false
                         }
 
                         Mode.EVENING -> {
                             strip.brightness = 0.03f
                             strip[stripOffset, stripLast] = Color.RED
+                            true
                         }
                     }
                 } catch (e: Exception) {
@@ -100,8 +123,8 @@ object TheStrip {
             runFlag || return
             strip[count] = rainbowColors[lastRainbowColorIndex++]
             if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
-            KobotSleep.millis(50)
         }
+        strip.show()
         lastRainbowColorIndex++
         if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
     }

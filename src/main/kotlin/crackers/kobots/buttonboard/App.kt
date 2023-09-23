@@ -16,9 +16,9 @@
 
 package crackers.kobots.buttonboard
 
+import crackers.kobots.buttonboard.TheActions.mqttClient
 import crackers.kobots.buttonboard.TheScreen.showIcons
 import crackers.kobots.devices.io.NeoKey
-import crackers.kobots.mqtt.KobotsMQTT
 import crackers.kobots.utilities.KobotSleep
 import org.slf4j.LoggerFactory
 import java.awt.Color
@@ -49,8 +49,6 @@ private var _remote: Boolean = false
 internal val isRemote: Boolean
     get() = _remote
 
-val mqttClient by lazy { KobotsMQTT("useless", "tcp://192.168.1.4:1883") }
-
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
@@ -76,7 +74,7 @@ fun main(args: Array<String>) {
             // adjust per time of day
             val hour = LocalTime.now().hour
             val mode = when {
-                hour in (1..6) -> Mode.NIGHT
+                hour in (0..6) -> Mode.NIGHT
                 hour <= 8 -> Mode.MORNING
                 hour <= 20 -> Mode.DAYTIME
                 else -> Mode.EVENING
