@@ -87,12 +87,12 @@ object EnvironmentDisplay : Runnable {
             "snow" to loadImage("/weather/snow.png"),
             "sunny" to loadImage("/weather/sunny.png"),
             "windy" to loadImage("/weather/windy.png"),
+            "pouring" to loadImage("/weather/rainy_heavy.png"),
             "default" to loadImage("/screaming.png")
         )
     }
 
     private const val SLEEP_SECONDS = 600L
-    private const val HEADLINE_PAUSE = 15L
 
     fun start() {
         future = executor.scheduleAtFixedRate(this, 1, SLEEP_SECONDS, TimeUnit.SECONDS)
