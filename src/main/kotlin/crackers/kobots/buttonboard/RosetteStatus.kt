@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.Duration
 import java.time.ZonedDateTime
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -32,7 +31,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 object RosetteStatus {
     private val lastCheckIn = mutableMapOf<String, ZonedDateTime>()
-    private val aliveCheckExecutor = Executors.newSingleThreadScheduledExecutor()
     private val hostList = listOf("brainz", "marvin", "useless", "zeke")
     private val logger = LoggerFactory.getLogger("RosetteStatus")
     internal val goToSleep = AtomicBoolean(false)
@@ -67,7 +65,8 @@ object RosetteStatus {
                         WS2811.PixelColor(Color.BLUE, brightness = 0.005f)
                 }
             }
+            pixelStatus.show()
         }
-        aliveCheckExecutor.scheduleAtFixedRate(runner, 15, 15, TimeUnit.SECONDS)
+        sharedExecutor.scheduleAtFixedRate(runner, 15, 15, TimeUnit.SECONDS)
     }
 }

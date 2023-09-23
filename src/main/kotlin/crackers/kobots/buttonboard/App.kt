@@ -33,7 +33,7 @@ const val REMOTE_PI = "diozero.remote.hostname"
 private val logger = LoggerFactory.getLogger("ButtonBox")
 
 // set up an executor that everyone can share
-internal val executor = Executors.newScheduledThreadPool(5)
+internal val sharedExecutor = Executors.newScheduledThreadPool(5)
 
 private val _runFlag = AtomicBoolean(true)
 internal var runFlag: Boolean
@@ -128,6 +128,6 @@ fun main(args: Array<String>) {
     if (!isRemote) TheStrip.stop()
     TheScreen.close()
     keyboard.close()
-    executor.shutdownNow()
+    sharedExecutor.shutdownNow()
     exitProcess(0)
 }

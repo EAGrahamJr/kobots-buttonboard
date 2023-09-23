@@ -58,7 +58,7 @@ object TheStrip {
             strip.brightness = 0.1f
             strip.autoWrite = true
 
-            future = executor.submit(runnable)
+            future = sharedExecutor.submit(runnable)
             RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
             return true
         } catch (_: Throwable) {
@@ -113,9 +113,9 @@ object TheStrip {
     fun stop() {
         if (::future.isInitialized) {
             future.cancel(true)
-            strip.fill(Color.BLACK)
-            seeSaw.close()
         }
+        strip.fill(Color.BLACK)
+        seeSaw.close()
     }
 
     private fun showRainbow() {

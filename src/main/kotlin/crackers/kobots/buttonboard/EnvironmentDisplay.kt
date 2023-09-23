@@ -95,7 +95,7 @@ object EnvironmentDisplay : Runnable {
     private const val SLEEP_SECONDS = 600L
 
     fun start() {
-        future = executor.scheduleAtFixedRate(this, 1, SLEEP_SECONDS, TimeUnit.SECONDS)
+        future = sharedExecutor.scheduleAtFixedRate(this, 1, SLEEP_SECONDS, TimeUnit.SECONDS)
     }
 
     fun stop() {
