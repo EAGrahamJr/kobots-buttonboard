@@ -16,14 +16,15 @@
 
 package crackers.kobots.buttonboard
 
+import crackers.kobots.app.AppCommon.GOLDENROD
+import crackers.kobots.app.AppCommon.PURPLE
 import crackers.kobots.buttonboard.TheActions.Actions
 import crackers.kobots.buttonboard.TheScreen.Images
-import crackers.kobots.utilities.GOLDENROD
-import crackers.kobots.utilities.PURPLE
 import java.awt.Color
 
 /**
  * Shared stuff
+ * @Deprecated("Use ModeMenus")
  */
 internal enum class Mode(
     val actions: List<Actions>,

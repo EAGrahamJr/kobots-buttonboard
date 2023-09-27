@@ -17,10 +17,11 @@
 package crackers.kobots.buttonboard
 
 import crackers.hassk.EntityState
+import crackers.kobots.app.AppCommon
+import crackers.kobots.app.AppCommon.center
+import crackers.kobots.app.AppCommon.loadImage
 import crackers.kobots.buttonboard.TheActions.hasskClient
 import crackers.kobots.devices.display.SSD1327
-import crackers.kobots.utilities.center
-import crackers.kobots.utilities.loadImage
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.awt.Color
@@ -42,7 +43,7 @@ object EnvironmentDisplay : Runnable {
     private lateinit var future: Future<*>
 
     private val screen by lazy {
-        SSD1327(SSD1327.ADAFRUIT_STEMMA).apply {
+        SSD1327().apply {
             displayOn = false
             clear()
         }
@@ -95,7 +96,7 @@ object EnvironmentDisplay : Runnable {
     private const val SLEEP_SECONDS = 600L
 
     fun start() {
-        future = sharedExecutor.scheduleAtFixedRate(this, 1, SLEEP_SECONDS, TimeUnit.SECONDS)
+        future = AppCommon.executor.scheduleAtFixedRate(this, 1, SLEEP_SECONDS, TimeUnit.SECONDS)
     }
 
     fun stop() {

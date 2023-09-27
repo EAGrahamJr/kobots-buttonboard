@@ -59,7 +59,7 @@ object TheActions {
         mode.actions[button].let { doAction(it) }
     }
 
-    private fun doAction(action: Actions) {
+    internal fun doAction(action: Actions) {
         Logger.warn("Doing action {}", action)
         with(hasskClient) {
             when (action) {

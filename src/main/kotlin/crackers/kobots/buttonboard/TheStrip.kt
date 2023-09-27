@@ -18,12 +18,13 @@ package crackers.kobots.buttonboard
 
 import com.diozero.api.I2CDevice
 import com.diozero.util.SleepUtil
+import crackers.kobots.app.AppCommon
+import crackers.kobots.app.AppCommon.GOLDENROD
+import crackers.kobots.app.AppCommon.colorIntervalFromHSB
 import crackers.kobots.buttonboard.TheActions.mqttClient
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
-import crackers.kobots.utilities.GOLDENROD
-import crackers.kobots.utilities.KobotSleep
-import crackers.kobots.utilities.colorIntervalFromHSB
+import crackers.kobots.parts.app.KobotSleep
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.util.concurrent.Future
@@ -58,7 +59,7 @@ object TheStrip {
             strip.brightness = 0.1f
             strip.autoWrite = true
 
-            future = sharedExecutor.submit(runnable)
+            future = AppCommon.executor.submit(runnable)
             RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
             return true
         } catch (_: Throwable) {
@@ -115,6 +116,7 @@ object TheStrip {
             future.cancel(true)
         }
         strip.fill(Color.BLACK)
+        strip.show()
         seeSaw.close()
     }
 

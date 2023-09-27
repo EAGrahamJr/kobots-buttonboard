@@ -16,6 +16,7 @@
 
 package crackers.kobots.buttonboard
 
+import crackers.kobots.app.AppCommon
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.lighting.WS2811
 import crackers.kobots.mqtt.KobotsMQTT
@@ -67,6 +68,6 @@ object RosetteStatus {
             }
             pixelStatus.show()
         }
-        sharedExecutor.scheduleAtFixedRate(runner, 15, 15, TimeUnit.SECONDS)
+        AppCommon.executor.scheduleAtFixedRate(runner, 15, 15, TimeUnit.SECONDS)
     }
 }

@@ -16,15 +16,17 @@
 
 package crackers.kobots.buttonboard
 
+import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.TheActions.mqttClient
 import crackers.kobots.buttonboard.TheScreen.showIcons
+import crackers.kobots.devices.expander.I2CMultiplexer
 import crackers.kobots.devices.io.NeoKey
-import crackers.kobots.utilities.KobotSleep
+import crackers.kobots.parts.app.KobotSleep
+import crackers.kobots.parts.app.io.NeoKeyHandler
+import crackers.kobots.parts.app.io.NeoKeyMenu
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.LocalTime
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 
@@ -32,13 +34,9 @@ const val REMOTE_PI = "diozero.remote.hostname"
 
 private val logger = LoggerFactory.getLogger("ButtonBox")
 
-// set up an executor that everyone can share
-internal val sharedExecutor = Executors.newScheduledThreadPool(5)
-
-private val _runFlag = AtomicBoolean(true)
 internal var runFlag: Boolean
-    get() = _runFlag.get()
-    private set(b) = _runFlag.set(b)
+    get() = AppCommon.runFlag.get()
+    private set(b) = AppCommon.runFlag.set(b)
 
 private val _currentMode = AtomicReference(Mode.NIGHT)
 internal var currentMode: Mode
@@ -48,6 +46,14 @@ internal var currentMode: Mode
 private var _remote: Boolean = false
 internal val isRemote: Boolean
     get() = _remote
+
+internal val multiplexor by lazy { I2CMultiplexer() }
+
+internal lateinit var handlerUno: NeoKeyHandler
+internal lateinit var displayUno: NeoKeyMenu.MenuDisplay
+internal lateinit var handlerDos: NeoKeyHandler
+internal lateinit var displayDos: NeoKeyMenu.MenuDisplay
+
 
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
@@ -60,11 +66,18 @@ fun main(args: Array<String>) {
         false
     }
 
-    val keyboard = NeoKey().apply { pixels.brightness = 0.05f }
+    val kb1Device = multiplexor.getI2CDevice(0, NeoKey.DEFAULT_I2C_ADDRESS)
+    val keyboardUno = NeoKey(kb1Device).apply { brightness = 0.01f }
+    handlerUno = NeoKeyHandler(keyboardUno)
+
     mqttClient.startAliveCheck()
 
-    keyboard[3] = Color.RED
+    keyboardUno[3] = Color.RED
     var lastButtonsRead: List<Boolean> = listOf(false, false, false, false)
+
+    val kb2Device = multiplexor.getI2CDevice(3, NeoKey.DEFAULT_I2C_ADDRESS)
+    val keyboardDos = NeoKey(kb2Device).apply { brightness = 0.01f }
+    handlerDos = NeoKeyHandler(keyboardDos)
 
     TheStrip.start()
     EnvironmentDisplay.start()
@@ -81,10 +94,12 @@ fun main(args: Array<String>) {
             }
             // mode change or error cleared
             if (mode != currentMode) {
-                keyboard.brightness = mode.brightness
+                keyboardUno.brightness = mode.brightness
+                keyboardDos.brightness = mode.brightness
+
                 showIcons(mode)
                 mode.colors.forEachIndexed { index, color ->
-                    keyboard[index] = color
+                    keyboardUno[index] = color
                 }
                 currentMode = mode
             }
@@ -93,41 +108,29 @@ fun main(args: Array<String>) {
              * This is purely button driven, so use the buttons - try to "debounce" by only detecting changes between
              * iterations. This is because humans are slow
              */
-            val currentButtons = keyboard.read()
-            val whichButtonsPressed = if (currentButtons != lastButtonsRead) {
-                lastButtonsRead = currentButtons
-                currentButtons.mapIndexedNotNull { index, b ->
-                    if (b) {
-                        keyboard[index] = Color.YELLOW
-                        index
-                    } else {
-                        null
-                    }
-                }
-            } else {
-                emptyList()
-            }
-            if (whichButtonsPressed.size > 1) {
-                runFlag = false
-            } else {
-                whichButtonsPressed.firstOrNull()?.let { button ->
+            var actionExecuted = false
+            handlerUno.read().mapIndexed { button, pressed ->
+                if (!actionExecuted && pressed) {
                     TheActions.doStuff(button, currentMode)
-                    keyboard[button] = currentMode.colors[button]
+                    actionExecuted = true
                 }
             }
+            if (handlerDos.read()[3]) runFlag = false
         } catch (e: Throwable) {
             logger.error("Error found - continuing", e)
         }
         KobotSleep.millis(100)
     }
-    keyboard.fill(Color.RED)
+    keyboardUno.fill(Color.RED)
+    keyboardDos.fill(Color.BLACK)
     logger.warn("Exiting ")
 
 //    client.close()
     EnvironmentDisplay.stop()
     if (!isRemote) TheStrip.stop()
     TheScreen.close()
-    keyboard.close()
-    sharedExecutor.shutdownNow()
+    keyboardUno.close()
+    keyboardDos.close()
+    AppCommon.executor.shutdownNow()
     exitProcess(0)
 }

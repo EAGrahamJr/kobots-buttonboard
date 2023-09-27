@@ -16,11 +16,10 @@
 
 package crackers.kobots.buttonboard
 
-import com.diozero.api.I2CDevice
 import com.diozero.devices.oled.SSD1306
 import com.diozero.devices.oled.SsdOledCommunicationChannel
-import crackers.kobots.utilities.center
-import crackers.kobots.utilities.loadImage
+import crackers.kobots.app.AppCommon.center
+import crackers.kobots.app.AppCommon.loadImage
 import java.awt.Color
 import java.awt.Font
 import java.awt.Graphics2D
@@ -31,7 +30,8 @@ import java.awt.image.BufferedImage
  */
 object TheScreen {
     private val screen = let {
-        val channel = SsdOledCommunicationChannel.I2cCommunicationChannel(I2CDevice(1, SSD1306.DEFAULT_I2C_ADDRESS))
+        val device = multiplexor.getI2CDevice(7, SSD1306.DEFAULT_I2C_ADDRESS)
+        val channel = SsdOledCommunicationChannel.I2cCommunicationChannel(device)
         SSD1306(channel, SSD1306.Height.SHORT).apply {
             clear()
             setDisplayOn(true)
