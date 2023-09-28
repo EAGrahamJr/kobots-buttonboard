@@ -23,16 +23,17 @@ import crackers.kobots.buttonboard.TheActions.mqttClient
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
 import crackers.kobots.parts.GOLDENROD
-import crackers.kobots.parts.app.KobotSleep
+import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.colorIntervalFromHSB
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 
 /**
  * Run pretty stuff on the Neopixel strip.
  */
-object TheStrip {
+object TheStrip : Runnable {
     private val logger = LoggerFactory.getLogger("TheStrip")
     private lateinit var seeSaw: AdafruitSeeSaw
     private lateinit var strip: NeoPixel
@@ -59,65 +60,71 @@ object TheStrip {
             strip.brightness = 0.1f
             strip.autoWrite = true
 
-            future = AppCommon.executor.submit(runnable)
+            future = AppCommon.executor.scheduleAtFixedRate(this, 10, 10, TimeUnit.SECONDS)
             RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
             return true
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
             SleepUtil.busySleep(50)
         }
         logger.error("Failed to initialize")
         return false
     }
 
-    private val runnable = Runnable {
-        while (AppCommon.applicationRunning) {
-            if (currentMode != lastMode) {
-                try {
-                    lastMode = currentMode
-                    // check the time of day vs mode
+    override fun run() {
+        try {
+            if (currentMode == Mode.DAYTIME) showRainbow()
+            if (currentMode == lastMode) return
 
-                    strip.autoWrite = when (currentMode) {
-                        Mode.NIGHT -> {
-                            strip[stripOffset, stripLast] = Color.BLACK
-                            true
-                        }
-                        Mode.MORNING -> {
-                            strip.brightness = 0.03f
-                            strip[stripOffset, stripLast] = GOLDENROD
-                            true
-                        }
-
-                        Mode.DAYTIME -> {
-                            strip.brightness = 0.2f
-                            false
-                        }
-
-                        Mode.EVENING -> {
-                            strip.brightness = 0.03f
-                            strip[stripOffset, stripLast] = Color.RED
-                            true
-                        }
-                    }
-                } catch (e: Exception) {
-                    logger.error("Cannot display strip", e)
+            lastMode = currentMode
+            strip.autoWrite = when (currentMode) {
+                Mode.NIGHT -> {
+                    strip[stripOffset, stripLast] = Color.BLACK
+                    true
                 }
 
-                RosetteStatus.goToSleep.set(currentMode == Mode.NIGHT)
+                Mode.MORNING -> {
+                    strip.brightness = 0.03f
+                    strip[stripOffset, stripLast] = GOLDENROD
+                    true
+                }
+
+                Mode.DAYTIME -> {
+                    strip.brightness = 0.2f
+                    false
+                }
+
+                Mode.EVENING -> {
+                    strip.brightness = 0.03f
+                    strip[stripOffset, stripLast] = Color.RED
+                    true
+                }
+
+                Mode.NONE -> {
+                    strip.brightness = 0.01f
+                    strip[stripOffset, stripLast] = PURPLE
+                    true
+                }
             }
-            if (currentMode == Mode.DAYTIME) showRainbow()
-            KobotSleep.seconds(10)
+
+            RosetteStatus.goToSleep.set(currentMode == Mode.NIGHT)
+        } catch (e: Exception) {
+            logger.error("Cannot display strip", e)
         }
-        // turn off the strip
-        strip.fill(Color.BLACK)
     }
 
     fun stop() {
+        if (isRemote) return
+
         if (::future.isInitialized) {
             future.cancel(true)
         }
-        strip.fill(Color.BLACK)
-        strip.show()
-        seeSaw.close()
+        try {
+            strip.fill(Color.BLACK)
+            strip.show()
+            seeSaw.close()
+        } catch (e: Exception) {
+            logger.error("Cannot close strip", e)
+        }
     }
 
     private fun showRainbow() {

@@ -171,28 +171,113 @@ val RobotMenu =
         displayDos,
         listOf(
             NeoKeyMenu.MenuItem(
-                "One",
-                icon = Images.EXIT.image,
+                "Drops",
+                icon = loadImage("/robot/symptoms.png"),
                 buttonColor = Color.DARK_GRAY,
-                action = { println("No Op menu 1") }
+                action = { TheActions.GripperActions.PICKUP.send() }
             ),
             NeoKeyMenu.MenuItem(
-                "two",
-                icon = Images.EXIT.image,
+                "Rtn",
+                icon = loadImage("/robot/redo.png"),
                 buttonColor = Color.GREEN,
-                action = { println("No op menu 2") }
+                action = { TheActions.GripperActions.RETURN.send() }
             ),
             NeoKeyMenu.MenuItem(
-                "three",
-                icon = Images.EXIT.image,
-                buttonColor = Color.BLUE,
-                action = { println("No op menu 3") }
+                "Hi",
+                icon = loadImage("/robot/hail.png"),
+                buttonColor = Color.CYAN.darker(),
+                action = { TheActions.GripperActions.SAY_HI.send() }
             ),
             NeoKeyMenu.MenuItem(
                 "Exit",
-                icon = Images.EXIT.image,
+                icon = loadImage("/robot/dangerous.png"),
                 buttonColor = Color.RED,
-                action = { AppCommon.applicationRunning = false }
+                action = {
+                    TheActions.GripperActions.STOP.send()
+                    AppCommon.applicationRunning = false
+                }
             )
         )
     )
+
+/*
+
+
+    const val EVENT_TOPIC = "kobots/events"
+    // sequence completion comes from the gripomatic
+    const val ROTO_PICKUP = "LocationPickup"
+    const val ROTO_RETURN = "ReturnPickup"
+
+
+private val smallMenu by lazy {
+    listOf(
+        NeoKeyMenu.MenuItem(
+            "Home",
+            icon = loadImage("/home.png")
+        ) { armRequest(homeSequence) },
+        NeoKeyMenu.MenuItem(
+            "Say Hi",
+            icon = loadImage("/hail.png"),
+            buttonColor = Color.BLUE
+        ) { armRequest(sayHi) },
+        NeoKeyMenu.MenuItem(
+            "Return",
+            icon = loadImage("/redo.png"),
+            buttonColor = GOLDENROD
+        ) { publishToTopic(DA_TOPIC, returnRequested) },
+        NeoKeyMenu.MenuItem(
+            "Exit",
+            icon = loadImage("/dangerous.png"),
+            buttonColor = Color.RED
+        ) {
+            runFlag.set(false)
+        }
+    )
+}
+private val gripperMenu by lazy {
+    listOf(
+        NeoKeyMenu.MenuItem(
+            "Home",
+            icon = loadImage("/home.png")
+        ) { armRequest(homeSequence) },
+        NeoKeyMenu.MenuItem(
+            "Say Hi",
+            icon = loadImage("/hail.png"),
+            buttonColor = Color.BLUE
+        ) { armRequest(sayHi) },
+        NeoKeyMenu.MenuItem(
+            "Excuse Me",
+            abbrev = "Sorry",
+            icon = loadImage("/cancel.png"),
+            buttonColor = PURPLE
+        ) { armRequest(excuseMe) },
+//    NeoKeyMenu.MenuItem("Manual", buttonColor = Color.ORANGE) { _manualMode.set(true) },
+        NeoKeyMenu.MenuItem(
+            "Lift It",
+            icon = loadImage("/upload.png"),
+            buttonColor = Color.GREEN
+        ) { ServoMaticCommand.UP.send() },
+        NeoKeyMenu.MenuItem(
+            "Get It",
+            icon = loadImage("/symptoms.png"),
+            buttonColor = Color.CYAN
+        ) { publishToTopic(DA_TOPIC, dropOffRequested) },
+        NeoKeyMenu.MenuItem(
+            "Return",
+            icon = loadImage("/redo.png"),
+            buttonColor = GOLDENROD
+        ) { publishToTopic(DA_TOPIC, returnRequested) },
+        NeoKeyMenu.MenuItem(
+            "Exit",
+            icon = loadImage("/dangerous.png"),
+            buttonColor = Color.RED
+        ) { runFlag.set(false) },
+        NeoKeyMenu.MenuItem(
+            "Sleep",
+            icon = loadImage("/bed.png"),
+            buttonColor = Color.BLUE.darker().darker()
+        ) { armRequest(goToSleep) }
+    )
+}
+
+ */

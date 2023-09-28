@@ -70,6 +70,14 @@ object TheActions {
         }
     }
 
+    const val GRIPOMATIC_TOPIC = "kobots/gripOMatic"
+
+    enum class GripperActions {
+        PICKUP, RETURN, HOME, SAY_HI, STOP;
+
+        fun send() = mqttClient.publish(GRIPOMATIC_TOPIC, name)
+    }
+
     private fun HAssKClient.toggleOnSwitch(name: String) = if (switch(name).state().state == "off") on else off
 
     private fun HAssKClient.toggleOnLight(name: String) = if (light(name).state().state == "off") on else off
