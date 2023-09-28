@@ -18,10 +18,10 @@ package crackers.kobots.buttonboard
 
 import crackers.hassk.EntityState
 import crackers.kobots.app.AppCommon
-import crackers.kobots.app.AppCommon.center
-import crackers.kobots.app.AppCommon.loadImage
-import crackers.kobots.buttonboard.TheActions.hasskClient
+import crackers.kobots.app.AppCommon.hasskClient
 import crackers.kobots.devices.display.SSD1327
+import crackers.kobots.parts.center
+import crackers.kobots.parts.loadImage
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.awt.Color

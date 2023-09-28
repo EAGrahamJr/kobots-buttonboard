@@ -19,12 +19,12 @@ package crackers.kobots.buttonboard
 import com.diozero.api.I2CDevice
 import com.diozero.util.SleepUtil
 import crackers.kobots.app.AppCommon
-import crackers.kobots.app.AppCommon.GOLDENROD
-import crackers.kobots.app.AppCommon.colorIntervalFromHSB
 import crackers.kobots.buttonboard.TheActions.mqttClient
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
+import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.app.KobotSleep
+import crackers.kobots.parts.colorIntervalFromHSB
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.util.concurrent.Future
@@ -70,7 +70,7 @@ object TheStrip {
     }
 
     private val runnable = Runnable {
-        while (runFlag) {
+        while (AppCommon.applicationRunning) {
             if (currentMode != lastMode) {
                 try {
                     lastMode = currentMode

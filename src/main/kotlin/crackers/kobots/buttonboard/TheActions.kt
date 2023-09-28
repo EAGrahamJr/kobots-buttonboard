@@ -20,6 +20,7 @@ import com.typesafe.config.ConfigFactory
 import crackers.hassk.Constants.off
 import crackers.hassk.Constants.on
 import crackers.hassk.HAssKClient
+import crackers.kobots.app.AppCommon
 import crackers.kobots.mqtt.KobotsMQTT
 import org.slf4j.LoggerFactory
 import org.tinylog.Logger
@@ -29,12 +30,10 @@ import java.net.InetAddress
  * What to do when a button is pressed.
  */
 object TheActions {
-    internal val hasskClient: HAssKClient
     internal val mqttClient: KobotsMQTT
 
     init {
         with(ConfigFactory.load()) {
-            hasskClient = HAssKClient(getString("ha.token"), getString("ha.server"), getInt("ha.port"))
             mqttClient = KobotsMQTT(hostname(), getString("mqtt.broker"))
         }
     }
@@ -52,16 +51,9 @@ object TheActions {
         TOP, MORNING, OFFICE, BEDROOM, KITCHEN, TV, MOVIE, BEDTIME, LATE_NIGHT, NOT_ALL, OFFICE_FAN
     }
 
-    /**
-     * Do this serially because it takes time.
-     */
-    internal fun doStuff(button: Int, mode: Mode) {
-        mode.actions[button].let { doAction(it) }
-    }
-
     internal fun doAction(action: Actions) {
         Logger.warn("Doing action {}", action)
-        with(hasskClient) {
+        with(AppCommon.hasskClient) {
             when (action) {
                 Actions.TOP -> scene("top_button") turn on
                 Actions.MORNING -> scene("early_morning") turn on

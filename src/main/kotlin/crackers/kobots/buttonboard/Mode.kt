@@ -16,10 +16,9 @@
 
 package crackers.kobots.buttonboard
 
-import crackers.kobots.app.AppCommon.GOLDENROD
-import crackers.kobots.app.AppCommon.PURPLE
 import crackers.kobots.buttonboard.TheActions.Actions
-import crackers.kobots.buttonboard.TheScreen.Images
+import crackers.kobots.parts.GOLDENROD
+import crackers.kobots.parts.PURPLE
 import java.awt.Color
 
 /**

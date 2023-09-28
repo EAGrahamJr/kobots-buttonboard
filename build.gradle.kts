@@ -15,7 +15,7 @@ repositories {
 
 val DIOZERO_VER = "1.4.0"
 val DEVICES_VER = "0.2.1"
-val PARTS_VER = "0.0.2"
+val PARTS_VER = "0.0.3"
 val JAR_NAME = "bboard"
 
 dependencies {
