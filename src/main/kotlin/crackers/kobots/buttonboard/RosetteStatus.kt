@@ -38,6 +38,8 @@ object RosetteStatus {
 
     /**
      * Listens for `KOBOTS_ALIVE` messages and tracks the last time a message was received from each host.
+     *
+     * This is not using the "built-in" MQTT listener because we're also checking for "up" statuses.
      */
     internal fun manageAliveChecks(pixelStatus: NeoPixel, mqtt: KobotsMQTT, offset: Int = 0) {
         // store everybody's last time

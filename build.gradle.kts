@@ -2,7 +2,7 @@ plugins {
     application
     kotlin("jvm") version "1.9.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.jmailen.kotlinter") version "3.12.0"
+    id("org.jmailen.kotlinter") version "3.16.0"
 }
 
 group = "crackers.kobots"
@@ -14,8 +14,8 @@ repositories {
 }
 
 val DIOZERO_VER = "1.4.0"
-val DEVICES_VER = "0.2.1"
-val PARTS_VER = "0.0.3"
+val DEVICES_VER = "0.2+"
+val PARTS_VER = "0.0+"
 val JAR_NAME = "bboard"
 
 dependencies {
@@ -39,7 +39,6 @@ kotlin {
 
 kotlinter {
     ignoreFailures = true
-    disabledRules = arrayOf("no-wildcard-imports")
 }
 
 tasks {
@@ -58,6 +57,13 @@ tasks {
         // this is important for sing the remote client at the same time as other providers
         mergeServiceFiles()
     }
+    // don't need any of these
+    jar { enabled = false }
+    startScripts { enabled = false }
+    distTar { enabled = false }
+    distZip { enabled = false }
+    shadowDistTar { enabled = false }
+    shadowDistZip { enabled = false }
 
     /**
      * Deploy said shadow-jar to a remote Pi for runtime fun

@@ -18,6 +18,7 @@ package crackers.kobots.buttonboard
 
 import com.diozero.devices.oled.SSD1306
 import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.FrontBenchPicker.handlerDos
 import crackers.kobots.buttonboard.TheActions.mqttClient
 import crackers.kobots.devices.expander.I2CMultiplexer
 import crackers.kobots.devices.io.NeoKey
@@ -36,13 +37,13 @@ const val REMOTE_PI = "diozero.remote.hostname"
  * Defines what various parts of the day are
  */
 internal enum class Mode(
-    val brightness: Float = 0.1f
+    val brightness: Float = 0.1f,
 ) {
     NONE(0f),
     NIGHT(.01f),
     MORNING(.05f),
     DAYTIME,
-    EVENING(.03f)
+    EVENING(.03f),
 }
 
 private val logger = LoggerFactory.getLogger("ButtonBox")
@@ -60,10 +61,9 @@ private var _remote: Boolean = false
 internal val isRemote: Boolean
     get() = _remote
 
+internal val i2cMultiplexer: I2CMultiplexer by lazy { I2CMultiplexer() }
 internal lateinit var handlerUno: NeoKeyHandler
 internal lateinit var displayUno: TheScreen
-internal lateinit var handlerDos: NeoKeyHandler
-internal lateinit var displayDos: TheScreen
 
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
@@ -78,13 +78,12 @@ fun main(args: Array<String>) {
 
     TheStrip.start()
     EnvironmentDisplay.start()
-    I2CMultiplexer().use { multiplexor ->
-        startMultiplexed(multiplexor)
-
-        RobotMenu.displayMenu()
+    i2cMultiplexer.use { multiplexer ->
+        startMultiplexed(multiplexer)
 
         mqttClient.startAliveCheck()
         var currentMenu: NeoKeyMenu? = null
+        FrontBenchPicker.start()
 
         while (runFlag) {
             try {
@@ -100,26 +99,27 @@ fun main(args: Array<String>) {
                 if (mode != currentMode) {
                     handlerUno.brightness = mode.brightness
                     handlerDos.brightness = mode.brightness
-                    RobotMenu.displayMenu()
                     currentMenu = ModeMenus[mode]!!
                     currentMenu.displayMenu()
                     currentMode = mode
                 }
 
-                if (!currentMenu!!.firstButton()) RobotMenu.firstButton()
+                // *****************************
+                // ***** READ BUTTONS HERE *****
+                // *****************************
+                if (!currentMenu!!.firstButton()) FrontBenchPicker.currentMenu().firstButton()
             } catch (e: Throwable) {
                 logger.error("Error found - continuing", e)
             }
             KobotSleep.millis(100)
         }
         handlerUno.buttonColors = listOf(Color.RED, Color.RED, Color.RED, Color.RED)
-        displayUno.close()
-        handlerDos.buttonColors = listOf(Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK)
-        displayDos.close()
         logger.warn("Exiting ")
+        displayUno.close()
 
         EnvironmentDisplay.stop()
         TheStrip.stop()
+        FrontBenchPicker.stop()
         handlerUno.brightness = 0.01f
         handlerUno.buttonColors = listOf(Color.BLACK, Color.BLACK, Color.BLACK, Color.RED)
     }
@@ -128,14 +128,9 @@ fun main(args: Array<String>) {
     exitProcess(0)
 }
 
-private fun startMultiplexed(multiplexor: I2CMultiplexer) {
-    val kb1Device = multiplexor.getI2CDevice(0, NeoKey.DEFAULT_I2C_ADDRESS)
+private fun startMultiplexed(multiplexer: I2CMultiplexer) = with(multiplexer) {
+    val kb1Device = getI2CDevice(0, NeoKey.DEFAULT_I2C_ADDRESS)
     val keyboardUno = NeoKey(kb1Device).apply { brightness = 0.01f }
     handlerUno = NeoKeyHandler(keyboardUno)
-    displayUno = TheScreen(multiplexor.getI2CDevice(7, SSD1306.DEFAULT_I2C_ADDRESS))
-
-    val kb2Device = multiplexor.getI2CDevice(3, NeoKey.DEFAULT_I2C_ADDRESS)
-    val keyboardDos = NeoKey(kb2Device).apply { brightness = 0.01f }
-    handlerDos = NeoKeyHandler(keyboardDos)
-    displayDos = TheScreen(multiplexor.getI2CDevice(4, SSD1306.DEFAULT_I2C_ADDRESS))
+    displayUno = TheScreen(getI2CDevice(7, SSD1306.DEFAULT_I2C_ADDRESS))
 }

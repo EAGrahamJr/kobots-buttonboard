@@ -16,9 +16,7 @@
 
 package crackers.kobots.buttonboard
 
-import crackers.kobots.app.AppCommon
-import crackers.kobots.buttonboard.TheActions.Actions
-import crackers.kobots.buttonboard.TheActions.doAction
+import crackers.kobots.buttonboard.TheActions.HassActions
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.app.io.NeoKeyMenu
@@ -36,7 +34,7 @@ internal enum class Images(val image: BufferedImage) {
     RESTAURANT(loadImage("/restaurant.png")),
     SUN(loadImage("/sun.png")),
     TV(loadImage("/tv.png")),
-    FAN(loadImage("/fan.png"))
+    FAN(loadImage("/fan.png")),
 }
 
 internal val ModeMenus = mapOf(
@@ -48,27 +46,27 @@ internal val ModeMenus = mapOf(
                 "Off",
                 icon = Images.EXIT.image,
                 buttonColor = Color.DARK_GRAY,
-                action = { doAction(Actions.NOT_ALL) }
+                action = { HassActions.NOT_ALL.execute() },
             ),
             NeoKeyMenu.MenuItem(
                 "Top",
                 icon = Images.LIGHTBULB.image,
                 buttonColor = Color.GREEN,
-                action = { doAction(Actions.TOP) }
+                action = { HassActions.TOP.execute() },
             ),
             NeoKeyMenu.MenuItem(
                 "Morn",
                 icon = Images.SUN.image,
                 buttonColor = GOLDENROD,
-                action = { doAction(Actions.MORNING) }
+                action = { HassActions.MORNING.execute() },
             ),
             NeoKeyMenu.MenuItem(
                 "Bed",
                 icon = Images.BED.image,
                 buttonColor = Color.PINK,
-                action = { doAction(Actions.BEDROOM) }
-            )
-        )
+                action = { HassActions.BEDROOM.execute() },
+            ),
+        ),
     ),
     Mode.MORNING to NeoKeyMenu(
         handlerUno,
@@ -78,27 +76,27 @@ internal val ModeMenus = mapOf(
                 "Morn",
                 icon = Images.SUN.image,
                 buttonColor = GOLDENROD,
-                action = { doAction(Actions.MORNING) }
+                action = { HassActions.MORNING.execute() },
             ),
             NeoKeyMenu.MenuItem(
                 "Top",
                 icon = Images.LIGHTBULB.image,
                 buttonColor = Color.GREEN,
-                action = { doAction(Actions.TOP) }
+                action = { HassActions.TOP.execute() },
             ),
             NeoKeyMenu.MenuItem(
                 "Kit",
                 icon = Images.RESTAURANT.image,
                 buttonColor = Color.CYAN,
-                action = { doAction(Actions.KITCHEN) }
+                action = { HassActions.KITCHEN.execute() },
             ),
             NeoKeyMenu.MenuItem(
                 "Fan",
                 icon = Images.FAN.image,
                 buttonColor = Color.BLUE,
-                action = { doAction(Actions.OFFICE_FAN) }
-            )
-        )
+                action = { HassActions.OFFICE_FAN.execute() },
+            ),
+        ),
 
     ),
     Mode.DAYTIME to
@@ -110,27 +108,27 @@ internal val ModeMenus = mapOf(
                     "Top",
                     icon = Images.LIGHTBULB.image,
                     buttonColor = Color.GREEN,
-                    action = { doAction(Actions.TOP) }
+                    action = { HassActions.TOP.execute() },
                 ),
                 NeoKeyMenu.MenuItem(
                     "TV",
                     icon = Images.TV.image,
                     buttonColor = PURPLE,
-                    action = { doAction(Actions.TV) }
+                    action = { HassActions.TV.execute() },
                 ),
                 NeoKeyMenu.MenuItem(
                     "Movie",
                     icon = Images.MOVIE.image,
                     buttonColor = Color.RED,
-                    action = { doAction(Actions.MOVIE) }
+                    action = { HassActions.MOVIE.execute() },
                 ),
                 NeoKeyMenu.MenuItem(
                     "Fan",
                     icon = Images.FAN.image,
                     buttonColor = Color.BLUE,
-                    action = { doAction(Actions.OFFICE_FAN) }
-                )
-            )
+                    action = { HassActions.OFFICE_FAN.execute() },
+                ),
+            ),
 
         ),
     Mode.EVENING to NeoKeyMenu(
@@ -141,143 +139,26 @@ internal val ModeMenus = mapOf(
                 "Bed",
                 icon = Images.BED.image,
                 buttonColor = Color.PINK,
-                action = { doAction(Actions.BEDTIME) }
+                action = { HassActions.BEDTIME.execute() },
             ),
             NeoKeyMenu.MenuItem(
                 "Late",
                 icon = Images.MOON.image,
                 buttonColor = Color.RED,
-                action = { doAction(Actions.LATE_NIGHT) }
+                action = { HassActions.LATE_NIGHT.execute() },
             ),
             NeoKeyMenu.MenuItem(
                 "Off",
                 icon = Images.EXIT.image,
                 buttonColor = Color.DARK_GRAY,
-                action = { doAction(Actions.NOT_ALL) }
+                action = { HassActions.NOT_ALL.execute() },
             ),
             NeoKeyMenu.MenuItem(
                 "Fan",
                 icon = Images.FAN.image,
                 buttonColor = Color.BLUE,
-                action = { doAction(Actions.OFFICE_FAN) }
-            )
-        )
-    )
+                action = { HassActions.OFFICE_FAN.execute() },
+            ),
+        ),
+    ),
 )
-
-val RobotMenu =
-    NeoKeyMenu(
-        handlerDos,
-        displayDos,
-        listOf(
-            NeoKeyMenu.MenuItem(
-                "Drops",
-                icon = loadImage("/robot/symptoms.png"),
-                buttonColor = Color.DARK_GRAY,
-                action = { TheActions.GripperActions.PICKUP.send() }
-            ),
-            NeoKeyMenu.MenuItem(
-                "Rtn",
-                icon = loadImage("/robot/redo.png"),
-                buttonColor = Color.GREEN,
-                action = { TheActions.GripperActions.RETURN.send() }
-            ),
-            NeoKeyMenu.MenuItem(
-                "Hi",
-                icon = loadImage("/robot/hail.png"),
-                buttonColor = Color.CYAN.darker(),
-                action = { TheActions.GripperActions.SAY_HI.send() }
-            ),
-            NeoKeyMenu.MenuItem(
-                "Exit",
-                icon = loadImage("/robot/dangerous.png"),
-                buttonColor = Color.RED,
-                action = {
-                    TheActions.GripperActions.STOP.send()
-                    AppCommon.applicationRunning = false
-                }
-            )
-        )
-    )
-
-/*
-
-
-    const val EVENT_TOPIC = "kobots/events"
-    // sequence completion comes from the gripomatic
-    const val ROTO_PICKUP = "LocationPickup"
-    const val ROTO_RETURN = "ReturnPickup"
-
-
-private val smallMenu by lazy {
-    listOf(
-        NeoKeyMenu.MenuItem(
-            "Home",
-            icon = loadImage("/home.png")
-        ) { armRequest(homeSequence) },
-        NeoKeyMenu.MenuItem(
-            "Say Hi",
-            icon = loadImage("/hail.png"),
-            buttonColor = Color.BLUE
-        ) { armRequest(sayHi) },
-        NeoKeyMenu.MenuItem(
-            "Return",
-            icon = loadImage("/redo.png"),
-            buttonColor = GOLDENROD
-        ) { publishToTopic(DA_TOPIC, returnRequested) },
-        NeoKeyMenu.MenuItem(
-            "Exit",
-            icon = loadImage("/dangerous.png"),
-            buttonColor = Color.RED
-        ) {
-            runFlag.set(false)
-        }
-    )
-}
-private val gripperMenu by lazy {
-    listOf(
-        NeoKeyMenu.MenuItem(
-            "Home",
-            icon = loadImage("/home.png")
-        ) { armRequest(homeSequence) },
-        NeoKeyMenu.MenuItem(
-            "Say Hi",
-            icon = loadImage("/hail.png"),
-            buttonColor = Color.BLUE
-        ) { armRequest(sayHi) },
-        NeoKeyMenu.MenuItem(
-            "Excuse Me",
-            abbrev = "Sorry",
-            icon = loadImage("/cancel.png"),
-            buttonColor = PURPLE
-        ) { armRequest(excuseMe) },
-//    NeoKeyMenu.MenuItem("Manual", buttonColor = Color.ORANGE) { _manualMode.set(true) },
-        NeoKeyMenu.MenuItem(
-            "Lift It",
-            icon = loadImage("/upload.png"),
-            buttonColor = Color.GREEN
-        ) { ServoMaticCommand.UP.send() },
-        NeoKeyMenu.MenuItem(
-            "Get It",
-            icon = loadImage("/symptoms.png"),
-            buttonColor = Color.CYAN
-        ) { publishToTopic(DA_TOPIC, dropOffRequested) },
-        NeoKeyMenu.MenuItem(
-            "Return",
-            icon = loadImage("/redo.png"),
-            buttonColor = GOLDENROD
-        ) { publishToTopic(DA_TOPIC, returnRequested) },
-        NeoKeyMenu.MenuItem(
-            "Exit",
-            icon = loadImage("/dangerous.png"),
-            buttonColor = Color.RED
-        ) { runFlag.set(false) },
-        NeoKeyMenu.MenuItem(
-            "Sleep",
-            icon = loadImage("/bed.png"),
-            buttonColor = Color.BLUE.darker().darker()
-        ) { armRequest(goToSleep) }
-    )
-}
-
- */

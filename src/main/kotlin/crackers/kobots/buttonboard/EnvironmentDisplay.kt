@@ -89,7 +89,7 @@ object EnvironmentDisplay : Runnable {
             "sunny" to loadImage("/weather/sunny.png"),
             "windy" to loadImage("/weather/windy.png"),
             "pouring" to loadImage("/weather/rainy_heavy.png"),
-            "default" to loadImage("/screaming.png")
+            "default" to loadImage("/screaming.png"),
         )
     }
 
@@ -166,7 +166,7 @@ object EnvironmentDisplay : Runnable {
     private val insideSensors = listOf(
         "sensor.cube_air_temperature",
         "sensor.trisensor_air_temperature",
-        "sensor.bedroom_temperature"
+        "sensor.bedroom_temperature",
     )
 
     /**
