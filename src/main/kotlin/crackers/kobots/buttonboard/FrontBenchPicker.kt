@@ -16,41 +16,27 @@
 
 package crackers.kobots.buttonboard
 
-import com.diozero.devices.oled.SSD1306
 import crackers.kobots.app.AppCommon
-import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.parts.ORANGISH
 import crackers.kobots.parts.PURPLE
-import crackers.kobots.parts.app.io.NeoKeyHandler
 import crackers.kobots.parts.app.io.NeoKeyMenu
 import crackers.kobots.parts.loadImage
-import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.util.concurrent.ConcurrentHashMap
+
+enum class FrontBenchActions {
+    NONE, STANDARD_ROBOT, SHOW_OFF
+}
 
 /**
  * Handles what menu items are shown for the front "bench" (NeoKey) buttons.
  */
-object FrontBenchPicker {
-    enum class FrontBenchActions {
-        NONE, STANDARD_ROBOT, SHOW_OFF
-    }
-
-    internal val handlerDos: NeoKeyHandler by lazy {
-        val kb2Device = i2cMultiplexer.getI2CDevice(3, NeoKey.DEFAULT_I2C_ADDRESS)
-        val keyboardDos = NeoKey(kb2Device).apply { brightness = 0.01f }
-        NeoKeyHandler(keyboardDos)
-    }
-    internal val displayDos: TheScreen by lazy {
-        TheScreen(i2cMultiplexer.getI2CDevice(4, SSD1306.DEFAULT_I2C_ADDRESS))
-    }
-
-    private val logger = LoggerFactory.getLogger("FrontBenchPicker")
-    private val menuSelections = ConcurrentHashMap(
+object FrontBenchPicker : BenchPicker<FrontBenchActions>(3, 4) {
+    override val menuSelections = ConcurrentHashMap(
         mapOf(
             FrontBenchActions.STANDARD_ROBOT to NeoKeyMenu(
-                handlerDos,
-                displayDos,
+                keyHandler,
+                display,
                 listOf(
                     NeoKeyMenu.MenuItem(
                         "Drops",
@@ -78,8 +64,8 @@ object FrontBenchPicker {
                 ),
             ),
             FrontBenchActions.SHOW_OFF to NeoKeyMenu(
-                handlerDos,
-                displayDos,
+                keyHandler,
+                display,
                 listOf(
                     NeoKeyMenu.MenuItem(
                         "Home",
@@ -110,22 +96,4 @@ object FrontBenchPicker {
             ),
         ),
     )
-
-    fun currentMenu() = menuSelections[currentMenu] ?: menuSelections[FrontBenchActions.STANDARD_ROBOT]!!
-    fun start() = currentMenu().displayMenu()
-    fun stop() {
-        displayDos.screen.setDisplayOn(false)
-        handlerDos.buttonColors = listOf(Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK)
-    }
-
-    private var currentMenu = FrontBenchActions.STANDARD_ROBOT
-
-    fun updateMenu() {
-        currentMenu = when (currentMenu) {
-            FrontBenchActions.STANDARD_ROBOT -> FrontBenchActions.SHOW_OFF
-            FrontBenchActions.SHOW_OFF -> FrontBenchActions.STANDARD_ROBOT
-            else -> FrontBenchActions.STANDARD_ROBOT
-        }
-        currentMenu().displayMenu()
-    }
 }

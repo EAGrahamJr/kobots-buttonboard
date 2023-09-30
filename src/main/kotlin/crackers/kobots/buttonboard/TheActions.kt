@@ -33,7 +33,7 @@ object TheActions {
         fun execute()
     }
 
-    internal val mqttClient: KobotsMQTT
+    val mqttClient: KobotsMQTT
 
     // remote control of this thing
     const val BBOARD_TOPIC = "kobots/buttonboard"
@@ -59,27 +59,27 @@ object TheActions {
         }
     }
 
-    internal enum class HassActions : Action {
+    enum class HassActions : Action {
         TOP, MORNING, OFFICE, BEDROOM, KITCHEN, TV, MOVIE, BEDTIME, LATE_NIGHT, NOT_ALL, OFFICE_FAN;
 
-        override fun execute() = doAction(this)
-    }
+        override fun execute() {
+            val action = this
+            Logger.warn("Doing action {}", this)
 
-    private fun doAction(action: HassActions) {
-        Logger.warn("Doing action {}", action)
-        with(AppCommon.hasskClient) {
-            when (action) {
-                HassActions.TOP -> scene("top_button") turn on
-                HassActions.MORNING -> scene("early_morning") turn on
-                HassActions.OFFICE -> group("office_group") turn toggleOnLight("paper")
-                HassActions.BEDROOM -> group("bedroom_group") turn toggleOnLight("shelf_lamp")
-                HassActions.KITCHEN -> light("kitchen_lights") turn toggleOnLight("kitchen_lights")
-                HassActions.TV -> scene("daytime_tv") turn on
-                HassActions.MOVIE -> scene("movie_time") turn on
-                HassActions.BEDTIME -> scene("bed_time") turn on
-                HassActions.LATE_NIGHT -> scene("late_night") turn on
-                HassActions.NOT_ALL -> group("not_bedroom_group") turn off
-                HassActions.OFFICE_FAN -> switch("small_fan") turn toggleOnSwitch("small_fan")
+            with(AppCommon.hasskClient) {
+                when (action) {
+                    TOP -> scene("top_button") turn on
+                    MORNING -> scene("early_morning") turn on
+                    OFFICE -> group("office_group") turn toggleOnLight("paper")
+                    BEDROOM -> group("bedroom_group") turn toggleOnLight("shelf_lamp")
+                    KITCHEN -> light("kitchen_lights") turn toggleOnLight("kitchen_lights")
+                    TV -> scene("daytime_tv") turn on
+                    MOVIE -> scene("movie_time") turn on
+                    BEDTIME -> scene("bed_time") turn on
+                    LATE_NIGHT -> scene("late_night") turn on
+                    NOT_ALL -> group("not_bedroom_group") turn off
+                    OFFICE_FAN -> switch("small_fan") turn toggleOnSwitch("small_fan")
+                }
             }
         }
     }
@@ -97,5 +97,5 @@ object TheActions {
     private fun HAssKClient.toggleOnLight(name: String) = if (light(name).state().state == "off") on else off
 
     // more for receiving messages than sending them
-    internal enum class FrontBenchActions
+    enum class FrontBenchActions
 }

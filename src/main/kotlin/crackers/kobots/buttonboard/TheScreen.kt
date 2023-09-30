@@ -36,8 +36,8 @@ class TheScreen(i2cDevice: I2CDeviceInterface) : SmallMenuDisplay(DisplayMode.IC
     }
 
     override fun displayFun(menuImage: BufferedImage) {
-        screen.display(menuImage)
         screen.setContrast((if (currentMode == Mode.NIGHT) 0x05 else 0x20).toByte())
+        screen.display(menuImage)
     }
 
     fun close() {
