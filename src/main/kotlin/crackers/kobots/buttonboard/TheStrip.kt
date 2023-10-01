@@ -17,7 +17,6 @@
 package crackers.kobots.buttonboard
 
 import com.diozero.api.I2CDevice
-import com.diozero.util.SleepUtil
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.TheActions.mqttClient
 import crackers.kobots.devices.lighting.NeoPixel
@@ -38,7 +37,7 @@ object TheStrip : Runnable {
     private lateinit var seeSaw: AdafruitSeeSaw
     private lateinit var strip: NeoPixel
 
-    // 0 and 360 are the same, so back off (and the 30 makes this even easier)
+    // 0 and 360 are the same, so back off a bit
     private val rainbowColors = colorIntervalFromHSB(0f, 348f, 30)
     private var lastRainbowColorIndex: Int = 0
 
@@ -49,25 +48,16 @@ object TheStrip : Runnable {
     private val stripOffset = 8
     private val stripLast = stripOffset + 29
 
-    fun start(): Boolean {
-        if (isRemote) return true
+    fun start() {
+        if (isRemote) return
 
-        for (i in 0 until 10) try {
-            seeSaw = AdafruitSeeSaw(I2CDevice(1, 0x60))
-            strip = NeoPixel(seeSaw, 38, 15)
-            logger.warn("Took $i tries to initialize")
-
-            strip.brightness = 0.1f
-            strip.autoWrite = true
-
-            future = AppCommon.executor.scheduleAtFixedRate(this, 10, 10, TimeUnit.SECONDS)
-            RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
-            return true
-        } catch (t: Throwable) {
-            SleepUtil.busySleep(50)
+        seeSaw = AdafruitSeeSaw(I2CDevice(1, 0x60))
+        strip = NeoPixel(seeSaw, 38, 15).apply {
+            brightness = 0.1f
+            autoWrite = true
         }
-        logger.error("Failed to initialize")
-        return false
+        future = AppCommon.executor.scheduleAtFixedRate(this, 10, 10, TimeUnit.SECONDS)
+        RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
     }
 
     override fun run() {
@@ -129,7 +119,7 @@ object TheStrip : Runnable {
 
     private fun showRainbow() {
         for (count in stripOffset..stripLast) {
-            runFlag || return
+            AppCommon.applicationRunning || return
             strip[count] = rainbowColors[lastRainbowColorIndex++]
             if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
         }

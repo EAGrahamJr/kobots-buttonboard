@@ -19,10 +19,10 @@ package crackers.kobots.buttonboard
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.app.io.NeoKeyMenu
+import crackers.kobots.parts.app.io.NeoKeyMenu.MenuItem
 import crackers.kobots.parts.loadImage
 import java.awt.Color
 import java.awt.image.BufferedImage
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Handles what menu items are shown for the back "bench" (NeoKey) buttons.
@@ -40,132 +40,127 @@ object BackBenchPicker : BenchPicker<Mode>(0, 7) {
         FAN(loadImage("/fan.png")),
     }
 
-    override val menuSelections = ConcurrentHashMap(
-        mapOf(
-            Mode.NIGHT to NeoKeyMenu(
-                keyHandler,
-                display,
-                listOf(
-                    NeoKeyMenu.MenuItem(
-                        "Off",
-                        icon = Images.EXIT.image,
-                        buttonColor = Color.DARK_GRAY,
-                        action = { TheActions.HassActions.NOT_ALL.execute() },
-                    ),
-                    NeoKeyMenu.MenuItem(
-                        "Top",
-                        icon = Images.LIGHTBULB.image,
-                        buttonColor = Color.GREEN,
-                        action = { TheActions.HassActions.TOP.execute() },
-                    ),
-                    NeoKeyMenu.MenuItem(
-                        "Morn",
-                        icon = Images.SUN.image,
-                        buttonColor = GOLDENROD,
-                        action = { TheActions.HassActions.MORNING.execute() },
-                    ),
-                    NeoKeyMenu.MenuItem(
-                        "Bed",
-                        icon = Images.BED.image,
-                        buttonColor = Color.PINK,
-                        action = { TheActions.HassActions.BEDROOM.execute() },
-                    ),
+    override val menuSelections = mapOf(
+        Mode.NIGHT to NeoKeyMenu(
+            keyHandler,
+            display,
+            listOf(
+                MenuItem(
+                    "Off",
+                    icon = Images.EXIT.image,
+                    buttonColor = Color.DARK_GRAY,
+                    action = { TheActions.HassActions.NOT_ALL.execute() },
                 ),
-            ),
-            Mode.MORNING to NeoKeyMenu(
-                keyHandler,
-                display,
-                listOf(
-                    NeoKeyMenu.MenuItem(
-                        "Morn",
-                        icon = Images.SUN.image,
-                        buttonColor = GOLDENROD,
-                        action = { TheActions.HassActions.MORNING.execute() },
-                    ),
-                    NeoKeyMenu.MenuItem(
-                        "Top",
-                        icon = Images.LIGHTBULB.image,
-                        buttonColor = Color.GREEN,
-                        action = { TheActions.HassActions.TOP.execute() },
-                    ),
-                    NeoKeyMenu.MenuItem(
-                        "Kit",
-                        icon = Images.RESTAURANT.image,
-                        buttonColor = Color.CYAN,
-                        action = { TheActions.HassActions.KITCHEN.execute() },
-                    ),
-                    NeoKeyMenu.MenuItem(
-                        "Fan",
-                        icon = Images.FAN.image,
-                        buttonColor = Color.BLUE,
-                        action = { TheActions.HassActions.OFFICE_FAN.execute() },
-                    ),
+                MenuItem(
+                    "Top",
+                    icon = Images.LIGHTBULB.image,
+                    buttonColor = Color.GREEN,
+                    action = { TheActions.HassActions.TOP.execute() },
                 ),
-
+                MenuItem(
+                    "Morn",
+                    icon = Images.SUN.image,
+                    buttonColor = GOLDENROD,
+                    action = { TheActions.HassActions.MORNING.execute() },
                 ),
-            Mode.DAYTIME to
-                NeoKeyMenu(
-                    keyHandler,
-                    display,
-                    listOf(
-                        NeoKeyMenu.MenuItem(
-                            "Top",
-                            icon = Images.LIGHTBULB.image,
-                            buttonColor = Color.GREEN,
-                            action = { TheActions.HassActions.TOP.execute() },
-                        ),
-                        NeoKeyMenu.MenuItem(
-                            "TV",
-                            icon = Images.TV.image,
-                            buttonColor = PURPLE,
-                            action = { TheActions.HassActions.TV.execute() },
-                        ),
-                        NeoKeyMenu.MenuItem(
-                            "Movie",
-                            icon = Images.MOVIE.image,
-                            buttonColor = Color.RED,
-                            action = { TheActions.HassActions.MOVIE.execute() },
-                        ),
-                        NeoKeyMenu.MenuItem(
-                            "Fan",
-                            icon = Images.FAN.image,
-                            buttonColor = Color.BLUE,
-                            action = { TheActions.HassActions.OFFICE_FAN.execute() },
-                        ),
-                    ),
-
-                    ),
-            Mode.EVENING to NeoKeyMenu(
-                keyHandler,
-                display,
-                listOf(
-                    NeoKeyMenu.MenuItem(
-                        "Bed",
-                        icon = Images.BED.image,
-                        buttonColor = Color.PINK,
-                        action = { TheActions.HassActions.BEDTIME.execute() },
-                    ),
-                    NeoKeyMenu.MenuItem(
-                        "Late",
-                        icon = Images.MOON.image,
-                        buttonColor = Color.RED,
-                        action = { TheActions.HassActions.LATE_NIGHT.execute() },
-                    ),
-                    NeoKeyMenu.MenuItem(
-                        "Off",
-                        icon = Images.EXIT.image,
-                        buttonColor = Color.DARK_GRAY,
-                        action = { TheActions.HassActions.NOT_ALL.execute() },
-                    ),
-                    NeoKeyMenu.MenuItem(
-                        "Fan",
-                        icon = Images.FAN.image,
-                        buttonColor = Color.BLUE,
-                        action = { TheActions.HassActions.OFFICE_FAN.execute() },
-                    ),
+                MenuItem(
+                    "Bed",
+                    icon = Images.BED.image,
+                    buttonColor = Color.PINK,
+                    action = { TheActions.HassActions.BEDROOM.execute() },
                 ),
             ),
         ),
-
-        )
+        Mode.MORNING to NeoKeyMenu(
+            keyHandler,
+            display,
+            listOf(
+                MenuItem(
+                    "Morn",
+                    icon = Images.SUN.image,
+                    buttonColor = GOLDENROD,
+                    action = { TheActions.HassActions.MORNING.execute() },
+                ),
+                MenuItem(
+                    "Top",
+                    icon = Images.LIGHTBULB.image,
+                    buttonColor = Color.GREEN,
+                    action = { TheActions.HassActions.TOP.execute() },
+                ),
+                MenuItem(
+                    "Kit",
+                    icon = Images.RESTAURANT.image,
+                    buttonColor = Color.CYAN,
+                    action = { TheActions.HassActions.KITCHEN.execute() },
+                ),
+                MenuItem(
+                    "Fan",
+                    icon = Images.FAN.image,
+                    buttonColor = Color.BLUE,
+                    action = { TheActions.HassActions.OFFICE_FAN.execute() },
+                ),
+            ),
+        ),
+        Mode.DAYTIME to
+            NeoKeyMenu(
+                keyHandler,
+                display,
+                listOf(
+                    MenuItem(
+                        "Top",
+                        icon = Images.LIGHTBULB.image,
+                        buttonColor = Color.GREEN,
+                        action = { TheActions.HassActions.TOP.execute() },
+                    ),
+                    MenuItem(
+                        "TV",
+                        icon = Images.TV.image,
+                        buttonColor = PURPLE,
+                        action = { TheActions.HassActions.TV.execute() },
+                    ),
+                    MenuItem(
+                        "Movie",
+                        icon = Images.MOVIE.image,
+                        buttonColor = Color.RED,
+                        action = { TheActions.HassActions.MOVIE.execute() },
+                    ),
+                    MenuItem(
+                        "Fan",
+                        icon = Images.FAN.image,
+                        buttonColor = Color.BLUE,
+                        action = { TheActions.HassActions.OFFICE_FAN.execute() },
+                    ),
+                ),
+            ),
+        Mode.EVENING to NeoKeyMenu(
+            keyHandler,
+            display,
+            listOf(
+                MenuItem(
+                    "Bed",
+                    icon = Images.BED.image,
+                    buttonColor = Color.PINK,
+                    action = { TheActions.HassActions.BEDTIME.execute() },
+                ),
+                MenuItem(
+                    "Late",
+                    icon = Images.MOON.image,
+                    buttonColor = Color.RED,
+                    action = { TheActions.HassActions.LATE_NIGHT.execute() },
+                ),
+                MenuItem(
+                    "Off",
+                    icon = Images.EXIT.image,
+                    buttonColor = Color.DARK_GRAY,
+                    action = { TheActions.HassActions.NOT_ALL.execute() },
+                ),
+                MenuItem(
+                    "Fan",
+                    icon = Images.FAN.image,
+                    buttonColor = Color.BLUE,
+                    action = { TheActions.HassActions.OFFICE_FAN.execute() },
+                ),
+            ),
+        ),
+    )
 }

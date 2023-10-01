@@ -19,7 +19,6 @@ package crackers.kobots.buttonboard
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.TheActions.mqttClient
 import crackers.kobots.devices.expander.I2CMultiplexer
-import crackers.kobots.parts.app.KobotSleep
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.LocalTime
@@ -43,10 +42,6 @@ enum class Mode(
 
 private val logger = LoggerFactory.getLogger("ButtonBox")
 
-internal var runFlag: Boolean
-    get() = AppCommon.runFlag.get()
-    private set(b) = AppCommon.runFlag.set(b)
-
 private val _currentMode = AtomicReference(Mode.NONE)
 internal var currentMode: Mode
     get() = _currentMode.get()
@@ -62,51 +57,24 @@ internal val i2cMultiplexer: I2CMultiplexer by lazy { I2CMultiplexer() }
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
 fun main(args: Array<String>) {
-    _remote = if (args.isNotEmpty()) {
-        System.setProperty(REMOTE_PI, args[0])
-        true
-    } else {
-        false
-    }
+    _remote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
 
     TheStrip.start()
     EnvironmentDisplay.start()
-    i2cMultiplexer.use { multiplexer ->
+    i2cMultiplexer.use {
         FrontBenchPicker.start()
         BackBenchPicker.start()
         mqttClient.startAliveCheck()
 
-        while (runFlag) {
-            try {
-                // adjust per time of day
-                val hour = LocalTime.now().hour
-                val mode = when {
-                    hour in (0..6) -> Mode.NIGHT
-                    hour <= 8 -> Mode.MORNING
-                    hour <= 20 -> Mode.DAYTIME
-                    else -> Mode.EVENING
-                }
-                // mode change or error cleared
-                if (mode != currentMode) {
-                    BackBenchPicker.selectMenu(mode)
-                    mode.brightness.let {
-                        FrontBenchPicker.keyHandler.brightness = it
-                        BackBenchPicker.keyHandler.brightness = it
-                    }
-                    BackBenchPicker.currentMenu.displayMenu()
-                    FrontBenchPicker.currentMenu.displayMenu()
-                    currentMode = mode
-                }
+        // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
+        AppCommon.executor.scheduleAtFixedRate(
+            ::modeAndKeyboardCheck,
+            100,
+            100,
+            java.util.concurrent.TimeUnit.MILLISECONDS
+        )
+        AppCommon.awaitTermination()
 
-                // *****************************
-                // ***** READ BUTTONS HERE *****
-                // *****************************
-                if (!BackBenchPicker.currentMenu.firstButton()) FrontBenchPicker.currentMenu.firstButton()
-            } catch (e: Throwable) {
-                logger.error("Error found - continuing", e)
-            }
-            KobotSleep.millis(100)
-        }
         BackBenchPicker.keyHandler.buttonColors = listOf(Color.RED, Color.RED, Color.RED, Color.RED)
         logger.warn("Exiting ")
 
@@ -118,4 +86,35 @@ fun main(args: Array<String>) {
 
     AppCommon.executor.shutdownNow()
     exitProcess(0)
+}
+
+private fun modeAndKeyboardCheck() {
+    try {
+        // adjust per time of day
+        val hour = LocalTime.now().hour
+        val mode = when {
+            hour in (0..6) -> Mode.NIGHT
+            hour <= 8 -> Mode.MORNING
+            hour <= 20 -> Mode.DAYTIME
+            else -> Mode.EVENING
+        }
+        // mode change or error cleared
+        if (mode != currentMode) {
+            BackBenchPicker.selectMenu(mode)
+            mode.brightness.let {
+                FrontBenchPicker.keyHandler.brightness = it
+                BackBenchPicker.keyHandler.brightness = it
+            }
+            BackBenchPicker.currentMenu.displayMenu()
+            FrontBenchPicker.currentMenu.displayMenu()
+            currentMode = mode
+        }
+
+        // *****************************
+        // ***** READ BUTTONS HERE *****
+        // *****************************
+        if (!BackBenchPicker.currentMenu.firstButton()) FrontBenchPicker.currentMenu.firstButton()
+    } catch (e: Throwable) {
+        logger.error("Error found - continuing", e)
+    }
 }
