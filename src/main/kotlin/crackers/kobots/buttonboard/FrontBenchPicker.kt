@@ -18,7 +18,6 @@ package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
 import crackers.kobots.parts.ORANGISH
-import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.app.io.NeoKeyMenu
 import crackers.kobots.parts.app.io.NeoKeyMenu.MenuItem
 import crackers.kobots.parts.loadImage
@@ -75,22 +74,26 @@ object FrontBenchPicker : BenchPicker<FrontBenchActions>(3, 4) {
                     "Excuse Me",
                     abbrev = "Sorry",
                     icon = loadImage("/robot/cancel.png"),
-                    buttonColor = PURPLE,
+                    buttonColor = Color.CYAN.darker(),
                 ) { TheActions.GripperActions.EXCUSE_ME.execute() },
                 MenuItem(
                     "Sleep",
                     icon = loadImage("/bed.png"),
-                    buttonColor = ORANGISH,
+                    buttonColor = Color.BLUE.darker(),
                 ) { TheActions.GripperActions.SLEEP.execute() },
                 MenuItem(
                     "Stop",
                     icon = loadImage("/robot/halt.png"),
+                    buttonColor = ORANGISH,
+                ) {
+                    TheActions.GripperActions.STOP.execute()
+                    updateMenu()
+                },
+                MenuItem(
+                    "Flash",
+                    icon = loadImage("/robot/flashlight_on.png"),
                     buttonColor = Color.YELLOW,
-                    action = {
-                        TheActions.GripperActions.STOP.execute()
-                        updateMenu()
-                    },
-                ),
+                ) { TheActions.GripperActions.FLASHLIGHT.execute() },
             ),
         ),
     )

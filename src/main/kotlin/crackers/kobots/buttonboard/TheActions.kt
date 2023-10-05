@@ -87,7 +87,7 @@ object TheActions {
     const val GRIPOMATIC_TOPIC = "kobots/gripOMatic"
 
     enum class GripperActions : Action {
-        PICKUP, RETURN, HOME, SAY_HI, STOP, EXCUSE_ME, SLEEP;
+        PICKUP, RETURN, HOME, SAY_HI, STOP, EXCUSE_ME, SLEEP, FLASHLIGHT;
 
         override fun execute() = mqttClient.publish(GRIPOMATIC_TOPIC, name)
     }
