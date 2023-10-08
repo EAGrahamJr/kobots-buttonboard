@@ -22,6 +22,7 @@ import crackers.hassk.Constants.on
 import crackers.hassk.HAssKClient
 import crackers.kobots.app.AppCommon
 import crackers.kobots.mqtt.KobotsMQTT
+import crackers.mopidykontrol.MopidyKlient
 import org.tinylog.Logger
 import java.net.InetAddress
 
@@ -34,6 +35,7 @@ object TheActions {
     }
 
     val mqttClient: KobotsMQTT
+    val mopidyKlient: MopidyKlient
 
     // remote control of this thing
     const val BBOARD_TOPIC = "kobots/buttonboard"
@@ -56,11 +58,16 @@ object TheActions {
                     BBoardActions.valueOf(s.uppercase()).execute()
                 }
             }
+            mopidyKlient = MopidyKlient(getString("mopidy.host"), getInt("mopidy.port"))
         }
     }
 
     enum class HassActions : Action {
         TOP, MORNING, OFFICE, BEDROOM, KITCHEN, TV, MOVIE, BEDTIME, LATE_NIGHT, NOT_ALL, OFFICE_FAN;
+
+        private fun HAssKClient.toggleOnSwitch(name: String) = if (switch(name).state().state == "off") on else off
+
+        private fun HAssKClient.toggleOnLight(name: String) = if (light(name).state().state == "off") on else off
 
         override fun execute() {
             val action = this
@@ -84,17 +91,39 @@ object TheActions {
         }
     }
 
-    const val GRIPOMATIC_TOPIC = "kobots/gripOMatic"
-
     enum class GripperActions : Action {
         PICKUP, RETURN, HOME, SAY_HI, STOP, EXCUSE_ME, SLEEP, FLASHLIGHT;
+
+        val GRIPOMATIC_TOPIC = "kobots/gripOMatic"
 
         override fun execute() = mqttClient.publish(GRIPOMATIC_TOPIC, name)
     }
 
-    private fun HAssKClient.toggleOnSwitch(name: String) = if (switch(name).state().state == "off") on else off
+    enum class MopdiyActions : Action {
+        STOP, PLAY, PAUSE, NEXT, PREVIOUS, VOLUME_UP, VOLUME_DOWN, MUTE, UNMUTE, SHUFFLE, REPEAT, REPEAT_OFF, REPEAT_ONE;
 
-    private fun HAssKClient.toggleOnLight(name: String) = if (light(name).state().state == "off") on else off
+        override fun execute() {
+            val action = this
+            with(mopidyKlient) {
+                when (action) {
+                    STOP -> stop()
+                    PLAY -> play()
+                    PAUSE -> pause()
+                    NEXT -> next()
+                    PREVIOUS -> previous()
+//                    VOLUME_UP -> volumeUp()
+//                    VOLUME_DOWN -> volumeDown()
+//                    MUTE -> mute()
+//                    UNMUTE -> unmute()
+//                    SHUFFLE -> shuffle()
+//                    REPEAT -> repeat()
+//                    REPEAT_OFF -> repeatOff()
+//                    REPEAT_ONE -> repeatOne()
+                    else -> Logger.warn("Mopidy action {} not implemented", action)
+                }
+            }
+        }
+    }
 
     // more for receiving messages than sending them
     enum class FrontBenchActions

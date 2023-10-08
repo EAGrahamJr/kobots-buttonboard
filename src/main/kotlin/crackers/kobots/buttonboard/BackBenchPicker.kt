@@ -16,6 +16,9 @@
 
 package crackers.kobots.buttonboard
 
+import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.TheActions.HassActions
+import crackers.kobots.buttonboard.TheActions.MopdiyActions
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.app.io.NeoKeyMenu
@@ -40,6 +43,12 @@ object BackBenchPicker : BenchPicker<Mode>(0, 7) {
         FAN(loadImage("/fan.png")),
     }
 
+    val theFanThing = {
+        HassActions.OFFICE_FAN.execute()
+        with(AppCommon.hasskClient) {
+            (if (switch("small_fan").state().state == "off") MopdiyActions.PLAY else MopdiyActions.STOP).execute()
+        }
+    }
     override val menuSelections = mapOf(
         Mode.NIGHT to NeoKeyMenu(
             keyHandler,
@@ -49,25 +58,31 @@ object BackBenchPicker : BenchPicker<Mode>(0, 7) {
                     "Off",
                     icon = Images.EXIT.image,
                     buttonColor = Color.DARK_GRAY,
-                    action = { TheActions.HassActions.NOT_ALL.execute() },
+                    action = {
+                        HassActions.NOT_ALL.execute()
+                        MopdiyActions.STOP.execute()
+                    },
                 ),
                 MenuItem(
                     "Top",
                     icon = Images.LIGHTBULB.image,
                     buttonColor = Color.GREEN,
-                    action = { TheActions.HassActions.TOP.execute() },
+                    action = { HassActions.TOP.execute() },
                 ),
                 MenuItem(
                     "Morn",
                     icon = Images.SUN.image,
                     buttonColor = GOLDENROD,
-                    action = { TheActions.HassActions.MORNING.execute() },
+                    action = {
+                        HassActions.MORNING.execute()
+                        MopdiyActions.PLAY.execute()
+                    },
                 ),
                 MenuItem(
                     "Bed",
                     icon = Images.BED.image,
                     buttonColor = Color.PINK,
-                    action = { TheActions.HassActions.BEDROOM.execute() },
+                    action = { HassActions.BEDROOM.execute() },
                 ),
             ),
         ),
@@ -79,25 +94,31 @@ object BackBenchPicker : BenchPicker<Mode>(0, 7) {
                     "Morn",
                     icon = Images.SUN.image,
                     buttonColor = GOLDENROD,
-                    action = { TheActions.HassActions.MORNING.execute() },
+                    action = {
+                        HassActions.MORNING.execute()
+                        MopdiyActions.PLAY.execute()
+                    },
                 ),
                 MenuItem(
                     "Top",
                     icon = Images.LIGHTBULB.image,
                     buttonColor = Color.GREEN,
-                    action = { TheActions.HassActions.TOP.execute() },
+                    action = {
+                        HassActions.TOP.execute()
+                        MopdiyActions.PLAY.execute()
+                    },
                 ),
                 MenuItem(
                     "Kit",
                     icon = Images.RESTAURANT.image,
                     buttonColor = Color.CYAN,
-                    action = { TheActions.HassActions.KITCHEN.execute() },
+                    action = { HassActions.KITCHEN.execute() },
                 ),
                 MenuItem(
                     "Fan",
                     icon = Images.FAN.image,
                     buttonColor = Color.BLUE,
-                    action = { TheActions.HassActions.OFFICE_FAN.execute() },
+                    action = theFanThing,
                 ),
             ),
         ),
@@ -110,25 +131,34 @@ object BackBenchPicker : BenchPicker<Mode>(0, 7) {
                         "Top",
                         icon = Images.LIGHTBULB.image,
                         buttonColor = Color.GREEN,
-                        action = { TheActions.HassActions.TOP.execute() },
+                        action = {
+                            HassActions.TOP.execute()
+                            MopdiyActions.PLAY.execute()
+                        },
                     ),
                     MenuItem(
                         "TV",
                         icon = Images.TV.image,
                         buttonColor = PURPLE,
-                        action = { TheActions.HassActions.TV.execute() },
+                        action = {
+                            HassActions.TV.execute()
+                            MopdiyActions.STOP.execute()
+                        },
                     ),
                     MenuItem(
                         "Movie",
                         icon = Images.MOVIE.image,
                         buttonColor = Color.RED,
-                        action = { TheActions.HassActions.MOVIE.execute() },
+                        action = {
+                            HassActions.MOVIE.execute()
+                            MopdiyActions.STOP.execute()
+                        },
                     ),
                     MenuItem(
                         "Fan",
                         icon = Images.FAN.image,
                         buttonColor = Color.BLUE,
-                        action = { TheActions.HassActions.OFFICE_FAN.execute() },
+                        action = theFanThing,
                     ),
                 ),
             ),
@@ -140,25 +170,28 @@ object BackBenchPicker : BenchPicker<Mode>(0, 7) {
                     "Bed",
                     icon = Images.BED.image,
                     buttonColor = Color.PINK,
-                    action = { TheActions.HassActions.BEDTIME.execute() },
+                    action = { HassActions.BEDTIME.execute() },
                 ),
                 MenuItem(
                     "Late",
                     icon = Images.MOON.image,
                     buttonColor = Color.RED,
-                    action = { TheActions.HassActions.LATE_NIGHT.execute() },
+                    action = { HassActions.LATE_NIGHT.execute() },
                 ),
                 MenuItem(
                     "Off",
                     icon = Images.EXIT.image,
                     buttonColor = Color.DARK_GRAY,
-                    action = { TheActions.HassActions.NOT_ALL.execute() },
+                    action = {
+                        HassActions.NOT_ALL.execute()
+                        MopdiyActions.STOP.execute()
+                    },
                 ),
                 MenuItem(
                     "Fan",
                     icon = Images.FAN.image,
                     buttonColor = Color.BLUE,
-                    action = { TheActions.HassActions.OFFICE_FAN.execute() },
+                    action = theFanThing,
                 ),
             ),
         ),

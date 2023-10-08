@@ -71,7 +71,7 @@ fun main(args: Array<String>) {
             ::modeAndKeyboardCheck,
             100,
             100,
-            java.util.concurrent.TimeUnit.MILLISECONDS
+            java.util.concurrent.TimeUnit.MILLISECONDS,
         )
         AppCommon.awaitTermination()
 
