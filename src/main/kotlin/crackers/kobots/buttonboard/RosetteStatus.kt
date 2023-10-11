@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 object RosetteStatus {
     private val lastCheckIn = mutableMapOf<String, ZonedDateTime>()
-    private val hostList = listOf("brainz", "marvin", "useless", "zeke")
+    private val hostList = listOf("brainz", "marvin", "useless", "zeke", "ringo", "murphy")
     private val logger = LoggerFactory.getLogger("RosetteStatus")
     internal val goToSleep = AtomicBoolean(false)
 

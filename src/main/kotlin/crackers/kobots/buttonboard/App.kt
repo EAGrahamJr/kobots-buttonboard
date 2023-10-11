@@ -69,8 +69,8 @@ fun main(args: Array<String>) {
         // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
         AppCommon.executor.scheduleAtFixedRate(
             ::modeAndKeyboardCheck,
-            100,
-            100,
+            1000,
+            50,
             java.util.concurrent.TimeUnit.MILLISECONDS,
         )
         AppCommon.awaitTermination()

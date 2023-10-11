@@ -30,8 +30,8 @@ import java.awt.image.BufferedImage
 /**
  * Handles what menu items are shown for the back "bench" (NeoKey) buttons.
  */
-object BackBenchPicker : BenchPicker<Mode>(0, 7) {
-    private enum class Images(val image: BufferedImage) {
+object BackBenchPicker : BenchPicker<Mode>(1, 1) {
+    enum class HAImages(val image: BufferedImage) {
         BED(loadImage("/bed.png")),
         EXIT(loadImage("/exit.png")),
         LIGHTBULB(loadImage("/lightbulb.png")),
@@ -43,83 +43,85 @@ object BackBenchPicker : BenchPicker<Mode>(0, 7) {
         FAN(loadImage("/fan.png")),
     }
 
-    val theFanThing = {
-        HassActions.OFFICE_FAN.execute()
-        with(AppCommon.hasskClient) {
-            (if (switch("small_fan").state().state == "off") MopdiyActions.PLAY else MopdiyActions.STOP).execute()
-        }
-    }
+    val topMenuItem = MenuItem(
+        "Top",
+        icon = HAImages.LIGHTBULB.image,
+        buttonColor = Color.GREEN,
+        action = { HassActions.TOP.execute() },
+    )
+    val morningMenuItem = MenuItem(
+        "Morn",
+        icon = HAImages.SUN.image,
+        buttonColor = GOLDENROD,
+        action = {
+            HassActions.MORNING.execute()
+            MopdiyActions.PLAY.execute()
+        },
+    )
+    val fanControl = MenuItem(
+        "Fan",
+        icon = HAImages.FAN.image,
+        buttonColor = Color.BLUE,
+        action = {
+            HassActions.OFFICE_FAN.execute()
+            with(AppCommon.hasskClient) {
+                (if (switch("small_fan").state().state == "off") MopdiyActions.PLAY else MopdiyActions.STOP).execute()
+            }
+        },
+    )
+    val notAllOff = MenuItem(
+        "Off",
+        icon = HAImages.EXIT.image,
+        buttonColor = Color.DARK_GRAY,
+        action = {
+            HassActions.NOT_ALL.execute()
+            MopdiyActions.STOP.execute()
+        },
+    )
+    val audioPlay = MenuItem(
+        "Play",
+        icon = loadImage("/audio/music_note.png"),
+        buttonColor = Color.GREEN,
+        action = { MopdiyActions.PLAY.execute() },
+    )
+    val audioPause = MenuItem(
+        "Pause",
+        icon = loadImage("/audio/music_off.png"),
+        buttonColor = GOLDENROD,
+        action = { MopdiyActions.PAUSE.execute() },
+    )
+
     override val menuSelections = mapOf(
         Mode.NIGHT to NeoKeyMenu(
             keyHandler,
             display,
             listOf(
-                MenuItem(
-                    "Off",
-                    icon = Images.EXIT.image,
-                    buttonColor = Color.DARK_GRAY,
-                    action = {
-                        HassActions.NOT_ALL.execute()
-                        MopdiyActions.STOP.execute()
-                    },
-                ),
-                MenuItem(
-                    "Top",
-                    icon = Images.LIGHTBULB.image,
-                    buttonColor = Color.GREEN,
-                    action = { HassActions.TOP.execute() },
-                ),
-                MenuItem(
-                    "Morn",
-                    icon = Images.SUN.image,
-                    buttonColor = GOLDENROD,
-                    action = {
-                        HassActions.MORNING.execute()
-                        MopdiyActions.PLAY.execute()
-                    },
-                ),
+                notAllOff,
+                morningMenuItem,
                 MenuItem(
                     "Bed",
-                    icon = Images.BED.image,
+                    icon = HAImages.BED.image,
                     buttonColor = Color.PINK,
                     action = { HassActions.BEDROOM.execute() },
                 ),
+                topMenuItem,
             ),
         ),
         Mode.MORNING to NeoKeyMenu(
             keyHandler,
             display,
             listOf(
-                MenuItem(
-                    "Morn",
-                    icon = Images.SUN.image,
-                    buttonColor = GOLDENROD,
-                    action = {
-                        HassActions.MORNING.execute()
-                        MopdiyActions.PLAY.execute()
-                    },
-                ),
-                MenuItem(
-                    "Top",
-                    icon = Images.LIGHTBULB.image,
-                    buttonColor = Color.GREEN,
-                    action = {
-                        HassActions.TOP.execute()
-                        MopdiyActions.PLAY.execute()
-                    },
-                ),
+                topMenuItem,
+                morningMenuItem,
                 MenuItem(
                     "Kit",
-                    icon = Images.RESTAURANT.image,
+                    icon = HAImages.RESTAURANT.image,
                     buttonColor = Color.CYAN,
                     action = { HassActions.KITCHEN.execute() },
                 ),
-                MenuItem(
-                    "Fan",
-                    icon = Images.FAN.image,
-                    buttonColor = Color.BLUE,
-                    action = theFanThing,
-                ),
+                fanControl,
+                audioPlay,
+                audioPause,
             ),
         ),
         Mode.DAYTIME to
@@ -127,18 +129,10 @@ object BackBenchPicker : BenchPicker<Mode>(0, 7) {
                 keyHandler,
                 display,
                 listOf(
-                    MenuItem(
-                        "Top",
-                        icon = Images.LIGHTBULB.image,
-                        buttonColor = Color.GREEN,
-                        action = {
-                            HassActions.TOP.execute()
-                            MopdiyActions.PLAY.execute()
-                        },
-                    ),
+                    topMenuItem,
                     MenuItem(
                         "TV",
-                        icon = Images.TV.image,
+                        icon = HAImages.TV.image,
                         buttonColor = PURPLE,
                         action = {
                             HassActions.TV.execute()
@@ -147,19 +141,16 @@ object BackBenchPicker : BenchPicker<Mode>(0, 7) {
                     ),
                     MenuItem(
                         "Movie",
-                        icon = Images.MOVIE.image,
+                        icon = HAImages.MOVIE.image,
                         buttonColor = Color.RED,
                         action = {
                             HassActions.MOVIE.execute()
                             MopdiyActions.STOP.execute()
                         },
                     ),
-                    MenuItem(
-                        "Fan",
-                        icon = Images.FAN.image,
-                        buttonColor = Color.BLUE,
-                        action = theFanThing,
-                    ),
+                    fanControl,
+                    audioPlay,
+                    audioPause,
                 ),
             ),
         Mode.EVENING to NeoKeyMenu(
@@ -168,31 +159,20 @@ object BackBenchPicker : BenchPicker<Mode>(0, 7) {
             listOf(
                 MenuItem(
                     "Bed",
-                    icon = Images.BED.image,
+                    icon = HAImages.BED.image,
                     buttonColor = Color.PINK,
                     action = { HassActions.BEDTIME.execute() },
                 ),
                 MenuItem(
                     "Late",
-                    icon = Images.MOON.image,
+                    icon = HAImages.MOON.image,
                     buttonColor = Color.RED,
                     action = { HassActions.LATE_NIGHT.execute() },
                 ),
-                MenuItem(
-                    "Off",
-                    icon = Images.EXIT.image,
-                    buttonColor = Color.DARK_GRAY,
-                    action = {
-                        HassActions.NOT_ALL.execute()
-                        MopdiyActions.STOP.execute()
-                    },
-                ),
-                MenuItem(
-                    "Fan",
-                    icon = Images.FAN.image,
-                    buttonColor = Color.BLUE,
-                    action = theFanThing,
-                ),
+                notAllOff,
+                fanControl,
+                audioPlay,
+                audioPause,
             ),
         ),
     )

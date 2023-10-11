@@ -30,7 +30,7 @@ enum class FrontBenchActions {
 /**
  * Handles what menu items are shown for the front "bench" (NeoKey) buttons.
  */
-object FrontBenchPicker : BenchPicker<FrontBenchActions>(3, 4) {
+object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
     override val menuSelections = mapOf(
         FrontBenchActions.STANDARD_ROBOT to NeoKeyMenu(
             keyHandler,
@@ -78,7 +78,7 @@ object FrontBenchPicker : BenchPicker<FrontBenchActions>(3, 4) {
                 ) { TheActions.GripperActions.EXCUSE_ME.execute() },
                 MenuItem(
                     "Sleep",
-                    icon = loadImage("/bed.png"),
+                    icon = BackBenchPicker.HAImages.BED.image,
                     buttonColor = Color.BLUE.darker(),
                 ) { TheActions.GripperActions.SLEEP.execute() },
                 MenuItem(

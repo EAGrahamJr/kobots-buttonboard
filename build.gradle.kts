@@ -14,15 +14,21 @@ repositories {
 }
 
 val DIOZERO_VER = "1.4.0"
+
 val DEVICES_VER = "0.2+"
 val PARTS_VER = "0.0+"
+val MOPIDY_VER = "0.0+"
+
 val JAR_NAME = "bboard"
 
 dependencies {
     implementation("com.diozero:diozero-core:$DIOZERO_VER")
     implementation("org.tinylog:slf4j-tinylog:2.6.2")
+
     implementation("crackers.kobots:kobots-devices:$DEVICES_VER")
     implementation("crackers.kobots:kobots-parts:$PARTS_VER")
+    implementation("crackers.automation:mopidy-kontrol:$MOPIDY_VER")
+
 //    implementation("com.diozero:diozero-provider-remote:$DIOZERO_VER")
     implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
     implementation("crackers.automation:hassk:0.0.1")
