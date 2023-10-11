@@ -34,7 +34,7 @@ enum class Mode(
     val brightness: Float = 0.1f,
 ) {
     NONE(0f),
-    NIGHT(.01f),
+    NIGHT(.005f),
     MORNING(.05f),
     DAYTIME,
     EVENING(.03f),
