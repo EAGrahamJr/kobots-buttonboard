@@ -43,53 +43,28 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
         FAN(loadImage("/fan.png")),
     }
 
-    val topMenuItem = MenuItem(
-        "Top",
-        icon = HAImages.LIGHTBULB.image,
-        buttonColor = Color.GREEN,
-        action = { HassActions.TOP.execute() },
-    )
-    val morningMenuItem = MenuItem(
-        "Morn",
-        icon = HAImages.SUN.image,
-        buttonColor = GOLDENROD,
-        action = {
-            HassActions.MORNING.execute()
-            MopdiyActions.PLAY.execute()
-        },
-    )
-    val fanControl = MenuItem(
-        "Fan",
-        icon = HAImages.FAN.image,
-        buttonColor = Color.BLUE,
-        action = {
-            HassActions.OFFICE_FAN.execute()
-            with(AppCommon.hasskClient) {
-                (if (switch("small_fan").state().state == "off") MopdiyActions.PLAY else MopdiyActions.STOP).execute()
-            }
-        },
-    )
-    val notAllOff = MenuItem(
-        "Off",
-        icon = HAImages.EXIT.image,
-        buttonColor = Color.DARK_GRAY,
-        action = {
-            HassActions.NOT_ALL.execute()
-            MopdiyActions.STOP.execute()
-        },
-    )
-    val audioPlay = MenuItem(
-        "Play",
-        icon = loadImage("/audio/music_note.png"),
-        buttonColor = Color.GREEN,
-        action = { MopdiyActions.PLAY.execute() },
-    )
-    val audioPause = MenuItem(
-        "Pause",
-        icon = loadImage("/audio/music_off.png"),
-        buttonColor = GOLDENROD,
-        action = { MopdiyActions.PAUSE.execute() },
-    )
+    val topMenuItem = MenuItem("Top", icon = HAImages.LIGHTBULB.image, buttonColor = Color.GREEN) {
+        HassActions.TOP.execute()
+    }
+
+    val morningMenuItem = MenuItem("Morn", icon = HAImages.SUN.image, buttonColor = GOLDENROD) {
+        HassActions.MORNING.execute()
+        MopdiyActions.PLAY.execute()
+    }
+
+    val fanControl = MenuItem("Fan", icon = HAImages.FAN.image, buttonColor = Color.BLUE) {
+        HassActions.OFFICE_FAN.execute()
+        with(AppCommon.hasskClient) {
+            (if (switch("small_fan").state().state == "off") MopdiyActions.PLAY else MopdiyActions.STOP).execute()
+        }
+    }
+
+    val notAllOff = MenuItem("Off", icon = HAImages.EXIT.image, buttonColor = Color.DARK_GRAY) {
+        HassActions.NOT_ALL.execute()
+        MopdiyActions.STOP.execute()
+    }
+
+    val bedroom = MenuItem("Bed", icon = HAImages.BED.image, buttonColor = Color.PINK) { HassActions.BEDROOM.execute() }
 
     override val menuSelections = mapOf(
         Mode.NIGHT to NeoKeyMenu(
@@ -98,12 +73,7 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
             listOf(
                 notAllOff,
                 morningMenuItem,
-                MenuItem(
-                    "Bed",
-                    icon = HAImages.BED.image,
-                    buttonColor = Color.PINK,
-                    action = { HassActions.BEDROOM.execute() },
-                ),
+                bedroom,
                 topMenuItem,
             ),
         ),
@@ -113,15 +83,10 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
             listOf(
                 topMenuItem,
                 morningMenuItem,
-                MenuItem(
-                    "Kit",
-                    icon = HAImages.RESTAURANT.image,
-                    buttonColor = Color.CYAN,
-                    action = { HassActions.KITCHEN.execute() },
-                ),
+                MenuItem("Kit", icon = HAImages.RESTAURANT.image, buttonColor = Color.CYAN) {
+                    HassActions.KITCHEN.execute()
+                },
                 fanControl,
-                audioPlay,
-                audioPause,
             ),
         ),
         Mode.DAYTIME to
@@ -130,49 +95,29 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                 display,
                 listOf(
                     topMenuItem,
-                    MenuItem(
-                        "TV",
-                        icon = HAImages.TV.image,
-                        buttonColor = PURPLE,
-                        action = {
-                            HassActions.TV.execute()
-                            MopdiyActions.STOP.execute()
-                        },
-                    ),
-                    MenuItem(
-                        "Movie",
-                        icon = HAImages.MOVIE.image,
-                        buttonColor = Color.RED,
-                        action = {
-                            HassActions.MOVIE.execute()
-                            MopdiyActions.STOP.execute()
-                        },
-                    ),
+                    MenuItem("Dim", buttonColor = GOLDENROD) { HassActions.TV.execute() },
+                    bedroom,
+                    MenuItem("TV", icon = HAImages.TV.image, buttonColor = PURPLE) {
+                        HassActions.TV.execute()
+                        MopdiyActions.STOP.execute()
+                    },
+                    MenuItem("Movie", icon = HAImages.MOVIE.image, buttonColor = Color.RED.darker()) {
+                        HassActions.MOVIE.execute()
+                        MopdiyActions.STOP.execute()
+                    },
                     fanControl,
-                    audioPlay,
-                    audioPause,
                 ),
             ),
         Mode.EVENING to NeoKeyMenu(
             keyHandler,
             display,
             listOf(
-                MenuItem(
-                    "Bed",
-                    icon = HAImages.BED.image,
-                    buttonColor = Color.PINK,
-                    action = { HassActions.BEDTIME.execute() },
-                ),
-                MenuItem(
-                    "Late",
-                    icon = HAImages.MOON.image,
-                    buttonColor = Color.RED,
-                    action = { HassActions.LATE_NIGHT.execute() },
-                ),
+                MenuItem("Bed", icon = HAImages.BED.image, buttonColor = Color.PINK) { HassActions.BEDTIME.execute() },
+                MenuItem("Late", icon = HAImages.MOON.image, buttonColor = Color.RED) {
+                    HassActions.LATE_NIGHT.execute()
+                },
                 notAllOff,
                 fanControl,
-                audioPlay,
-                audioPause,
             ),
         ),
     )

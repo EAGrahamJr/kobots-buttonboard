@@ -22,6 +22,7 @@ import crackers.kobots.devices.expander.I2CMultiplexer
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.LocalTime
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 
@@ -67,22 +68,24 @@ fun main(args: Array<String>) {
         mqttClient.startAliveCheck()
 
         // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
-        AppCommon.executor.scheduleAtFixedRate(
+        val mainExecutor = AppCommon.executor.scheduleWithFixedDelay(
             ::modeAndKeyboardCheck,
             1000,
             50,
-            java.util.concurrent.TimeUnit.MILLISECONDS,
+            TimeUnit.MILLISECONDS,
         )
         AppCommon.awaitTermination()
+        mainExecutor.cancel(true)
 
         BackBenchPicker.keyHandler.buttonColors = listOf(Color.RED, Color.RED, Color.RED, Color.RED)
         logger.warn("Exiting ")
 
-        EnvironmentDisplay.stop()
-        TheStrip.stop()
         FrontBenchPicker.stop()
         BackBenchPicker.stop()
     }
+    EnvironmentDisplay.stop()
+    TheStrip.stop()
+    GestureSensor.close()
 
     AppCommon.executor.shutdownNow()
     exitProcess(0)
@@ -112,7 +115,9 @@ private fun modeAndKeyboardCheck() {
 
         // *****************************
         // ***** READ BUTTONS HERE *****
+        // because the sensor can be used as an independent control, check it first
         // *****************************
+        GestureSensor.whatAmIDoing()
         if (!BackBenchPicker.currentMenu.firstButton()) FrontBenchPicker.currentMenu.firstButton()
     } catch (e: Throwable) {
         logger.error("Error found - continuing", e)

@@ -40,23 +40,10 @@ object TheActions {
     // remote control of this thing
     const val BBOARD_TOPIC = "kobots/buttonboard"
 
-    enum class BBoardActions : Action {
-        STOP, NEXT_FRONTBENCH;
-
-        override fun execute() {
-            when (this) {
-                STOP -> AppCommon.applicationRunning = false
-                NEXT_FRONTBENCH -> FrontBenchPicker.updateMenu()
-            }
-        }
-    }
-
     init {
         with(ConfigFactory.load()) {
             mqttClient = KobotsMQTT(InetAddress.getLocalHost().hostName, getString("mqtt.broker")).apply {
-                subscribe(BBOARD_TOPIC) { s: String ->
-                    BBoardActions.valueOf(s.uppercase()).execute()
-                }
+                subscribe(BBOARD_TOPIC) { s -> if (s.equals("stop", true)) AppCommon.applicationRunning = false }
             }
             mopidyKlient = MopidyKlient(getString("mopidy.host"), getInt("mopidy.port"))
         }
@@ -111,8 +98,8 @@ object TheActions {
                     PAUSE -> pause()
                     NEXT -> next()
                     PREVIOUS -> previous()
-//                    VOLUME_UP -> volumeUp()
-//                    VOLUME_DOWN -> volumeDown()
+                    VOLUME_UP -> volumeUp()
+                    VOLUME_DOWN -> volumeDown()
 //                    MUTE -> mute()
 //                    UNMUTE -> unmute()
 //                    SHUFFLE -> shuffle()
