@@ -10,3 +10,5 @@ out
 
 # personal stuff
 reference.conf
+application.conf
+credentials.json

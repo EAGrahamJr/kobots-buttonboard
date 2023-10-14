@@ -18,6 +18,7 @@ package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.TheActions.mqttClient
+import crackers.kobots.buttonboard.environment.EnvironmentDisplay
 import crackers.kobots.devices.expander.I2CMultiplexer
 import org.slf4j.LoggerFactory
 import java.awt.Color
