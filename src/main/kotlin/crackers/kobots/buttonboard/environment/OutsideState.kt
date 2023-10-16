@@ -34,11 +34,11 @@ internal const val TEMP_WIDTH = 128
  * Show the outside temperature and weather icon. This is currently scaled to fit in a 40x128 pixel area.
  */
 class OutsideState(val graphics2D: Graphics2D, val x: Int, val y: Int) {
-    private val font = Font(Font.SANS_SERIF, Font.PLAIN, 32)
-    private val fontMetrics: FontMetrics
+    private val theFont = Font(Font.SANS_SERIF, Font.PLAIN, 32)
+    private val theFM: FontMetrics
 
     init {
-        fontMetrics = graphics2D.getFontMetrics(font)
+        theFM = graphics2D.getFontMetrics(theFont)
     }
 
     internal fun show() = with(graphics2D) {
@@ -50,9 +50,9 @@ class OutsideState(val graphics2D: Graphics2D, val x: Int, val y: Int) {
         fillRect(x, y, TEMP_WIDTH, TEMP_HEIGHT)
 
         scaleImageAt(outsideTemp.icon()!!, x, y, TEMP_HEIGHT)
-        font = font
+        font = theFont
         color = temperatureColor(temp)
-        drawString("$temp\u2109", x + 50, fontMetrics.ascent)
+        drawString("$temp\u2109", x + 50, theFM.ascent)
     }
 
     private fun EntityState.icon() = images[state] ?: images["default"].also {

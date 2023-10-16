@@ -59,3 +59,7 @@ much for no real reason.
 ![Moar buttons](V5.png)
 
 Added an I2C multiplexer and a lot more "self-handling" code. The "front bench" of buttons is configurable by an external signal because I don't have a rotary encoder (yet). The NeoPixel ring shows "liveness" of various hosts and there's a NeoPixel strip just for (more) color.
+
+![Industrial V1](V6.png)
+
+ToF to handle menu switching and built on a "swirly plate" for a new **`Industrial`** look.

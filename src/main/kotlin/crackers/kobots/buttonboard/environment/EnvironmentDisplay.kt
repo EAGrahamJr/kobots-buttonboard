@@ -26,9 +26,10 @@ import java.awt.Font
 import java.awt.FontMetrics
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
-import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.Future
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Weather and agenda display.
@@ -38,12 +39,7 @@ object EnvironmentDisplay {
 
     private lateinit var future: Future<*>
 
-    private val screen by lazy {
-        SSD1327().apply {
-            displayOn = false
-            clear()
-        }
-    }
+    private val screen by lazy { SSD1327() }
     private val screenGraphics: Graphics2D
     private val image: BufferedImage
 
@@ -59,6 +55,8 @@ object EnvironmentDisplay {
                 dateFontMetrics = it.getFontMetrics(dateFont)
             }
         }
+        screen.displayOn = false
+        screen.clear()
     }
 
     private val dateBottom = TEMP_HEIGHT + dateFontMetrics.height
@@ -66,7 +64,7 @@ object EnvironmentDisplay {
     private val outsideState = OutsideState(screenGraphics, 0, 0)
 
     fun start() {
-        future = AppCommon.executor.scheduleAtFixedRate(::updateDisplay, Duration.ofSeconds(1), Duration.ofMinutes(5))
+        future = AppCommon.executor.scheduleAtFixedRate(1.seconds, 5.minutes, ::updateDisplay)
     }
 
     fun stop() {

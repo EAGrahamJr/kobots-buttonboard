@@ -25,13 +25,13 @@ import java.awt.Graphics2D
 import kotlin.math.roundToInt
 
 class InsideTemps(val graphics: Graphics2D, val startDrawingAt: Int, val maxWidth: Int, val maxHeight: Int) {
-    private val font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
-    private val fontMetrics: FontMetrics
+    private val inFont = Font(Font.SANS_SERIF, Font.PLAIN, 12)
+    private val inFM: FontMetrics
     private val lineHeight: Int
 
     init {
-        fontMetrics = graphics.getFontMetrics(font)
-        lineHeight = fontMetrics.height
+        inFM = graphics.getFontMetrics(inFont)
+        lineHeight = inFM.height
     }
 
     private val insideSensors = listOf(
@@ -53,11 +53,11 @@ class InsideTemps(val graphics: Graphics2D, val startDrawingAt: Int, val maxWidt
             maxHeight - startDrawingAt,
         )
 
-        font = font
+        font = inFont
 
         insideSensors.forEachIndexed { index, sensor ->
             val y =
-                startDrawingAt + (lineHeight * index) + fontMetrics.ascent
+                startDrawingAt + (lineHeight * index) + inFM.ascent
 
             val state = AppCommon.hasskClient.getState(sensor)
             val temp = try {
