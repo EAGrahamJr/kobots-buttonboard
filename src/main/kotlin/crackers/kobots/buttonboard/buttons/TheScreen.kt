@@ -14,18 +14,20 @@
  * permissions and limitations under the License.
  */
 
-package crackers.kobots.buttonboard
+package crackers.kobots.buttonboard.buttons
 
 import com.diozero.api.I2CDeviceInterface
 import com.diozero.devices.oled.SSD1306
 import com.diozero.devices.oled.SsdOledCommunicationChannel
+import crackers.kobots.buttonboard.Mode
+import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.parts.app.io.SmallMenuDisplay
 import java.awt.image.BufferedImage
 
 /**
  * Show menus
  */
-class TheScreen(i2cDevice: I2CDeviceInterface) : SmallMenuDisplay(DisplayMode.ICONS) {
+class TheScreen(i2cDevice: I2CDeviceInterface) : SmallMenuDisplay(DisplayMode.ICONS), AutoCloseable {
     val screen = let {
         val channel = SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice)
         SSD1306(channel, SSD1306.Height.SHORT).apply {
@@ -40,7 +42,7 @@ class TheScreen(i2cDevice: I2CDeviceInterface) : SmallMenuDisplay(DisplayMode.IC
         screen.display(menuImage)
     }
 
-    fun close() {
+    override fun close() {
         screen.clear()
         screen.setDisplayOn(false)
         screen.close()

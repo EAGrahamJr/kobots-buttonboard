@@ -14,9 +14,10 @@
  * permissions and limitations under the License.
  */
 
-package crackers.kobots.buttonboard
+package crackers.kobots.buttonboard.buttons
 
 import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.TheActions.HassActions
 import crackers.kobots.buttonboard.TheActions.MopdiyActions
 import crackers.kobots.parts.GOLDENROD
@@ -40,31 +41,29 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
         RESTAURANT(loadImage("/restaurant.png")),
         SUN(loadImage("/sun.png")),
         TV(loadImage("/tv.png")),
-        FAN(loadImage("/fan.png")),
+        FAN(loadImage("/fan.png"));
     }
 
-    val topMenuItem = MenuItem("Top", icon = HAImages.LIGHTBULB.image, buttonColor = Color.GREEN) {
-        HassActions.TOP.execute()
-    }
+    val topMenuItem = MenuItem("Top", icon = HAImages.LIGHTBULB.image, buttonColor = Color.GREEN) { HassActions.TOP() }
 
     val morningMenuItem = MenuItem("Morn", icon = HAImages.SUN.image, buttonColor = GOLDENROD) {
-        HassActions.MORNING.execute()
-        MopdiyActions.PLAY.execute()
+        HassActions.MORNING()
+        MopdiyActions.PLAY()
     }
 
     val fanControl = MenuItem("Fan", icon = HAImages.FAN.image, buttonColor = Color.BLUE) {
-        HassActions.OFFICE_FAN.execute()
+        HassActions.OFFICE_FAN()
         with(AppCommon.hasskClient) {
-            (if (switch("small_fan").state().state == "off") MopdiyActions.PLAY else MopdiyActions.STOP).execute()
+            (if (switch("small_fan").state().state == "off") MopdiyActions.PLAY else MopdiyActions.STOP)()
         }
     }
 
     val notAllOff = MenuItem("Off", icon = HAImages.EXIT.image, buttonColor = Color.DARK_GRAY) {
-        HassActions.NOT_ALL.execute()
-        MopdiyActions.STOP.execute()
+        HassActions.NOT_ALL()
+        MopdiyActions.STOP()
     }
 
-    val bedroom = MenuItem("Bed", icon = HAImages.BED.image, buttonColor = Color.PINK) { HassActions.BEDROOM.execute() }
+    val bedroom = MenuItem("Bed", icon = HAImages.BED.image, buttonColor = Color.PINK) { HassActions.BEDROOM() }
 
     override val menuSelections = mapOf(
         Mode.NIGHT to NeoKeyMenu(
@@ -83,9 +82,7 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
             listOf(
                 topMenuItem,
                 morningMenuItem,
-                MenuItem("Kit", icon = HAImages.RESTAURANT.image, buttonColor = Color.CYAN) {
-                    HassActions.KITCHEN.execute()
-                },
+                MenuItem("Kit", icon = HAImages.RESTAURANT.image, buttonColor = Color.CYAN) { HassActions.KITCHEN() },
                 fanControl,
             ),
         ),
@@ -95,27 +92,28 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                 display,
                 listOf(
                     topMenuItem,
-                    MenuItem("Dim", buttonColor = GOLDENROD) { HassActions.TV.execute() },
+                    MenuItem("Dim", buttonColor = GOLDENROD) { HassActions.TV() },
                     bedroom,
                     MenuItem("TV", icon = HAImages.TV.image, buttonColor = PURPLE) {
-                        HassActions.TV.execute()
-                        MopdiyActions.STOP.execute()
+                        HassActions.TV()
+                        MopdiyActions.STOP()
                     },
                     MenuItem("Movie", icon = HAImages.MOVIE.image, buttonColor = Color.RED.darker()) {
-                        HassActions.MOVIE.execute()
-                        MopdiyActions.STOP.execute()
+                        HassActions.MOVIE()
+                        MopdiyActions.STOP()
                     },
                     fanControl,
+                    MenuItem("Stop", icon = loadImage("/cancel.png"), buttonColor = Color.ORANGE) {
+                        AppCommon.applicationRunning = false
+                    },
                 ),
             ),
         Mode.EVENING to NeoKeyMenu(
             keyHandler,
             display,
             listOf(
-                MenuItem("Bed", icon = HAImages.BED.image, buttonColor = Color.PINK) { HassActions.BEDTIME.execute() },
-                MenuItem("Late", icon = HAImages.MOON.image, buttonColor = Color.RED) {
-                    HassActions.LATE_NIGHT.execute()
-                },
+                MenuItem("Bed", icon = HAImages.BED.image, buttonColor = Color.PINK) { HassActions.BEDTIME() },
+                MenuItem("Late", icon = HAImages.MOON.image, buttonColor = Color.RED) { HassActions.LATE_NIGHT() },
                 notAllOff,
                 fanControl,
             ),

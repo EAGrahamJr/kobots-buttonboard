@@ -17,6 +17,8 @@
 package crackers.kobots.buttonboard.environment
 
 import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.Mode
+import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.devices.display.SSD1327
 import crackers.kobots.parts.center
 import crackers.kobots.parts.scheduleAtFixedRate
@@ -79,15 +81,14 @@ object EnvironmentDisplay {
     fun updateDisplay() {
         try {
             // leave it off at night
-            val localNow = LocalDateTime.now()
-            if (localNow.hour >= 23 || localNow.hour <= 6) {
+            if (currentMode == Mode.NIGHT) {
                 screen.displayOn = false
                 return
             }
             if (!screen.displayOn) {
                 screen.displayOn = true
                 // assuming this happens once a day, update the date
-                showDate(localNow)
+                showDate()
             }
             outsideState.show()
             insideStuff.show()
@@ -104,7 +105,8 @@ object EnvironmentDisplay {
     /**
      * Shows the date in the top line for the agenda block.
      */
-    private fun showDate(now: LocalDateTime) = with(screenGraphics) {
+    private fun showDate() = with(screenGraphics) {
+        val now = LocalDateTime.now()
         color = Color.BLACK
         fillRect(0, 0, MAX_W, MAX_H)
 

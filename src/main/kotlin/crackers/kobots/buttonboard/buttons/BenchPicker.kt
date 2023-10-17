@@ -14,9 +14,10 @@
  * permissions and limitations under the License.
  */
 
-package crackers.kobots.buttonboard
+package crackers.kobots.buttonboard.buttons
 
 import com.diozero.devices.oled.SSD1306
+import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.parts.app.io.NeoKeyHandler
 import crackers.kobots.parts.app.io.NeoKeyMenu
@@ -54,8 +55,8 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
 
     fun start() = currentMenu.displayMenu()
     fun stop() {
-        display.screen.setDisplayOn(false)
         keyHandler.buttonColors = listOf(Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK)
+        display.close()
     }
 
     /**

@@ -17,6 +17,7 @@
 package crackers.kobots.buttonboard
 
 import crackers.kobots.buttonboard.TheActions.mopidyKlient
+import crackers.kobots.buttonboard.buttons.FrontBenchPicker
 import crackers.kobots.devices.sensors.VL6180X
 import crackers.kobots.parts.app.KobotSleep
 import java.util.concurrent.atomic.AtomicBoolean

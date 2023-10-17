@@ -25,13 +25,14 @@ import crackers.kobots.mqtt.KobotsMQTT
 import crackers.mopidykontrol.MopidyKlient
 import org.tinylog.Logger
 import java.net.InetAddress
+import java.time.LocalTime
 
 /**
  * What to do when a button is pressed.
  */
 object TheActions {
     interface Action {
-        fun execute()
+        operator fun invoke()
     }
 
     val mqttClient: KobotsMQTT
@@ -39,6 +40,7 @@ object TheActions {
 
     // remote control of this thing
     const val BBOARD_TOPIC = "kobots/buttonboard"
+    val TEN_THIRTY = LocalTime.of(20, 30, 0)
 
     init {
         with(ConfigFactory.load()) {
@@ -56,7 +58,7 @@ object TheActions {
 
         private fun HAssKClient.toggleOnLight(name: String) = if (light(name).state().state == "off") on else off
 
-        override fun execute() {
+        override fun invoke() {
             val action = this
             Logger.warn("Doing action {}", this)
 
@@ -71,7 +73,12 @@ object TheActions {
                     MOVIE -> scene("movie_time") turn on
                     BEDTIME -> scene("bed_time") turn on
                     LATE_NIGHT -> scene("late_night") turn on
-                    NOT_ALL -> group("not_bedroom_group") turn off
+                    NOT_ALL -> {
+                        if (LocalTime.now().isAfter(TEN_THIRTY)) {
+                            currentMode = Mode.NIGHT
+                        }
+                        group("not_bedroom_group") turn off
+                    }
                     OFFICE_FAN -> switch("small_fan") turn toggleOnSwitch("small_fan")
                 }
             }
@@ -83,13 +90,13 @@ object TheActions {
 
         val GRIPOMATIC_TOPIC = "kobots/gripOMatic"
 
-        override fun execute() = mqttClient.publish(GRIPOMATIC_TOPIC, name)
+        override fun invoke() = mqttClient.publish(GRIPOMATIC_TOPIC, name)
     }
 
     enum class MopdiyActions : Action {
         STOP, PLAY, PAUSE, NEXT, PREVIOUS, VOLUME_UP, VOLUME_DOWN, MUTE, UNMUTE, SHUFFLE, REPEAT, REPEAT_OFF, REPEAT_ONE;
 
-        override fun execute() {
+        override fun invoke() {
             val action = this
             with(mopidyKlient) {
                 when (action) {

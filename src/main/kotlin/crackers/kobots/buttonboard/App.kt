@@ -18,14 +18,18 @@ package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.TheActions.mqttClient
+import crackers.kobots.buttonboard.buttons.BackBenchPicker
+import crackers.kobots.buttonboard.buttons.FrontBenchPicker
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay
 import crackers.kobots.devices.expander.I2CMultiplexer
+import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.LocalTime
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 const val REMOTE_PI = "diozero.remote.hostname"
 
@@ -45,9 +49,9 @@ enum class Mode(
 private val logger = LoggerFactory.getLogger("ButtonBox")
 
 private val _currentMode = AtomicReference(Mode.NONE)
-internal var currentMode: Mode
+var currentMode: Mode
     get() = _currentMode.get()
-    private set(m) = _currentMode.set(m)
+    set(m) = _currentMode.set(m)
 
 private var _remote: Boolean = false
 internal val isRemote: Boolean
@@ -69,14 +73,9 @@ fun main(args: Array<String>) {
         mqttClient.startAliveCheck()
 
         // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
-        val mainExecutor = AppCommon.executor.scheduleWithFixedDelay(
-            ::modeAndKeyboardCheck,
-            1000,
-            50,
-            TimeUnit.MILLISECONDS,
-        )
+        val theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 50.milliseconds, ::modeAndKeyboardCheck)
         AppCommon.awaitTermination()
-        mainExecutor.cancel(true)
+        theFuture.cancel(true)
 
         BackBenchPicker.keyHandler.buttonColors = listOf(Color.RED, Color.RED, Color.RED, Color.RED)
         logger.warn("Exiting ")
@@ -100,7 +99,7 @@ private fun modeAndKeyboardCheck() {
             hour in (0..6) -> Mode.NIGHT
             hour <= 8 -> Mode.MORNING
             hour <= 20 -> Mode.DAYTIME
-            else -> Mode.EVENING
+            else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
         }
         // mode change or error cleared
         if (mode != currentMode) {

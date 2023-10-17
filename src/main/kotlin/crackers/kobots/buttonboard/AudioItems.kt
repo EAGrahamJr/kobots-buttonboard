@@ -29,25 +29,21 @@ val audioPlay = MenuItem(
     "Play",
     icon = loadImage("/audio/music_note.png"),
     buttonColor = Color.GREEN,
-    action = { TheActions.MopdiyActions.PLAY.execute() },
-)
+) { TheActions.MopdiyActions.PLAY() }
 val audioPause = MenuItem(
     "Pause",
     icon = loadImage("/audio/music_off.png"),
     buttonColor = GOLDENROD,
-    action = { TheActions.MopdiyActions.PAUSE.execute() },
-)
+) { TheActions.MopdiyActions.PAUSE() }
 val volumeUp = MenuItem(
     "Vol Up",
     abbrev = "V+",
     icon = loadImage("/audio/volume_up.png"),
     buttonColor = Color.GREEN,
-    action = { TheActions.MopdiyActions.VOLUME_UP.execute() },
-)
+) { TheActions.MopdiyActions.VOLUME_UP() }
 val volumeDown = MenuItem(
     "Vol Down",
     abbrev = "V-",
     icon = loadImage("/audio/volume_down.png"),
     buttonColor = ORANGISH,
-    action = { TheActions.MopdiyActions.VOLUME_DOWN.execute() },
-)
+) { TheActions.MopdiyActions.VOLUME_DOWN() }
