@@ -20,29 +20,18 @@ import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.TheActions.HassActions
 import crackers.kobots.buttonboard.TheActions.MopdiyActions
+import crackers.kobots.buttonboard.buttons.BenchPicker.Companion.HAImages
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.app.io.NeoKeyMenu
+import crackers.kobots.parts.app.io.NeoKeyMenu.Companion.NO_KEY
 import crackers.kobots.parts.app.io.NeoKeyMenu.MenuItem
-import crackers.kobots.parts.loadImage
 import java.awt.Color
-import java.awt.image.BufferedImage
 
 /**
  * Handles what menu items are shown for the back "bench" (NeoKey) buttons.
  */
 object BackBenchPicker : BenchPicker<Mode>(1, 1) {
-    enum class HAImages(val image: BufferedImage) {
-        BED(loadImage("/bed.png")),
-        EXIT(loadImage("/exit.png")),
-        LIGHTBULB(loadImage("/lightbulb.png")),
-        MOON(loadImage("/moon.png")),
-        MOVIE(loadImage("/movie.png")),
-        RESTAURANT(loadImage("/restaurant.png")),
-        SUN(loadImage("/sun.png")),
-        TV(loadImage("/tv.png")),
-        FAN(loadImage("/fan.png"));
-    }
 
     val topMenuItem = MenuItem("Top", icon = HAImages.LIGHTBULB.image, buttonColor = Color.GREEN) { HassActions.TOP() }
 
@@ -65,6 +54,9 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
 
     val bedroom = MenuItem("Bed", icon = HAImages.BED.image, buttonColor = Color.PINK) { HassActions.BEDROOM() }
 
+    val stahp = MenuItem("Stop", icon = CANCEL_ICON, buttonColor = Color.ORANGE) {
+        AppCommon.applicationRunning = false
+    }
     override val menuSelections = mapOf(
         Mode.NIGHT to NeoKeyMenu(
             keyHandler,
@@ -84,6 +76,8 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                 morningMenuItem,
                 MenuItem("Kit", icon = HAImages.RESTAURANT.image, buttonColor = Color.CYAN) { HassActions.KITCHEN() },
                 fanControl,
+                NO_KEY,
+                stahp,
             ),
         ),
         Mode.DAYTIME to
@@ -103,9 +97,8 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                         MopdiyActions.STOP()
                     },
                     fanControl,
-                    MenuItem("Stop", icon = loadImage("/cancel.png"), buttonColor = Color.ORANGE) {
-                        AppCommon.applicationRunning = false
-                    },
+                    NO_KEY,
+                    stahp,
                 ),
             ),
         Mode.EVENING to NeoKeyMenu(

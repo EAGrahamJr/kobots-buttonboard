@@ -21,8 +21,10 @@ import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.parts.app.io.NeoKeyHandler
 import crackers.kobots.parts.app.io.NeoKeyMenu
+import crackers.kobots.parts.loadImage
 import org.slf4j.LoggerFactory
 import java.awt.Color
+import java.awt.image.BufferedImage
 
 /**
  * Synchronize screen, menu, and keyboard.
@@ -73,5 +75,32 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
     fun selectMenu(whichOne: M) {
         _currentMenu = whichOne
         currentMenu.displayMenu()
+    }
+
+    companion object {
+
+        val CANCEL_ICON = loadImage("/cancel.png")
+
+        enum class HAImages(val image: BufferedImage) {
+            BED(loadImage("/bed.png")),
+            EXIT(loadImage("/exit.png")),
+            LIGHTBULB(loadImage("/lightbulb.png")),
+            MOON(loadImage("/moon.png")),
+            MOVIE(loadImage("/movie.png")),
+            RESTAURANT(loadImage("/restaurant.png")),
+            SUN(loadImage("/sun.png")),
+            TV(loadImage("/tv.png")),
+            FAN(loadImage("/fan.png")),
+        }
+
+        enum class RobotImages(val image: BufferedImage) {
+            STOP(loadImage("/robot/dangerous.png")),
+            FLASHLIGHT(loadImage("/robot/flashlight_on.png")),
+            HI(loadImage("/robot/hail.png")),
+            STOP_IT(loadImage("/robot/halt.png")),
+            HOME(loadImage("/robot/home.png")),
+            RETURN(loadImage("/robot/redo.png")),
+            DROPS(loadImage("/robot/symptoms.png")),
+        }
     }
 }

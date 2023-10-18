@@ -17,7 +17,6 @@
 package crackers.kobots.buttonboard.environment
 
 import crackers.kobots.app.AppCommon
-import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.devices.display.SSD1327
 import crackers.kobots.parts.center
@@ -81,7 +80,7 @@ object EnvironmentDisplay {
     fun updateDisplay() {
         try {
             // leave it off at night
-            if (currentMode == Mode.NIGHT) {
+            if (currentMode.isNight()) {
                 screen.displayOn = false
                 return
             }

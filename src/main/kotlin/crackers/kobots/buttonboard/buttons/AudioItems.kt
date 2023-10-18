@@ -14,36 +14,45 @@
  * permissions and limitations under the License.
  */
 
-package crackers.kobots.buttonboard
+package crackers.kobots.buttonboard.buttons
 
+import crackers.kobots.buttonboard.TheActions
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.ORANGISH
 import crackers.kobots.parts.app.io.NeoKeyMenu.MenuItem
 import crackers.kobots.parts.loadImage
 import java.awt.Color
+import java.awt.image.BufferedImage
+
+enum class AudioImages(val image: BufferedImage) {
+    PLAY(loadImage("/audio/music_note.png")),
+    PAUSE(loadImage("/audio/music_off.png")),
+    VOLUME_UP(loadImage("/audio/volume_up.png")),
+    VOLUME_DOWN(loadImage("/audio/volume_down.png")),
+}
 
 /*
  * Audio Menu items
  */
 val audioPlay = MenuItem(
     "Play",
-    icon = loadImage("/audio/music_note.png"),
+    icon = AudioImages.PLAY.image,
     buttonColor = Color.GREEN,
 ) { TheActions.MopdiyActions.PLAY() }
 val audioPause = MenuItem(
     "Pause",
-    icon = loadImage("/audio/music_off.png"),
+    icon = AudioImages.PAUSE.image,
     buttonColor = GOLDENROD,
 ) { TheActions.MopdiyActions.PAUSE() }
 val volumeUp = MenuItem(
     "Vol Up",
     abbrev = "V+",
-    icon = loadImage("/audio/volume_up.png"),
+    icon = AudioImages.VOLUME_UP.image,
     buttonColor = Color.GREEN,
 ) { TheActions.MopdiyActions.VOLUME_UP() }
 val volumeDown = MenuItem(
     "Vol Down",
     abbrev = "V-",
-    icon = loadImage("/audio/volume_down.png"),
+    icon = AudioImages.VOLUME_DOWN.image,
     buttonColor = ORANGISH,
 ) { TheActions.MopdiyActions.VOLUME_DOWN() }

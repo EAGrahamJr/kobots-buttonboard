@@ -36,14 +36,15 @@ const val REMOTE_PI = "diozero.remote.hostname"
 /**
  * Defines what various parts of the day are
  */
-enum class Mode(
-    val brightness: Float = 0.1f,
-) {
+enum class Mode(val brightness: Float) {
     NONE(0f),
     NIGHT(.005f),
-    MORNING(.05f),
-    DAYTIME,
+    MORNING(.02f),
+    DAYTIME(0.05f),
     EVENING(.03f),
+    ;
+
+    fun isNight() = this == NIGHT || this == EVENING
 }
 
 private val logger = LoggerFactory.getLogger("ButtonBox")
@@ -51,7 +52,18 @@ private val logger = LoggerFactory.getLogger("ButtonBox")
 private val _currentMode = AtomicReference(Mode.NONE)
 var currentMode: Mode
     get() = _currentMode.get()
-    set(m) = _currentMode.set(m)
+    set(m) {
+        val v = _currentMode.get()
+        if (_currentMode.compareAndSet(v, m)) {
+            BackBenchPicker.selectMenu(m)
+            m.brightness.let {
+                FrontBenchPicker.keyHandler.brightness = it
+                BackBenchPicker.keyHandler.brightness = it
+            }
+            BackBenchPicker.currentMenu.displayMenu()
+            FrontBenchPicker.currentMenu.displayMenu()
+        }
+    }
 
 private var _remote: Boolean = false
 internal val isRemote: Boolean
@@ -95,22 +107,11 @@ private fun modeAndKeyboardCheck() {
     try {
         // adjust per time of day
         val hour = LocalTime.now().hour
-        val mode = when {
+        currentMode = when {
             hour in (0..6) -> Mode.NIGHT
             hour <= 8 -> Mode.MORNING
             hour <= 20 -> Mode.DAYTIME
             else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
-        }
-        // mode change or error cleared
-        if (mode != currentMode) {
-            BackBenchPicker.selectMenu(mode)
-            mode.brightness.let {
-                FrontBenchPicker.keyHandler.brightness = it
-                BackBenchPicker.keyHandler.brightness = it
-            }
-            BackBenchPicker.currentMenu.displayMenu()
-            FrontBenchPicker.currentMenu.displayMenu()
-            currentMode = mode
         }
 
         // *****************************
