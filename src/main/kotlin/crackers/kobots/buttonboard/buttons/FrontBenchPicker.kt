@@ -52,6 +52,9 @@ object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
         ),
     )
     val DARK_CYAH = Color.CYAN.darker()
+    private val homeItem = MenuItem("Home", buttonColor = Color.GREEN, icon = RobotImages.HOME.image) {
+        GripperActions.HOME()
+    }
     override val menuSelections = mapOf(
         FrontBenchActions.STANDARD_ROBOT to NeoKeyMenu(
             keyHandler,
@@ -63,9 +66,7 @@ object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
                 MenuItem("Rtn", icon = RobotImages.RETURN.image, buttonColor = Color.GREEN) {
                     GripperActions.RETURN()
                 },
-                MenuItem("Hi", icon = RobotImages.HI.image, buttonColor = DARK_CYAH) {
-                    GripperActions.SAY_HI()
-                },
+                homeItem,
                 MenuItem("Exit", icon = RobotImages.STOP.image, buttonColor = Color.RED) {
                     GripperActions.STOP()
                     AppCommon.applicationRunning = false
@@ -76,12 +77,13 @@ object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
             keyHandler,
             display,
             listOf(
-                MenuItem("Home", buttonColor = Color.GREEN, icon = RobotImages.HOME.image) {
-                    GripperActions.HOME()
-                },
+                homeItem,
                 MenuItem("Excuse Me", "Sry", CANCEL_ICON, DARK_CYAH) { GripperActions.EXCUSE_ME() },
                 MenuItem("Sleep", icon = HAImages.BED.image, buttonColor = Color.BLUE.darker()) {
                     GripperActions.SLEEP()
+                },
+                MenuItem("Hi", icon = RobotImages.HI.image, buttonColor = DARK_CYAH) {
+                    GripperActions.SAY_HI()
                 },
                 MenuItem("Stop", icon = RobotImages.STOP_IT.image, buttonColor = ORANGISH) {
                     GripperActions.STOP()

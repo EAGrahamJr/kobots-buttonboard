@@ -9,23 +9,26 @@ The world's most expensive remote control for HomeAssistant. Uses
 
 ### Cost
 
-And counting (discounting the LEGO pieces):
+And counting (discounting the LEGO pieces) and does **not** count the Raspberry Pi<sup>**1**</sup>:
 
-| Item                                      |      ~Price |
-|-------------------------------------------|------------:|
-| Raspberry Pi 4<br/><sup>(ref Covid)</sup> |     $225.00 |
-| SparkFun Qwiic pHat v2                    |       $8.00 |
-| 128x128 OLED display                      |      $23.00 |
-| I2C Multiplexer                           |       $7.00 |
-| 128x32 OLED display x 2                   |       $8.00 |
-| NeoKey 1x4 I2C x 2                        |      $20.00 |
-| Keys (4 x 2)                              |       $7.00 |
-| Key caps (4 x 2)                          |       $5.00 |
-| Neopixel strip, 1/2 meter                 |      $13.00 |
-| Neopixel ring (8 pixels)                  |       $4.00 |
-| Neopixel controller                       |       $8.00 |
-| Extra STEMMA cables                       |      $12.00 |
-| **TOTAL**                                 | **$340.00** |
+| Item                      |   ~Price |
+|---------------------------|---------:|
+| SparkFun Qwiic pHat v2    |       $8 |
+| 128x128 OLED display      |      $23 |
+| I2C Multiplexer           |       $7 |
+| 128x32 OLED display x 2   |       $8 |
+| NeoKey 1x4 I2C x 2        |      $20 |
+| Keys (4 x 2)              |       $7 |
+| Key caps (4 x 2)          |       $5 |
+| Neopixel strip, 1/2 meter |      $13 |
+| Neopixel ring (8 pixels)  |       $4 |
+| Neopixel controller       |       $8 |
+| ToF sensor                |      $14 |
+| Swirly board              |      $11 |
+| Extra STEMMA cables       |      $12 |
+| **TOTAL**                 | **$140** |
+
+<sup>**1**</sup> Bought a Raspberry Pi 4 mid-COVID lockdown for a silly price of $225
 
 ### V1, Mk 2
 
@@ -59,6 +62,8 @@ much for no real reason.
 ![Moar buttons](V5.png)
 
 Added an I2C multiplexer and a lot more "self-handling" code. The "front bench" of buttons is configurable by an external signal because I don't have a rotary encoder (yet). The NeoPixel ring shows "liveness" of various hosts and there's a NeoPixel strip just for (more) color.
+
+### V6
 
 ![Industrial V1](V6.png)
 

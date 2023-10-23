@@ -23,22 +23,24 @@ import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.PURPLE
+import crackers.kobots.parts.app.KobotSleep
 import crackers.kobots.parts.colorIntervalFromHSB
+import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Run pretty stuff on the Neopixel strip.
  */
-object TheStrip : Runnable {
+object TheStrip {
     private val logger = LoggerFactory.getLogger("TheStrip")
     private lateinit var seeSaw: AdafruitSeeSaw
     private lateinit var strip: NeoPixel
 
-    // 0 and 360 are the same, so back off a bit
-    private val rainbowColors = colorIntervalFromHSB(0f, 348f, 30)
+    // run it all the way 'round
+    private val rainbowColors = colorIntervalFromHSB(0f, 359f, 30)
     private var lastRainbowColorIndex: Int = 0
 
     private var lastMode: Mode? = null
@@ -56,43 +58,38 @@ object TheStrip : Runnable {
             brightness = 0.1f
             autoWrite = true
         }
-        future = AppCommon.executor.scheduleAtFixedRate(this, 10, 10, TimeUnit.SECONDS)
+        future = AppCommon.executor.scheduleWithFixedDelay(10.seconds, 10.seconds, ::showIt)
         RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
     }
 
-    override fun run() {
+    fun showIt() {
         try {
             if (currentMode == Mode.DAYTIME) showRainbow()
             if (currentMode == lastMode) return
 
             lastMode = currentMode
-            strip.autoWrite = when (currentMode) {
+            when (currentMode) {
                 Mode.NIGHT -> {
                     strip[stripOffset, stripLast] = Color.BLACK
-                    true
                 }
 
                 Mode.MORNING -> {
                     strip.brightness = 0.03f
                     strip[stripOffset, stripLast] = GOLDENROD
-                    true
                 }
 
                 Mode.DAYTIME -> {
-                    strip.brightness = 0.2f
-                    false
+                    strip.brightness = 0.4f
                 }
 
                 Mode.EVENING -> {
                     strip.brightness = 0.03f
                     strip[stripOffset, stripLast] = Color.RED
-                    true
                 }
 
                 Mode.NONE -> {
                     strip.brightness = 0.01f
                     strip[stripOffset, stripLast] = PURPLE
-                    true
                 }
             }
 
@@ -122,8 +119,8 @@ object TheStrip : Runnable {
             AppCommon.applicationRunning || return
             strip[count] = rainbowColors[lastRainbowColorIndex++]
             if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
+            KobotSleep.millis(75)
         }
-        strip.show()
         lastRainbowColorIndex++
         if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
     }
