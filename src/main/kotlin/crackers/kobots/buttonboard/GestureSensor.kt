@@ -16,44 +16,42 @@
 
 package crackers.kobots.buttonboard
 
-import crackers.kobots.buttonboard.TheActions.mopidyKlient
-import crackers.kobots.buttonboard.buttons.FrontBenchPicker
-import crackers.kobots.devices.sensors.VL6180X
-import crackers.kobots.parts.app.KobotSleep
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.min
+import crackers.kobots.app.AppCommon
+import crackers.kobots.devices.sensors.VCNL4040
+import org.slf4j.LoggerFactory
+import java.time.Duration
+import java.time.Instant
 
 /**
  * TODO currently using TimeOfFlight sensor, but hooe to actually use a gesture sensor
  */
 object GestureSensor : AutoCloseable {
-    private val sensor = VL6180X()
+    private var wereWeCloseLastTime = false
+    private lateinit var whenWeWereCloseLastTime: Instant
+
+    private val sensor = VCNL4040(i2cMultiplexer.getI2CDevice(7, VCNL4040.DEFAULT_I2C_ADDRESS))
+        .apply {
+            ambientLightEnabled = true
+            proximityEnabled = true
+        }
     override fun close() {
         sensor.close()
     }
 
-    private val mode = AtomicBoolean(false)
-    var volumeMode: Boolean
-        get() = mode.get()
-        set(value) {
-            mode.set(value)
-        }
-
     fun whatAmIDoing() {
-        if (volumeMode) {
-            // TODO how do you "lock" it?
-            KobotSleep.millis(100)
-            mopidyKlient.volume = min(sensor.range / 2.0, 100.0).toInt()
-        } else {
-            wereWeCloseLastTime = isItClose().also {
-                if (it && !wereWeCloseLastTime) {
-                    FrontBenchPicker.updateMenu()
-//                    volumeMode = (FrontBenchPicker.currentMenu == FrontBenchPicker.audioPlayMenu)
+        wereWeCloseLastTime = isItClose().also { yikes ->
+            if (yikes) {
+                if (wereWeCloseLastTime) {
+                    if (Duration.between(whenWeWereCloseLastTime, Instant.now()) > Duration.ofSeconds(4)) {
+                        LoggerFactory.getLogger("GestureSensor").info("We're close, and we've been close for a while")
+                        AppCommon.applicationRunning = false
+                    }
+                } else {
+                    whenWeWereCloseLastTime = Instant.now()
                 }
             }
         }
     }
 
-    private var wereWeCloseLastTime = false
-    fun isItClose(distance: Int = 50) = sensor.range < distance
+    fun isItClose(distance: Int = 19) = sensor.proximity > distance
 }

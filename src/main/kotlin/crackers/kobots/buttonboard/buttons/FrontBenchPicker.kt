@@ -17,26 +17,27 @@
 package crackers.kobots.buttonboard.buttons
 
 import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.RosetteStatus
 import crackers.kobots.buttonboard.TheActions.GripperActions
 import crackers.kobots.buttonboard.buttons.BenchPicker.Companion.HAImages
 import crackers.kobots.buttonboard.buttons.BenchPicker.Companion.RobotImages
 import crackers.kobots.parts.ORANGISH
 import crackers.kobots.parts.app.io.NeoKeyMenu
 import crackers.kobots.parts.app.io.NeoKeyMenu.MenuItem
+import crackers.kobots.parts.scheduleWithFixedDelay
 import java.awt.Color
+import java.util.concurrent.Future
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class FrontBenchActions {
-    NONE, STANDARD_ROBOT, SHOW_OFF, MOPIDI
+    STANDARD_ROBOT, SHOW_OFF, MOPIDI
 }
 
 /**
  * Handles what menu items are shown for the front "bench" (NeoKey) buttons.
  */
 object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
-    /**
-     * Set as a discrete object so we can tell when it's activated.
-     */
-    val audioPlayMenu = NeoKeyMenu(
+    private val audioPlayMenu = NeoKeyMenu(
         keyHandler,
         display,
         listOf(
@@ -44,17 +45,29 @@ object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
             audioPause,
             volumeUp,
             volumeDown,
-//            NO_KEY,
-//            MenuItem("Stop", icon = STOP_IT, buttonColor = ORANGISH) {
-//                GestureSensor.volumeMode = false
-//                updateMenu()
-//            },
         ),
     )
-    val DARK_CYAH = Color.CYAN.darker()
+
+    private val DARK_CYAN = Color.CYAN.darker()
+
     private val homeItem = MenuItem("Home", buttonColor = Color.GREEN, icon = RobotImages.HOME.image) {
         GripperActions.HOME()
     }
+
+    private lateinit var blinkyFuture: Future<*>
+    private var blinkyState = false
+
+    fun startBlinky() {
+        blinkyFuture = AppCommon.executor.scheduleWithFixedDelay(500.milliseconds, 500.milliseconds) {
+            blinkyState = !blinkyState
+            if (blinkyState) {
+                keyBoard[1] = Color.RED
+            } else {
+                keyBoard[1] = Color.GREEN
+            }
+        }
+    }
+
     override val menuSelections = mapOf(
         FrontBenchActions.STANDARD_ROBOT to NeoKeyMenu(
             keyHandler,
@@ -63,14 +76,17 @@ object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
                 MenuItem("Drops", icon = RobotImages.DROPS.image, buttonColor = Color.DARK_GRAY) {
                     GripperActions.PICKUP()
                 },
-                MenuItem("Rtn", icon = RobotImages.RETURN.image, buttonColor = Color.GREEN) {
+                MenuItem("Rtn", icon = RobotImages.RETURN.image, buttonColor = DARK_CYAN) {
                     GripperActions.RETURN()
+                    if (::blinkyFuture.isInitialized) blinkyFuture.cancel(true)
                 },
                 homeItem,
-                MenuItem("Exit", icon = RobotImages.STOP.image, buttonColor = Color.RED) {
-                    GripperActions.STOP()
-                    AppCommon.applicationRunning = false
-                },
+                MenuItem(
+                    "Clear",
+                    icon = RobotImages.CLEAR.image,
+                    buttonColor = Color.BLUE,
+                    action = RosetteStatus::reset
+                ),
             ),
         ),
         FrontBenchActions.SHOW_OFF to NeoKeyMenu(
@@ -78,11 +94,11 @@ object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
             display,
             listOf(
                 homeItem,
-                MenuItem("Excuse Me", "Sry", CANCEL_ICON, DARK_CYAH) { GripperActions.EXCUSE_ME() },
+                MenuItem("Excuse Me", "Sry", CANCEL_ICON, DARK_CYAN) { GripperActions.EXCUSE_ME() },
                 MenuItem("Sleep", icon = HAImages.BED.image, buttonColor = Color.BLUE.darker()) {
                     GripperActions.SLEEP()
                 },
-                MenuItem("Hi", icon = RobotImages.HI.image, buttonColor = DARK_CYAH) {
+                MenuItem("Hi", icon = RobotImages.HI.image, buttonColor = DARK_CYAN) {
                     GripperActions.SAY_HI()
                 },
                 MenuItem("Stop", icon = RobotImages.STOP_IT.image, buttonColor = ORANGISH) {

@@ -16,9 +16,9 @@
 
 package crackers.kobots.buttonboard
 
-import com.diozero.api.I2CDevice
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.TheActions.mqttClient
+import crackers.kobots.devices.getOrCreateI2CDevice
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
 import crackers.kobots.parts.GOLDENROD
@@ -53,7 +53,9 @@ object TheStrip {
     fun start() {
         if (isRemote) return
 
-        seeSaw = AdafruitSeeSaw(I2CDevice(1, 0x60))
+        // because this can conflict with a thing on the multiplexer
+        val i2cDevice = getOrCreateI2CDevice(1, 0x60)
+        seeSaw = AdafruitSeeSaw(i2cDevice)
         strip = NeoPixel(seeSaw, 38, 15).apply {
             brightness = 0.1f
             autoWrite = true

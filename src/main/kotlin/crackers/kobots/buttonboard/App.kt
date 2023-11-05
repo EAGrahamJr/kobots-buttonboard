@@ -20,6 +20,7 @@ import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.TheActions.mqttClient
 import crackers.kobots.buttonboard.buttons.BackBenchPicker
 import crackers.kobots.buttonboard.buttons.FrontBenchPicker
+import crackers.kobots.buttonboard.buttons.RotoRegulator
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay
 import crackers.kobots.devices.expander.I2CMultiplexer
 import crackers.kobots.parts.scheduleWithFixedDelay
@@ -52,16 +53,20 @@ private val logger = LoggerFactory.getLogger("ButtonBox")
 private val _currentMode = AtomicReference(Mode.NONE)
 var currentMode: Mode
     get() = _currentMode.get()
+    @Synchronized
     set(m) {
-        val v = _currentMode.get()
-        if (_currentMode.compareAndSet(v, m)) {
+        if (_currentMode.get() != m) {
+            _currentMode.set(m)
             BackBenchPicker.selectMenu(m)
+            // TODO handler shouldn't be exposed?
             m.brightness.let {
                 FrontBenchPicker.keyHandler.brightness = it
                 BackBenchPicker.keyHandler.brightness = it
             }
+            // TODO or this?
             BackBenchPicker.currentMenu.displayMenu()
             FrontBenchPicker.currentMenu.displayMenu()
+            RotoRegulator.setPixelColor()
         }
     }
 
@@ -70,6 +75,12 @@ internal val isRemote: Boolean
     get() = _remote
 
 internal val i2cMultiplexer: I2CMultiplexer by lazy { I2CMultiplexer() }
+
+fun killAllTheThings() {
+    TheActions.GripperActions.STOP()
+    TheActions.ServoMaticActions.STOP()
+    AppCommon.applicationRunning = false
+}
 
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
@@ -82,6 +93,7 @@ fun main(args: Array<String>) {
     i2cMultiplexer.use {
         FrontBenchPicker.start()
         BackBenchPicker.start()
+
         mqttClient.startAliveCheck()
 
         // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
@@ -94,33 +106,37 @@ fun main(args: Array<String>) {
 
         FrontBenchPicker.stop()
         BackBenchPicker.stop()
+        RotoRegulator.encoder.close()
     }
     EnvironmentDisplay.stop()
     TheStrip.stop()
-    GestureSensor.close()
 
     AppCommon.executor.shutdownNow()
     exitProcess(0)
 }
 
 private fun modeAndKeyboardCheck() {
-    try {
-        // adjust per time of day
-        val hour = LocalTime.now().hour
-        currentMode = when {
-            hour in (0..6) -> Mode.NIGHT
-            hour <= 8 -> Mode.MORNING
-            hour <= 20 -> Mode.DAYTIME
-            else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
-        }
+    if (AppCommon.applicationRunning) {
+        try {
+            // adjust per time of day
+            val hour = LocalTime.now().hour
+            currentMode = when {
+                hour in (0..6) -> Mode.NIGHT
+                hour <= 8 -> Mode.MORNING
+                hour <= 20 -> Mode.DAYTIME
+                else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
+            }
 
-        // *****************************
-        // ***** READ BUTTONS HERE *****
-        // because the sensor can be used as an independent control, check it first
-        // *****************************
-        GestureSensor.whatAmIDoing()
-        if (!BackBenchPicker.currentMenu.firstButton()) FrontBenchPicker.currentMenu.firstButton()
-    } catch (e: Throwable) {
-        logger.error("Error found - continuing", e)
+            // *****************************
+            // ***** READ BUTTONS HERE *****
+            // because the sensor can be used as an independent control, check it first
+            // ditto for the rotary encoder
+            // *****************************
+            GestureSensor.whatAmIDoing()
+            RotoRegulator.readTwist()
+            if (!BackBenchPicker.currentMenu.firstButton()) FrontBenchPicker.currentMenu.firstButton()
+        } catch (e: Throwable) {
+            logger.error("Error found - continuing", e)
+        }
     }
 }

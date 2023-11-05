@@ -21,7 +21,9 @@ import crackers.hassk.Constants.off
 import crackers.hassk.Constants.on
 import crackers.hassk.HAssKClient
 import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.buttons.FrontBenchPicker
 import crackers.kobots.mqtt.KobotsMQTT
+import crackers.kobots.parts.movement.SequenceExecutor
 import crackers.mopidykontrol.MopidyKlient
 import org.tinylog.Logger
 import java.net.InetAddress
@@ -46,6 +48,15 @@ object TheActions {
         with(ConfigFactory.load()) {
             mqttClient = KobotsMQTT(InetAddress.getLocalHost().hostName, getString("mqtt.broker")).apply {
                 subscribe(BBOARD_TOPIC) { s -> if (s.equals("stop", true)) AppCommon.applicationRunning = false }
+                subscribeJSON(SequenceExecutor.MQTT_TOPIC) { payload ->
+                    with(payload) {
+                        Logger.info("Got sequence request {}", payload)
+                        // if the "arm" thingies completes an eye-drop, start blinking the return button
+                        if (getString("source") == "TheArm" && getString("sequence") == "LocationPickup" && getBoolean("started")) {
+                            FrontBenchPicker.startBlinky()
+                        }
+                    }
+                }
             }
             mopidyKlient = MopidyKlient(getString("mopidy.host"), getInt("mopidy.port"))
         }
@@ -79,6 +90,7 @@ object TheActions {
                         }
                         group("not_bedroom_group") turn off
                     }
+
                     OFFICE_FAN -> switch("small_fan") turn toggleOnSwitch("small_fan")
                 }
             }
@@ -91,6 +103,14 @@ object TheActions {
         val GRIPOMATIC_TOPIC = "kobots/gripOMatic"
 
         override fun invoke() = mqttClient.publish(GRIPOMATIC_TOPIC, name)
+    }
+
+    enum class ServoMaticActions : Action {
+        STOP, UP, DOWN, LEFT, RIGHT, CENTER, SLEEP, WAKEY;
+
+        val SERVOMATIC_TOPIC = "kobots/servoMatic"
+
+        override fun invoke() = mqttClient.publish(SERVOMATIC_TOPIC, name)
     }
 
     enum class MopdiyActions : Action {

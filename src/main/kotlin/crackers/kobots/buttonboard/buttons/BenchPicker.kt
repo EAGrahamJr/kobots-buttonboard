@@ -66,8 +66,8 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
      */
     @Synchronized
     fun updateMenu() {
-        val next = menuSelections.keys.indexOf(_currentMenu) + 1
-        _currentMenu = menuSelections.keys.elementAt(next % menuSelections.size)
+        val next = (_currentMenu.ordinal + 1) % menuSelections.size
+        _currentMenu = _currentMenu.declaringJavaClass.enumConstants[next]
         currentMenu.displayMenu()
     }
 
@@ -101,6 +101,7 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
             HOME(loadImage("/robot/home.png")),
             RETURN(loadImage("/robot/redo.png")),
             DROPS(loadImage("/robot/symptoms.png")),
+            CLEAR(loadImage("/robot/restart_alt.png")),
         }
     }
 }
