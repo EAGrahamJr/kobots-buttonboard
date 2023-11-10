@@ -85,7 +85,7 @@ object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
                     "Clear",
                     icon = RobotImages.CLEAR.image,
                     buttonColor = Color.BLUE,
-                    action = RosetteStatus::reset
+                    action = RosetteStatus::reset,
                 ),
             ),
         ),

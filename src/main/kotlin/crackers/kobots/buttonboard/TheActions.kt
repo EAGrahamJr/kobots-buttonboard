@@ -21,12 +21,9 @@ import crackers.hassk.Constants.off
 import crackers.hassk.Constants.on
 import crackers.hassk.HAssKClient
 import crackers.kobots.app.AppCommon
-import crackers.kobots.buttonboard.buttons.FrontBenchPicker
-import crackers.kobots.mqtt.KobotsMQTT
-import crackers.kobots.parts.movement.SequenceExecutor
+import crackers.kobots.app.AppCommon.mqttClient
 import crackers.mopidykontrol.MopidyKlient
-import org.tinylog.Logger
-import java.net.InetAddress
+import org.slf4j.LoggerFactory
 import java.time.LocalTime
 
 /**
@@ -37,27 +34,16 @@ object TheActions {
         operator fun invoke()
     }
 
-    val mqttClient: KobotsMQTT
     val mopidyKlient: MopidyKlient
+    private val logger = LoggerFactory.getLogger("TheActions")
 
     // remote control of this thing
     const val BBOARD_TOPIC = "kobots/buttonboard"
     val TEN_THIRTY = LocalTime.of(20, 30, 0)
 
     init {
+
         with(ConfigFactory.load()) {
-            mqttClient = KobotsMQTT(InetAddress.getLocalHost().hostName, getString("mqtt.broker")).apply {
-                subscribe(BBOARD_TOPIC) { s -> if (s.equals("stop", true)) AppCommon.applicationRunning = false }
-                subscribeJSON(SequenceExecutor.MQTT_TOPIC) { payload ->
-                    with(payload) {
-                        Logger.info("Got sequence request {}", payload)
-                        // if the "arm" thingies completes an eye-drop, start blinking the return button
-                        if (getString("source") == "TheArm" && getString("sequence") == "LocationPickup" && getBoolean("started")) {
-                            FrontBenchPicker.startBlinky()
-                        }
-                    }
-                }
-            }
             mopidyKlient = MopidyKlient(getString("mopidy.host"), getInt("mopidy.port"))
         }
     }
@@ -71,7 +57,7 @@ object TheActions {
 
         override fun invoke() {
             val action = this
-            Logger.warn("Doing action {}", this)
+            logger.info("Doing action {}", this)
 
             with(AppCommon.hasskClient) {
                 when (action) {
@@ -133,12 +119,9 @@ object TheActions {
 //                    REPEAT -> repeat()
 //                    REPEAT_OFF -> repeatOff()
 //                    REPEAT_ONE -> repeatOne()
-                    else -> Logger.warn("Mopidy action {} not implemented", action)
+                    else -> logger.warn("Mopidy action {} not implemented", action)
                 }
             }
         }
     }
-
-    // more for receiving messages than sending them
-    enum class FrontBenchActions
 }

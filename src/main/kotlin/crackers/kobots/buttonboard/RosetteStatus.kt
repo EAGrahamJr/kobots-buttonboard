@@ -17,17 +17,19 @@
 package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
+import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.lighting.WS2811
 import crackers.kobots.mqtt.KobotsMQTT
+import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.properties.Delegates
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Blinken lights.
@@ -53,25 +55,26 @@ object RosetteStatus {
         mqtt.subscribe(KobotsMQTT.KOBOTS_ALIVE) { s: String -> lastCheckIn[s] = ZonedDateTime.now() }
 
         // check for dead kobots
-        val runner = Runnable {
-            val now = ZonedDateTime.now()
-            lastCheckIn.forEach { (host, lastSeenAt) ->
-                val lastGasp = Duration.between(lastSeenAt, now).seconds
-                val pixelNumber = hostList.indexOf(host)
-                if (pixelNumber < 0) {
-                    logger.warn("Unknown host $host")
-                } else {
-                    rosette[pixelNumber + rosetteOffset] = when {
-                        goToSleep.get() -> WS2811.PixelColor(Color.BLACK, brightness = 0.0f)
-                        lastGasp < 60 -> WS2811.PixelColor(Color.GREEN, brightness = 0.005f)
-                        lastGasp < 120 -> WS2811.PixelColor(Color.YELLOW, brightness = 0.01f)
-                        else -> WS2811.PixelColor(Color.RED, brightness = 0.1f)
+        AppCommon.executor.scheduleWithFixedDelay(15.seconds, 15.seconds) {
+            whileRunning {
+                val now = ZonedDateTime.now()
+                lastCheckIn.forEach { (host, lastSeenAt) ->
+                    val lastGasp = Duration.between(lastSeenAt, now).seconds
+                    val pixelNumber = hostList.indexOf(host)
+                    if (pixelNumber < 0) {
+                        logger.warn("Unknown host $host")
+                    } else {
+                        rosette[pixelNumber + rosetteOffset] = when {
+                            goToSleep.get() -> WS2811.PixelColor(Color.BLACK, brightness = 0.0f)
+                            lastGasp < 60 -> WS2811.PixelColor(Color.GREEN, brightness = 0.005f)
+                            lastGasp < 120 -> WS2811.PixelColor(Color.YELLOW, brightness = 0.01f)
+                            else -> WS2811.PixelColor(Color.RED, brightness = 0.1f)
+                        }
                     }
                 }
+                clearAndShow()
             }
-            clearAndShow()
         }
-        AppCommon.executor.scheduleAtFixedRate(runner, 15, 15, TimeUnit.SECONDS)
     }
 
     /**

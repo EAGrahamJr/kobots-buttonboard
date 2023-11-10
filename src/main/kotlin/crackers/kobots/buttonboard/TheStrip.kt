@@ -17,7 +17,8 @@
 package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
-import crackers.kobots.buttonboard.TheActions.mqttClient
+import crackers.kobots.app.AppCommon.mqttClient
+import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.devices.getOrCreateI2CDevice
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
@@ -65,39 +66,37 @@ object TheStrip {
     }
 
     fun showIt() {
-        try {
+        whileRunning {
             if (currentMode == Mode.DAYTIME) showRainbow()
-            if (currentMode == lastMode) return
+            if (currentMode != lastMode) {
+                lastMode = currentMode
+                when (currentMode) {
+                    Mode.NIGHT -> {
+                        strip[stripOffset, stripLast] = Color.BLACK
+                    }
 
-            lastMode = currentMode
-            when (currentMode) {
-                Mode.NIGHT -> {
-                    strip[stripOffset, stripLast] = Color.BLACK
+                    Mode.MORNING -> {
+                        strip.brightness = 0.03f
+                        strip[stripOffset, stripLast] = GOLDENROD
+                    }
+
+                    Mode.DAYTIME -> {
+                        strip.brightness = 0.4f
+                    }
+
+                    Mode.EVENING -> {
+                        strip.brightness = 0.03f
+                        strip[stripOffset, stripLast] = Color.RED
+                    }
+
+                    Mode.NONE -> {
+                        strip.brightness = 0.01f
+                        strip[stripOffset, stripLast] = PURPLE
+                    }
                 }
 
-                Mode.MORNING -> {
-                    strip.brightness = 0.03f
-                    strip[stripOffset, stripLast] = GOLDENROD
-                }
-
-                Mode.DAYTIME -> {
-                    strip.brightness = 0.4f
-                }
-
-                Mode.EVENING -> {
-                    strip.brightness = 0.03f
-                    strip[stripOffset, stripLast] = Color.RED
-                }
-
-                Mode.NONE -> {
-                    strip.brightness = 0.01f
-                    strip[stripOffset, stripLast] = PURPLE
-                }
+                RosetteStatus.goToSleep.set(currentMode == Mode.NIGHT)
             }
-
-            RosetteStatus.goToSleep.set(currentMode == Mode.NIGHT)
-        } catch (e: Exception) {
-            logger.error("Cannot display strip", e)
         }
     }
 

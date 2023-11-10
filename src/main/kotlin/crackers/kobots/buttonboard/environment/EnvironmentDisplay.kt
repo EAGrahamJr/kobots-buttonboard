@@ -17,6 +17,7 @@
 package crackers.kobots.buttonboard.environment
 
 import crackers.kobots.app.AppCommon
+import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.devices.display.SSD1327
 import crackers.kobots.parts.center
@@ -65,7 +66,7 @@ object EnvironmentDisplay {
     private val outsideState = OutsideState(screenGraphics, 0, 0)
 
     fun start() {
-        future = AppCommon.executor.scheduleAtFixedRate(1.seconds, 5.minutes, ::updateDisplay)
+        future = AppCommon.executor.scheduleAtFixedRate(15.seconds, 5.minutes, ::updateDisplay)
     }
 
     fun stop() {
@@ -78,26 +79,24 @@ object EnvironmentDisplay {
     }
 
     fun updateDisplay() {
-        try {
+        whileRunning {
             // leave it off at night
             if (currentMode.isNight()) {
                 screen.displayOn = false
-                return
-            }
-            if (!screen.displayOn) {
-                screen.displayOn = true
-                // assuming this happens once a day, update the date
-                showDate()
-            }
-            outsideState.show()
-            insideStuff.show()
+            } else {
+                if (!screen.displayOn) {
+                    screen.displayOn = true
+                    // assuming this happens once a day, update the date
+                    showDate()
+                }
+                outsideState.show()
+                insideStuff.show()
 
-            with(screen) {
-                display(image)
-                show()
+                with(screen) {
+                    display(image)
+                    show()
+                }
             }
-        } catch (t: Throwable) {
-            LoggerFactory.getLogger(this::class.java).error("Unable to display", t)
         }
     }
 

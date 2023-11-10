@@ -17,22 +17,23 @@
 package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
-import crackers.kobots.buttonboard.TheActions.mqttClient
+import crackers.kobots.app.AppCommon.REMOTE_PI
+import crackers.kobots.app.AppCommon.mqttClient
+import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.buttons.BackBenchPicker
+import crackers.kobots.buttonboard.buttons.FrontBenchActions
 import crackers.kobots.buttonboard.buttons.FrontBenchPicker
 import crackers.kobots.buttonboard.buttons.RotoRegulator
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay
 import crackers.kobots.devices.expander.I2CMultiplexer
+import crackers.kobots.mqtt.KobotsMQTT
 import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
-import java.awt.Color
 import java.time.LocalTime
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
-
-const val REMOTE_PI = "diozero.remote.hostname"
 
 /**
  * Defines what various parts of the day are
@@ -53,6 +54,7 @@ private val logger = LoggerFactory.getLogger("ButtonBox")
 private val _currentMode = AtomicReference(Mode.NONE)
 var currentMode: Mode
     get() = _currentMode.get()
+
     @Synchronized
     set(m) {
         if (_currentMode.get() != m) {
@@ -88,20 +90,35 @@ fun killAllTheThings() {
 fun main(args: Array<String>) {
     _remote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
 
+    mqttClient.apply {
+        startAliveCheck()
+        subscribe(TheActions.BBOARD_TOPIC) { s -> if (s.equals("stop", true)) AppCommon.applicationRunning = false }
+        allowEmergencyStop()
+    }
+
     TheStrip.start()
     EnvironmentDisplay.start()
     i2cMultiplexer.use {
         FrontBenchPicker.start()
         BackBenchPicker.start()
 
-        mqttClient.startAliveCheck()
+        mqttClient.subscribeJSON(KobotsMQTT.KOBOTS_EVENTS) { payload ->
+            with(payload) {
+                logger.info("Kobots event: {}", payload)
+                // if the "arm" thingies completes an eye-drop, start blinking the return button
+                if (optString("source") == "TheArm" && optString("sequence") == "LocationPickup" && optBoolean("started")) {
+                    FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
+                    // TODO "zero" the rotor?
+                    FrontBenchPicker.startBlinky()
+                }
+            }
+        }
 
         // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
         val theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 50.milliseconds, ::modeAndKeyboardCheck)
         AppCommon.awaitTermination()
         theFuture.cancel(true)
 
-        BackBenchPicker.keyHandler.buttonColors = listOf(Color.RED, Color.RED, Color.RED, Color.RED)
         logger.warn("Exiting ")
 
         FrontBenchPicker.stop()
@@ -116,27 +133,23 @@ fun main(args: Array<String>) {
 }
 
 private fun modeAndKeyboardCheck() {
-    if (AppCommon.applicationRunning) {
-        try {
-            // adjust per time of day
-            val hour = LocalTime.now().hour
-            currentMode = when {
-                hour in (0..6) -> Mode.NIGHT
-                hour <= 8 -> Mode.MORNING
-                hour <= 20 -> Mode.DAYTIME
-                else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
-            }
-
-            // *****************************
-            // ***** READ BUTTONS HERE *****
-            // because the sensor can be used as an independent control, check it first
-            // ditto for the rotary encoder
-            // *****************************
-            GestureSensor.whatAmIDoing()
-            RotoRegulator.readTwist()
-            if (!BackBenchPicker.currentMenu.firstButton()) FrontBenchPicker.currentMenu.firstButton()
-        } catch (e: Throwable) {
-            logger.error("Error found - continuing", e)
+    whileRunning {
+        // adjust per time of day
+        val hour = LocalTime.now().hour
+        currentMode = when {
+            hour in (0..6) -> Mode.NIGHT
+            hour <= 8 -> Mode.MORNING
+            hour <= 20 -> Mode.DAYTIME
+            else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
         }
+
+        // *****************************
+        // ***** READ BUTTONS HERE *****
+        // because the sensor can be used as an independent control, check it first
+        // ditto for the rotary encoder
+        // *****************************
+        GestureSensor.whatAmIDoing()
+        RotoRegulator.readTwist()
+        if (!BackBenchPicker.currentMenu.firstButton()) FrontBenchPicker.currentMenu.firstButton()
     }
 }
