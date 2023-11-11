@@ -17,41 +17,76 @@
 package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
+import crackers.kobots.app.AppCommon.mqttClient
 import crackers.kobots.devices.sensors.VCNL4040
+import crackers.kobots.mqtt.KobotsMQTT.Companion.KOBOTS_EVENTS
+import crackers.kobots.parts.elapsed
+import crackers.kobots.parts.movement.SequenceExecutor.SequenceEvent
+import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
 
 /**
- * TODO currently using TimeOfFlight sensor, but hooe to actually use a gesture sensor
+ * Fire off events from a proximity sensor.
  */
 object GestureSensor : AutoCloseable {
-    private var wereWeCloseLastTime = false
-    private lateinit var whenWeWereCloseLastTime: Instant
+    private var lastStopCheck = false
+    private lateinit var lastStopCheckTime: Instant
+    private const val STOP_PROXIMITY = 20
+
+    private var proxTriggered = false
+    private const val PROXIMITY_THRESHOLD = 4
+    private lateinit var proxTriggeredTime: Instant
 
     private val sensor = VCNL4040(i2cMultiplexer.getI2CDevice(7, VCNL4040.DEFAULT_I2C_ADDRESS))
         .apply {
             ambientLightEnabled = true
             proximityEnabled = true
         }
+
+    private val logger = LoggerFactory.getLogger("GestureSensor")
+
     override fun close() {
         sensor.close()
     }
 
     fun whatAmIDoing() {
-        wereWeCloseLastTime = isItClose().also { yikes ->
-            if (yikes) {
-                if (wereWeCloseLastTime) {
-                    if (Duration.between(whenWeWereCloseLastTime, Instant.now()) > Duration.ofSeconds(4)) {
-                        LoggerFactory.getLogger("GestureSensor").info("We're close, and we've been close for a while")
-                        AppCommon.applicationRunning = false
-                    }
-                } else {
-                    whenWeWereCloseLastTime = Instant.now()
-                }
-            }
+        val prox = sensor.proximity.toInt()
+        val ambient = sensor.luminosity
+
+        if (prox > STOP_PROXIMITY) checkStopGesture() else lastStopCheck = false
+
+        // if over the threshold and the trigger has not fired, fire it
+        if (prox > PROXIMITY_THRESHOLD && !proxTriggered) {
+            proxTriggeredTime = Instant.now()
+            fireEvent(true)
+        }
+        // otherwise clear after a second
+        if (proxTriggered && prox < PROXIMITY_THRESHOLD && proxTriggeredTime.elapsed().toSeconds() > 1) {
+            fireEvent(false)
         }
     }
 
-    fun isItClose(distance: Int = 19) = sensor.proximity > distance
+    private fun fireEvent(b: Boolean) {
+        proxTriggered = b
+        val event = SequenceEvent("Proximity", "proxAlert", proxTriggered)
+        mqttClient.publish(KOBOTS_EVENTS, JSONObject(event))
+    }
+
+    private val FOUR_SECONDS = Duration.ofSeconds(4)
+
+    private fun checkStopGesture() {
+        if (lastStopCheck) {
+            val elapsed = lastStopCheckTime.elapsed()
+
+            if (elapsed > FOUR_SECONDS) {
+                logger.info("We're close, and we've been close for a while")
+                AppCommon.applicationRunning = false
+            }
+        } else {
+            lastStopCheckTime = Instant.now()
+        }
+        lastStopCheck = true
+    }
 }
