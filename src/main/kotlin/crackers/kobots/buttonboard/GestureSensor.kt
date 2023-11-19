@@ -82,6 +82,7 @@ object GestureSensor : AutoCloseable {
 
             if (elapsed > FOUR_SECONDS) {
                 logger.info("We're close, and we've been close for a while")
+                fireEvent(false)
                 AppCommon.applicationRunning = false
             }
         } else {
