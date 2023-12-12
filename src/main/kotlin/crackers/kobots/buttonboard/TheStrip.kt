@@ -89,7 +89,7 @@ object TheStrip {
                         strip[stripOffset, stripLast] = Color.RED
                     }
 
-                    Mode.NONE -> {
+                    else -> {
                         strip.brightness = 0.01f
                         strip[stripOffset, stripLast] = PURPLE
                     }

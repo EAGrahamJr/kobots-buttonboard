@@ -38,12 +38,13 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Defines what various parts of the day are
  */
-enum class Mode(val brightness: Float) {
+enum class Mode(val frontBright: Float, val backBright: Float = frontBright) {
     NONE(0f),
     NIGHT(.005f),
     MORNING(.02f),
     DAYTIME(0.05f),
     EVENING(.03f),
+    MANUAL(.05f, 0.1f),
     ;
 
     fun isNight() = this == NIGHT || this == EVENING
@@ -61,10 +62,8 @@ var currentMode: Mode
             _currentMode.set(m)
             BackBenchPicker.selectMenu(m)
             // TODO handler shouldn't be exposed?
-            m.brightness.let {
-                FrontBenchPicker.keyHandler.brightness = it
-                BackBenchPicker.keyHandler.brightness = it
-            }
+            FrontBenchPicker.keyHandler.brightness = m.frontBright
+            BackBenchPicker.keyHandler.brightness = m.backBright
             // TODO or this?
             BackBenchPicker.currentMenu.displayMenu()
             FrontBenchPicker.currentMenu.displayMenu()
@@ -139,7 +138,7 @@ private fun modeAndKeyboardCheck() {
         currentMode = when {
             hour in (0..6) -> Mode.NIGHT
             hour <= 8 -> Mode.MORNING
-            hour <= 20 -> Mode.DAYTIME
+            hour <= 20 -> if (currentMode == Mode.MANUAL) currentMode else Mode.DAYTIME
             else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
         }
 
