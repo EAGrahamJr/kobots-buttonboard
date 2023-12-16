@@ -97,4 +97,8 @@ object RotoRegulator {
         }
         setPixelColor()
     }
+
+    fun mangageLight(entityId: String?) {
+        println("TODO manage light $entityId")
+    }
 }

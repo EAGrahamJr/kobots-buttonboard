@@ -17,14 +17,20 @@
 package crackers.kobots.buttonboard.buttons
 
 import com.diozero.devices.oled.SSD1306
+import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.io.NeoKey
+import crackers.kobots.devices.lighting.PixelBuf
 import crackers.kobots.parts.app.io.NeoKeyHandler
 import crackers.kobots.parts.app.io.NeoKeyMenu
 import crackers.kobots.parts.loadImage
+import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.awt.image.BufferedImage
+import java.util.concurrent.Future
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Synchronize screen, menu, and keyboard.
@@ -52,7 +58,11 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
         @Synchronized
         get() {
             if (!::_currentMenu.isInitialized) _currentMenu = menuSelections.keys.first()
-            return menuSelections[_currentMenu]!!
+            return menuSelections[_currentMenu] ?: run {
+                logger.error("No menu for $_currentMenu")
+                _currentMenu = menuSelections.keys.first()
+                menuSelections[_currentMenu]!!
+            }
         }
 
     fun start() = currentMenu.displayMenu()
@@ -80,6 +90,7 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
     companion object {
 
         val CANCEL_ICON = loadImage("/cancel.png")
+        val DARK_CYAN = Color.CYAN.darker()
 
         enum class HAImages(val image: BufferedImage) {
             BED(loadImage("/bed.png")),
@@ -102,6 +113,38 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
             RETURN(loadImage("/robot/redo.png")),
             DROPS(loadImage("/robot/symptoms.png")),
             CLEAR(loadImage("/robot/restart_alt.png")),
+        }
+    }
+
+    class Blinker(private val pixelBuf: PixelBuf, private val blinkOffColor: Color = Color.RED) {
+        private val RUNNING = -1
+
+        // TODO allow more than one button to blink
+        private var blinkyFuture: Future<*>? = null
+        private var blinkyState = false
+        private lateinit var ogColor: Color
+
+        @Volatile
+        private var blinkingKeyIndex: Int = RUNNING
+
+        fun start(index: Int, color: Color? = null, blinkTime: Duration = 500.milliseconds) {
+            require(blinkingKeyIndex == RUNNING) { "Blinker already started" }
+            ogColor = color ?: pixelBuf[index].color
+            blinkingKeyIndex = index
+            blinkyFuture = AppCommon.executor.scheduleWithFixedDelay(blinkTime, blinkTime) {
+                blinkyState = !blinkyState.also {
+                    pixelBuf[index] = if (it) blinkOffColor else ogColor
+                }
+            }
+        }
+
+        fun stop() {
+            if (blinkingKeyIndex > RUNNING) {
+                pixelBuf[blinkingKeyIndex] = ogColor
+                blinkingKeyIndex = RUNNING
+                blinkyFuture?.cancel(true)
+                blinkyFuture = null
+            }
         }
     }
 }

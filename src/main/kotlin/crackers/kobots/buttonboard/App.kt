@@ -149,6 +149,8 @@ private fun modeAndKeyboardCheck() {
         // *****************************
         GestureSensor.whatAmIDoing()
         RotoRegulator.readTwist()
-        if (!BackBenchPicker.currentMenu.firstButton()) FrontBenchPicker.currentMenu.firstButton()
+
+        // run the back bench button check
+        if (!BackBenchPicker.multiTaskingButtons()) FrontBenchPicker.currentMenu.firstButton()
     }
 }

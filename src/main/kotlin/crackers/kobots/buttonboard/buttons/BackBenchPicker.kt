@@ -21,17 +21,24 @@ import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.TheActions.HassActions
 import crackers.kobots.buttonboard.TheActions.MopdiyActions
 import crackers.kobots.buttonboard.buttons.BenchPicker.Companion.HAImages
+import crackers.kobots.buttonboard.buttons.BenchPicker.Companion.RobotImages
+import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.parts.GOLDENROD
+import crackers.kobots.parts.ORANGISH
 import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.app.io.NeoKeyMenu
 import crackers.kobots.parts.app.io.NeoKeyMenu.Companion.NO_KEY
 import crackers.kobots.parts.app.io.NeoKeyMenu.MenuItem
+import org.json.JSONObject
 import java.awt.Color
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Handles what menu items are shown for the back "bench" (NeoKey) buttons.
  */
 object BackBenchPicker : BenchPicker<Mode>(1, 1) {
+    private const val NO_TOGGLE = -1
+    private val toggleActive = AtomicInteger(NO_TOGGLE)
 
     val topMenuItem = MenuItem("Top", icon = HAImages.LIGHTBULB.image, buttonColor = Color.GREEN) { HassActions.TOP() }
 
@@ -98,6 +105,9 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                     },
                     fanControl,
                     NO_KEY,
+                    MenuItem("Manual", icon = RobotImages.STOP_IT.image, buttonColor = DARK_CYAN) {
+                        currentMode = Mode.MANUAL
+                    },
                     stahp,
                 ),
             ),
@@ -111,5 +121,87 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                 fanControl,
             ),
         ),
+        Mode.MANUAL to NeoKeyMenu(
+            keyHandler,
+            display,
+            manualLightMenu(),
+        ),
     )
+
+    private class RotoAction(val entityId: String) : () -> Unit {
+        override fun invoke() {
+            RotoRegulator.mangageLight(entityId)
+        }
+    }
+
+    private val blinker = Blinker(keyHandler.keyboard.pixels, ORANGISH)
+
+    /**
+     * Builds list of selectable lights to control.
+     */
+    private fun manualLightMenu(): List<MenuItem> {
+        val itemList = mutableListOf<MenuItem>()
+        itemList += MenuItem("Back", icon = RobotImages.RETURN.image, buttonColor = DARK_CYAN) {
+            blinker.stop()
+            RotoRegulator.mangageLight(null)
+            currentMode = Mode.DAYTIME
+        }
+
+        with(AppCommon.hasskClient) {
+            states("light").forEach {
+                val id = it.entityId
+                val buttonColor = if (id.contains("group")) Color.BLUE else Color.GREEN
+                // if (state) Color.GREEN else Color.DARK_GRAY
+
+                val attributes = JSONObject(it.attributes)
+                val name = attributes.optString("friendly_name")
+                val state = it.state == "on"
+//                val brightness = attributes.optInt("brightness", 0)
+                val item = MenuItem(
+                    name = name.take(4),
+                    icon = HAImages.LIGHTBULB.image,
+                    buttonColor = buttonColor,
+                    action = RotoAction(id),
+                )
+                itemList += item
+            }
+        }
+        itemList += NO_KEY
+
+        return itemList
+    }
+
+
+    fun multiTaskingButtons() = currentMenu.execute().firstOrNull()?.let {
+        val (button, menuItem) = it
+        if (currentMode == Mode.MANUAL) manualButtonPress(button, menuItem) else menuItem.action()
+        true
+    } ?: false
+
+
+    private fun manualButtonPress(button: Int, menuItem: MenuItem) {
+        // assume we're accepting the button
+        if (toggleActive.compareAndSet(NO_TOGGLE, button)) {
+            // if it's a "roto action", turn on blinky and set up the rotator
+            menuItem.action.run {
+                if (this is RotoAction) {
+                    val buttonColor = if (entityId.contains("group")) Color.BLUE else Color.GREEN
+                    blinker.start(button, buttonColor)
+                }
+                // otherwise, it's a "normal" thing, so clear the toggle and execute
+                else {
+                    blinker.stop()
+                    toggleActive.set(NO_TOGGLE)
+                }
+                invoke()
+            }
+        }
+        // or it's the active button and we're toggling off
+        else if (toggleActive.compareAndSet(button, NO_TOGGLE)) {
+            // stop blinky
+            blinker.stop()
+            RotoRegulator.mangageLight(null)
+        }
+        // ignored
+    }
 }
