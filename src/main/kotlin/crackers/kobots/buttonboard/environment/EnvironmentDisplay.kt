@@ -52,11 +52,13 @@ object EnvironmentDisplay {
     internal const val MAX_H = 128
 
     init {
-        image = BufferedImage(MAX_W, MAX_H, BufferedImage.TYPE_BYTE_GRAY).also { img: BufferedImage ->
-            screenGraphics = (img.graphics as Graphics2D).also {
-                dateFontMetrics = it.getFontMetrics(dateFont)
+        image =
+            BufferedImage(MAX_W, MAX_H, BufferedImage.TYPE_BYTE_GRAY).also { img: BufferedImage ->
+                screenGraphics =
+                    (img.graphics as Graphics2D).also {
+                        dateFontMetrics = it.getFontMetrics(dateFont)
+                    }
             }
-        }
         screen.displayOn = false
         screen.clear()
     }
@@ -103,26 +105,34 @@ object EnvironmentDisplay {
     /**
      * Shows the date in the top line for the agenda block.
      */
-    private fun showDate() = with(screenGraphics) {
-        val now = LocalDateTime.now()
-        color = Color.BLACK
-        fillRect(0, 0, MAX_W, MAX_H)
+    private fun showDate() =
+        with(screenGraphics) {
+            val now = LocalDateTime.now()
+            color = Color.BLACK
+            fillRect(0, 0, MAX_W, MAX_H)
 
-        color = Color.WHITE
-        font = dateFont
-        val date = "${now.dayOfWeek.name.substring(0, 3)}  ${now.month.name.substring(0, 3)} ${now.dayOfMonth}"
-        val x = dateFontMetrics.center(date, MAX_W)
-        drawString(date, x, dateBottom)
-    }
+            color = Color.WHITE
+            font = dateFont
+            val date = "${now.dayOfWeek.name.substring(0, 3)}  ${now.month.name.substring(0, 3)} ${now.dayOfMonth}"
+            val x = dateFontMetrics.center(date, MAX_W)
+            drawString(date, x, dateBottom)
+        }
 
-    internal fun Graphics2D.scaleImageAt(image: BufferedImage, x: Int, y: Int, width: Int, height: Int = width) {
+    internal fun Graphics2D.scaleImageAt(
+        image: BufferedImage,
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int = width,
+    ) {
         drawImage(image, x, y, width, height, null)
     }
 
-    internal fun temperatureColor(temp: Int): Color = when {
-        temp > 79 -> Color.YELLOW
-        temp > 50 -> Color.GREEN
-        temp > 40 -> Color.CYAN
-        else -> Color.RED
-    }
+    internal fun temperatureColor(temp: Int): Color =
+        when {
+            temp > 79 -> Color.YELLOW
+            temp > 50 -> Color.GREEN
+            temp > 40 -> Color.CYAN
+            else -> Color.RED
+        }
 }

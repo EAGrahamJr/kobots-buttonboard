@@ -50,7 +50,11 @@ object RosetteStatus {
      *
      * This is not using the "built-in" MQTT listener because we're also checking for "up" statuses.
      */
-    internal fun manageAliveChecks(statusPixels: NeoPixel, mqtt: KobotsMQTT, pixelOffset: Int = 0) {
+    internal fun manageAliveChecks(
+        statusPixels: NeoPixel,
+        mqtt: KobotsMQTT,
+        pixelOffset: Int = 0,
+    ) {
         rosette = statusPixels
         rosetteOffset = pixelOffset
 
@@ -85,12 +89,13 @@ object RosetteStatus {
             if (pixelNumber < 0) {
                 logger.warn("Unknown host $host")
             } else {
-                rosette[pixelNumber + rosetteOffset] = when {
-                    goToSleep.get() -> WS2811.PixelColor(Color.BLACK, brightness = 0.0f)
-                    lastGasp < 60 -> WS2811.PixelColor(Color.GREEN, brightness = 0.005f)
-                    lastGasp < 120 -> WS2811.PixelColor(Color.YELLOW, brightness = 0.01f)
-                    else -> WS2811.PixelColor(Color.RED, brightness = 0.1f)
-                }
+                rosette[pixelNumber + rosetteOffset] =
+                    when {
+                        goToSleep.get() -> WS2811.PixelColor(Color.BLACK, brightness = 0.0f)
+                        lastGasp < 60 -> WS2811.PixelColor(Color.GREEN, brightness = 0.005f)
+                        lastGasp < 120 -> WS2811.PixelColor(Color.YELLOW, brightness = 0.01f)
+                        else -> WS2811.PixelColor(Color.RED, brightness = 0.1f)
+                    }
             }
         }
         clearAndShow()

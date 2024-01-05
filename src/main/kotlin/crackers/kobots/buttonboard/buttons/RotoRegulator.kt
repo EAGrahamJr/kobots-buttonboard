@@ -16,6 +16,7 @@
 
 package crackers.kobots.buttonboard.buttons
 
+import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.buttonboard.i2cMultiplexer
@@ -30,7 +31,6 @@ import java.awt.Color
  * Rotary encoder stuff.
  */
 object RotoRegulator {
-
     val encoder by lazy { QwiicTwist(i2cMultiplexer.getI2CDevice(2, QwiicTwist.DEFAULT_I2C_ADDRESS)) }
 
     init {
@@ -44,22 +44,24 @@ object RotoRegulator {
     private var buttonDown = false
 
     fun setPixelColor() {
-        val color = when (lastCount) {
-            IntRange.EMPTY -> Color.BLACK
-            midRange -> GOLDENROD
-            lowRange -> PURPLE
-            highRange -> Color.GREEN
-            else -> Color.RED
-        }
+        val color =
+            when (lastCount) {
+                IntRange.EMPTY -> Color.BLACK
+                midRange -> GOLDENROD
+                lowRange -> PURPLE
+                highRange -> Color.GREEN
+                else -> Color.RED
+            }
 
         encoder.pixel + color
-        encoder.pixel.brightness = when (currentMode) {
-            Mode.NIGHT -> 0.01f
-            Mode.MORNING -> 0.05f
-            Mode.DAYTIME -> 0.25f
-            Mode.EVENING -> 0.05f
-            else -> 0.01f
-        }
+        encoder.pixel.brightness =
+            when (currentMode) {
+                Mode.NIGHT -> 0.01f
+                Mode.MORNING -> 0.05f
+                Mode.DAYTIME -> 0.25f
+                Mode.EVENING -> 0.05f
+                else -> 0.01f
+            }
         // TODO only do this when it's "adjusting" something
 //        encoder.colorConnection = Triple(25, 25, 25)
     }
@@ -68,37 +70,65 @@ object RotoRegulator {
     val lowRange = -100..-3
     val highRange = 3..100
 
+    @Volatile
+    private var adjustingEntityId: String? = null
+    private var lastCountReading = 0
+
     fun readTwist() {
         buttonDown = (encoder button PRESSED).also { pressed -> if (pressed && !buttonDown) killAllTheThings() }
 
         val count = encoder.count
-        if (count in lastCount) return
+        if (adjustingEntityId == null) {
+            if (count in lastCount) return
 
-        lastCount = when {
-            count in midRange -> {
-                FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
-                midRange
-            }
+            lastCount =
+                when {
+                    count in midRange -> {
+                        FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
+                        midRange
+                    }
 
-            count in lowRange -> {
-                FrontBenchPicker.selectMenu(FrontBenchActions.SHOW_OFF)
-                lowRange
-            }
+                    count in lowRange -> {
+                        FrontBenchPicker.selectMenu(FrontBenchActions.SHOW_OFF)
+                        lowRange
+                    }
 
-            count in highRange -> {
-                FrontBenchPicker.selectMenu(FrontBenchActions.MOPIDI)
-                highRange
-            }
+                    count in highRange -> {
+                        FrontBenchPicker.selectMenu(FrontBenchActions.MOPIDI)
+                        highRange
+                    }
 
-            else -> {
-                FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
-                IntRange.EMPTY
+                    else -> {
+                        FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
+                        IntRange.EMPTY
+                    }
+                }
+            setPixelColor()
+        } else {
+            try {
+                val adjusted = count.coerceIn(0, 100)
+                encoder.count = adjusted
+                with(AppCommon.hasskClient) {
+                    light(adjustingEntityId!!.substringAfter("light.")) set adjusted
+                }
+            } catch (e: Exception) {
+                // TODO screw it - take it out of manual mode
+                currentMode = Mode.DAYTIME
+                adjustingEntityId = null
             }
         }
-        setPixelColor()
     }
 
-    fun mangageLight(entityId: String?) {
-        println("TODO manage light $entityId")
+    fun mangageLight(
+        entityId: String?,
+        currentBrightness: Int,
+    ) {
+        if (entityId != null) {
+            lastCountReading = encoder.count
+            encoder.count = currentBrightness
+        } else {
+            encoder.count = lastCountReading
+        }
+        adjustingEntityId = entityId
     }
 }

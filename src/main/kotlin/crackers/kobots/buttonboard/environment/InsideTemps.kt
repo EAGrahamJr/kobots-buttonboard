@@ -34,47 +34,51 @@ class InsideTemps(val graphics: Graphics2D, val startDrawingAt: Int, val maxWidt
         lineHeight = inFM.height
     }
 
-    private val insideSensors = listOf(
-        "sensor.cube_air_temperature",
-        "sensor.trisensor_air_temperature",
-        "sensor.bedroom_temperature",
-    )
+    private val insideSensors =
+        listOf(
+            "sensor.lr_enviro_temperature",
+            "sensor.office_enviro_temperature",
+            "sensor.bedroom_temperature",
+        )
 
     /**
      * Show the inside temperatures.
      */
-    internal fun show() = with(graphics) {
-        // clear the bottom area
-        color = Color.BLACK
-        fillRect(
-            0,
-            startDrawingAt,
-            maxWidth,
-            maxHeight - startDrawingAt,
-        )
+    internal fun show() =
+        with(graphics) {
+            // clear the bottom area
+            color = Color.BLACK
+            fillRect(
+                0,
+                startDrawingAt,
+                maxWidth,
+                maxHeight - startDrawingAt,
+            )
 
-        font = inFont
+            font = inFont
 
-        insideSensors.forEachIndexed { index, sensor ->
-            val y =
-                startDrawingAt + (lineHeight * index) + inFM.ascent
+            insideSensors.forEachIndexed { index, sensor ->
+                val y =
+                    startDrawingAt + (lineHeight * index) + inFM.ascent
 
-            val state = AppCommon.hasskClient.getState(sensor)
-            val temp = try {
-                state.state.toFloat().roundToInt()
-            } catch (_: Exception) {
-                0
+                val state = AppCommon.hasskClient.getState(sensor)
+                val temp =
+                    try {
+                        state.state.toFloat().roundToInt()
+                    } catch (_: Exception) {
+                        0
+                    }
+
+                color = Color.WHITE
+                val name =
+                    JSONObject(state.attributes!!).getString("friendly_name")?.removeSuffix(" Temperature")
+                        ?: state.entityId.removeSuffix("_temperature")
+                drawString(name, 0, y)
+
+                color = EnvironmentDisplay.temperatureColor(temp)
+                val tempText = "$temp\u2109"
+                val left = fontMetrics.stringWidth(tempText) + 2
+                drawString(tempText, maxWidth - left, y)
             }
-
-            color = Color.WHITE
-            val name = JSONObject(state.attributes!!).getString("friendly_name")?.removeSuffix(" Temperature")
-                ?: state.entityId.removeSuffix("_temperature")
-            drawString(name, 0, y)
-
-            color = EnvironmentDisplay.temperatureColor(temp)
-            val tempText = "$temp\u2109"
-            val left = fontMetrics.stringWidth(tempText) + 2
-            drawString(tempText, maxWidth - left, y)
         }
-    }
 }

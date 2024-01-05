@@ -49,7 +49,18 @@ object TheActions {
     }
 
     enum class HassActions : Action {
-        TOP, MORNING, OFFICE, BEDROOM, KITCHEN, TV, MOVIE, BEDTIME, LATE_NIGHT, NOT_ALL, OFFICE_FAN;
+        TOP,
+        MORNING,
+        OFFICE,
+        BEDROOM,
+        KITCHEN,
+        TV,
+        MOVIE,
+        BEDTIME,
+        LATE_NIGHT,
+        NOT_ALL,
+        OFFICE_FAN,
+        ;
 
         private fun HAssKClient.toggleOnSwitch(name: String) = if (switch(name).state().state == "off") on else off
 
@@ -84,7 +95,15 @@ object TheActions {
     }
 
     enum class GripperActions : Action {
-        PICKUP, RETURN, HOME, SAY_HI, STOP, EXCUSE_ME, SLEEP, FLASHLIGHT;
+        PICKUP,
+        RETURN,
+        HOME,
+        SAY_HI,
+        STOP,
+        EXCUSE_ME,
+        SLEEP,
+        FLASHLIGHT,
+        ;
 
         val GRIPOMATIC_TOPIC = "kobots/gripOMatic"
 
@@ -92,7 +111,15 @@ object TheActions {
     }
 
     enum class ServoMaticActions : Action {
-        STOP, UP, DOWN, LEFT, RIGHT, CENTER, SLEEP, WAKEY;
+        STOP,
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT,
+        CENTER,
+        SLEEP,
+        WAKEY,
+        ;
 
         val SERVOMATIC_TOPIC = "kobots/servoMatic"
 
@@ -100,7 +127,20 @@ object TheActions {
     }
 
     enum class MopdiyActions : Action {
-        STOP, PLAY, PAUSE, NEXT, PREVIOUS, VOLUME_UP, VOLUME_DOWN, MUTE, UNMUTE, SHUFFLE, REPEAT, REPEAT_OFF, REPEAT_ONE;
+        STOP,
+        PLAY,
+        PAUSE,
+        NEXT,
+        PREVIOUS,
+        VOLUME_UP,
+        VOLUME_DOWN,
+        MUTE,
+        UNMUTE,
+        SHUFFLE,
+        REPEAT,
+        REPEAT_OFF,
+        REPEAT_ONE,
+        ;
 
         override fun invoke() {
             val action = this

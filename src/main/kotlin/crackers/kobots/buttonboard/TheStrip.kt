@@ -57,10 +57,11 @@ object TheStrip {
         // because this can conflict with a thing on the multiplexer
         val i2cDevice = getOrCreateI2CDevice(1, 0x60)
         seeSaw = AdafruitSeeSaw(i2cDevice)
-        strip = NeoPixel(seeSaw, 38, 15).apply {
-            brightness = 0.1f
-            autoWrite = true
-        }
+        strip =
+            NeoPixel(seeSaw, 38, 15).apply {
+                brightness = 0.1f
+                autoWrite = true
+            }
         future = AppCommon.executor.scheduleWithFixedDelay(10.seconds, 10.seconds, ::showIt)
         RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
     }
@@ -115,10 +116,23 @@ object TheStrip {
         }
     }
 
+    val whichColors =
+        rainbowColors
+    // xmas
+//         List(30) { index -> if (index % 2 == 0) Color.RED else Color.GREEN }
+    // casey's birthday
+//        List(30) { index ->
+//            when (index % 3) {
+//                0 -> Color.GRAY
+//                1 -> PURPLE
+//                else -> Color.BLACK
+//            }
+//        }
+
     private fun showRainbow() {
         for (count in stripOffset..stripLast) {
             AppCommon.applicationRunning || return
-            strip[count] = rainbowColors[lastRainbowColorIndex++]
+            strip[count] = whichColors[lastRainbowColorIndex++]
             if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
             KobotSleep.millis(75)
         }

@@ -55,7 +55,6 @@ private val logger = LoggerFactory.getLogger("ButtonBox")
 private val _currentMode = AtomicReference(Mode.NONE)
 var currentMode: Mode
     get() = _currentMode.get()
-
     @Synchronized
     set(m) {
         if (_currentMode.get() != m) {
@@ -89,32 +88,16 @@ fun killAllTheThings() {
 fun main(args: Array<String>) {
     _remote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
 
-    mqttClient.apply {
-        startAliveCheck()
-        subscribe(TheActions.BBOARD_TOPIC) { s -> if (s.equals("stop", true)) AppCommon.applicationRunning = false }
-        allowEmergencyStop()
-    }
-
     TheStrip.start()
     EnvironmentDisplay.start()
     i2cMultiplexer.use {
         FrontBenchPicker.start()
         BackBenchPicker.start()
 
-        mqttClient.subscribeJSON(KobotsMQTT.KOBOTS_EVENTS) { payload ->
-            with(payload) {
-                logger.info("Kobots event: {}", payload)
-                // if the "arm" thingies completes an eye-drop, start blinking the return button
-                if (optString("source") == "TheArm" && optString("sequence") == "LocationPickup" && optBoolean("started")) {
-                    FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
-                    // TODO "zero" the rotor?
-                    FrontBenchPicker.startBlinky()
-                }
-            }
-        }
-
         // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
         val theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 50.milliseconds, ::modeAndKeyboardCheck)
+        // start the MQTT client
+        startMqttStuff()
         AppCommon.awaitTermination()
         theFuture.cancel(true)
 
@@ -131,16 +114,40 @@ fun main(args: Array<String>) {
     exitProcess(0)
 }
 
+private fun startMqttStuff() =
+    with(mqttClient) {
+        startAliveCheck()
+        subscribe(TheActions.BBOARD_TOPIC) { s -> if (s.equals("stop", true)) AppCommon.applicationRunning = false }
+        allowEmergencyStop()
+
+        subscribeJSON(KobotsMQTT.KOBOTS_EVENTS) { payload ->
+            with(payload) {
+                logger.info("Kobots event: {}", payload)
+                // if the "arm" thingies completes an eye-drop, start blinking the return button
+                if (optString("source") == "TheArm" && optString("sequence") == "LocationPickup" && optBoolean("started")) {
+                    FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
+                    // TODO "zero" the rotor?
+                    FrontBenchPicker.startBlinky()
+                }
+            }
+        }
+        subscribeJSON("/kobots_auto/caseys_lamp/state") { payload ->
+            if (currentMode == Mode.MORNING && payload.optString("state", "off") == "on") currentMode = Mode.DAYTIME
+        }
+    }
+
 private fun modeAndKeyboardCheck() {
     whileRunning {
         // adjust per time of day
         val hour = LocalTime.now().hour
-        currentMode = when {
-            hour in (0..6) -> Mode.NIGHT
-            hour <= 8 -> Mode.MORNING
-            hour <= 20 -> if (currentMode == Mode.MANUAL) currentMode else Mode.DAYTIME
-            else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
-        }
+        currentMode =
+            when {
+                currentMode == Mode.MANUAL -> currentMode
+                hour in (0..6) -> Mode.NIGHT
+                hour <= 8 && currentMode != Mode.DAYTIME -> Mode.MORNING
+                hour <= 20 -> Mode.DAYTIME
+                else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
+            }
 
         // *****************************
         // ***** READ BUTTONS HERE *****

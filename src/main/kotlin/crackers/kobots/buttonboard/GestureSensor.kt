@@ -39,11 +39,12 @@ object GestureSensor : AutoCloseable {
     private const val PROXIMITY_THRESHOLD = 4
     private lateinit var proxTriggeredTime: Instant
 
-    private val sensor = VCNL4040(i2cMultiplexer.getI2CDevice(7, VCNL4040.DEFAULT_I2C_ADDRESS))
-        .apply {
-            ambientLightEnabled = true
-            proximityEnabled = true
-        }
+    private val sensor =
+        VCNL4040(i2cMultiplexer.getI2CDevice(7, VCNL4040.DEFAULT_I2C_ADDRESS))
+            .apply {
+                ambientLightEnabled = true
+                proximityEnabled = true
+            }
 
     private val logger = LoggerFactory.getLogger("GestureSensor")
 

@@ -41,23 +41,25 @@ class OutsideState(val graphics2D: Graphics2D, val x: Int, val y: Int) {
         theFM = graphics2D.getFontMetrics(theFont)
     }
 
-    internal fun show() = with(graphics2D) {
-        val outsideTemp = AppCommon.hasskClient.getState("weather.home")
-        val temp = outsideTemp.temperature()
+    internal fun show() =
+        with(graphics2D) {
+            val outsideTemp = AppCommon.hasskClient.getState("weather.home")
+            val temp = outsideTemp.temperature()
 
-        // clear the top area
-        color = Color.BLACK
-        fillRect(x, y, TEMP_WIDTH, TEMP_HEIGHT)
+            // clear the top area
+            color = Color.BLACK
+            fillRect(x, y, TEMP_WIDTH, TEMP_HEIGHT)
 
-        scaleImageAt(outsideTemp.icon()!!, x, y, TEMP_HEIGHT)
-        font = theFont
-        color = temperatureColor(temp)
-        drawString("$temp\u2109", x + 50, theFM.ascent)
-    }
+            scaleImageAt(outsideTemp.icon()!!, x, y, TEMP_HEIGHT)
+            font = theFont
+            color = temperatureColor(temp)
+            drawString("$temp\u2109", x + 50, theFM.ascent)
+        }
 
-    private fun EntityState.icon() = images[state] ?: images["default"].also {
-        EnvironmentDisplay.logger.warn("Unknown weather state: $state")
-    }
+    private fun EntityState.icon() =
+        images[state] ?: images["default"].also {
+            EnvironmentDisplay.logger.warn("Unknown weather state: $state")
+        }
 
     private val images by lazy {
         mapOf(

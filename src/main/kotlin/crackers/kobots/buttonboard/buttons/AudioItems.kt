@@ -34,25 +34,29 @@ enum class AudioImages(val image: BufferedImage) {
 /*
  * Audio Menu items
  */
-val audioPlay = MenuItem(
-    "Play",
-    icon = AudioImages.PLAY.image,
-    buttonColor = Color.GREEN,
-) { TheActions.MopdiyActions.PLAY() }
-val audioPause = MenuItem(
-    "Pause",
-    icon = AudioImages.PAUSE.image,
-    buttonColor = GOLDENROD,
-) { TheActions.MopdiyActions.PAUSE() }
-val volumeUp = MenuItem(
-    "Vol Up",
-    abbrev = "V+",
-    icon = AudioImages.VOLUME_UP.image,
-    buttonColor = Color.GREEN,
-) { TheActions.MopdiyActions.VOLUME_UP() }
-val volumeDown = MenuItem(
-    "Vol Down",
-    abbrev = "V-",
-    icon = AudioImages.VOLUME_DOWN.image,
-    buttonColor = ORANGISH,
-) { TheActions.MopdiyActions.VOLUME_DOWN() }
+val audioPlay =
+    MenuItem(
+        "Play",
+        icon = AudioImages.PLAY.image,
+        buttonColor = Color.GREEN,
+    ) { TheActions.MopdiyActions.PLAY() }
+val audioPause =
+    MenuItem(
+        "Pause",
+        icon = AudioImages.PAUSE.image,
+        buttonColor = GOLDENROD,
+    ) { TheActions.MopdiyActions.PAUSE() }
+val volumeUp =
+    MenuItem(
+        "Vol Up",
+        abbrev = "V+",
+        icon = AudioImages.VOLUME_UP.image,
+        buttonColor = Color.GREEN,
+    ) { TheActions.MopdiyActions.VOLUME_UP() }
+val volumeDown =
+    MenuItem(
+        "Vol Down",
+        abbrev = "V-",
+        icon = AudioImages.VOLUME_DOWN.image,
+        buttonColor = ORANGISH,
+    ) { TheActions.MopdiyActions.VOLUME_DOWN() }

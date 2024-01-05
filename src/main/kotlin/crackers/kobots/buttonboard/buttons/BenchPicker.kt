@@ -66,6 +66,7 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
         }
 
     fun start() = currentMenu.displayMenu()
+
     fun stop() {
         keyHandler.buttonColors = listOf(Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK)
         display.close()
@@ -88,7 +89,6 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
     }
 
     companion object {
-
         val CANCEL_ICON = loadImage("/cancel.png")
         val DARK_CYAN = Color.CYAN.darker()
 
@@ -127,15 +127,21 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
         @Volatile
         private var blinkingKeyIndex: Int = RUNNING
 
-        fun start(index: Int, color: Color? = null, blinkTime: Duration = 500.milliseconds) {
+        fun start(
+            index: Int,
+            color: Color? = null,
+            blinkTime: Duration = 500.milliseconds,
+        ) {
             require(blinkingKeyIndex == RUNNING) { "Blinker already started" }
             ogColor = color ?: pixelBuf[index].color
             blinkingKeyIndex = index
-            blinkyFuture = AppCommon.executor.scheduleWithFixedDelay(blinkTime, blinkTime) {
-                blinkyState = !blinkyState.also {
-                    pixelBuf[index] = if (it) blinkOffColor else ogColor
+            blinkyFuture =
+                AppCommon.executor.scheduleWithFixedDelay(blinkTime, blinkTime) {
+                    blinkyState =
+                        !blinkyState.also {
+                            pixelBuf[index] = if (it) blinkOffColor else ogColor
+                        }
                 }
-            }
         }
 
         fun stop() {

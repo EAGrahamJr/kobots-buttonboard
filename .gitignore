@@ -2,7 +2,8 @@
 build
 
 # Idea and other things
-.idea
+.idea/*
+!.idea/codeStyles/
 *.iml
 .vscode
 bin

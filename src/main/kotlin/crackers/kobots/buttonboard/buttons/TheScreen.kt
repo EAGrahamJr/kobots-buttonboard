@@ -28,14 +28,15 @@ import java.awt.image.BufferedImage
  * Show menus
  */
 class TheScreen(i2cDevice: I2CDeviceInterface) : SmallMenuDisplay(DisplayMode.ICONS), AutoCloseable {
-    val screen = let {
-        val channel = SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice)
-        SSD1306(channel, SSD1306.Height.SHORT).apply {
-            clear()
-            setDisplayOn(true)
-            setContrast(0x20.toByte())
+    val screen =
+        let {
+            val channel = SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice)
+            SSD1306(channel, SSD1306.Height.SHORT).apply {
+                clear()
+                setDisplayOn(true)
+                setContrast(0x20.toByte())
+            }
         }
-    }
 
     override fun displayFun(menuImage: BufferedImage) {
         screen.setContrast((if (currentMode == Mode.NIGHT) 0x01 else 0x20).toByte())
