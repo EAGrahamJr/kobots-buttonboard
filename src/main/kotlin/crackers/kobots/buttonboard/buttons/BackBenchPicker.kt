@@ -71,82 +71,82 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
     override val menuSelections =
         mapOf(
             Mode.NIGHT to
-                    NeoKeyMenu(
-                        keyHandler,
-                        display,
-                        listOf(
-                            notAllOff,
-                            morningMenuItem,
-                            bedroom,
-                            topMenuItem,
-                        ),
+                NeoKeyMenu(
+                    keyHandler,
+                    display,
+                    listOf(
+                        notAllOff,
+                        morningMenuItem,
+                        bedroom,
+                        topMenuItem,
                     ),
+                ),
             Mode.MORNING to
-                    NeoKeyMenu(
-                        keyHandler,
-                        display,
-                        listOf(
-                            topMenuItem,
-                            morningMenuItem,
-                            MenuItem(
-                                "Kit",
-                                icon = HAImages.RESTAURANT.image,
-                                buttonColor = Color.CYAN
-                            ) { HassActions.KITCHEN() },
-                            fanControl,
-                            NO_KEY,
-                            stahp,
-                        ),
+                NeoKeyMenu(
+                    keyHandler,
+                    display,
+                    listOf(
+                        topMenuItem,
+                        morningMenuItem,
+                        MenuItem(
+                            "Kit",
+                            icon = HAImages.RESTAURANT.image,
+                            buttonColor = Color.CYAN,
+                        ) { HassActions.KITCHEN() },
+                        fanControl,
+                        NO_KEY,
+                        stahp,
                     ),
+                ),
             Mode.DAYTIME to
-                    NeoKeyMenu(
-                        keyHandler,
-                        display,
-                        listOf(
-                            topMenuItem,
-                            MenuItem("Dim", buttonColor = GOLDENROD) { HassActions.TV() },
-                            bedroom,
-                            MenuItem("TV", icon = HAImages.TV.image, buttonColor = PURPLE) {
-                                HassActions.TV()
-                                MopdiyActions.STOP()
-                            },
-                            MenuItem("Movie", icon = HAImages.MOVIE.image, buttonColor = Color.RED.darker()) {
-                                HassActions.MOVIE()
-                                MopdiyActions.STOP()
-                            },
-                            fanControl,
-                            NO_KEY,
-                            MenuItem("Manual", icon = RobotImages.STOP_IT.image, buttonColor = DARK_CYAN) {
-                                currentMode = Mode.MANUAL
-                            },
-                            stahp,
-                        ),
+                NeoKeyMenu(
+                    keyHandler,
+                    display,
+                    listOf(
+                        topMenuItem,
+                        MenuItem("Dim", buttonColor = GOLDENROD) { HassActions.TV() },
+                        bedroom,
+                        MenuItem("TV", icon = HAImages.TV.image, buttonColor = PURPLE) {
+                            HassActions.TV()
+                            MopdiyActions.STOP()
+                        },
+                        MenuItem("Movie", icon = HAImages.MOVIE.image, buttonColor = Color.RED.darker()) {
+                            HassActions.MOVIE()
+                            MopdiyActions.STOP()
+                        },
+                        fanControl,
+                        NO_KEY,
+                        MenuItem("Manual", icon = RobotImages.STOP_IT.image, buttonColor = DARK_CYAN) {
+                            currentMode = Mode.MANUAL
+                        },
+                        stahp,
                     ),
+                ),
             Mode.EVENING to
-                    NeoKeyMenu(
-                        keyHandler,
-                        display,
-                        listOf(
-                            MenuItem(
-                                "Bed",
-                                icon = HAImages.BED.image,
-                                buttonColor = Color.PINK
-                            ) { HassActions.BEDTIME() },
-                            MenuItem(
-                                "Late",
-                                icon = HAImages.MOON.image,
-                                buttonColor = Color.RED
-                            ) { HassActions.LATE_NIGHT() },
-                            notAllOff,
-                            fanControl,
-                        ),
+                NeoKeyMenu(
+                    keyHandler,
+                    display,
+                    listOf(
+                        MenuItem(
+                            "Bed",
+                            icon = HAImages.BED.image,
+                            buttonColor = Color.PINK,
+                        ) { HassActions.BEDTIME() },
+                        MenuItem(
+                            "Late",
+                            icon = HAImages.MOON.image,
+                            buttonColor = Color.RED,
+                        ) { HassActions.LATE_NIGHT() },
+                        notAllOff,
+                        fanControl,
                     ),
+                ),
             Mode.MANUAL to
-                    NeoKeyMenu(
-                        keyHandler,
-                        display,
-                        manualLightMenu(),
-                    ),
+                NeoKeyMenu(
+                    keyHandler,
+                    display,
+                    manualLightMenu(),
+                ),
         )
 
     private class RotoAction(val entityId: String, val currentBrightness: Int = 0) : () -> Unit {

@@ -76,47 +76,47 @@ object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
     override val menuSelections =
         mapOf(
             FrontBenchActions.STANDARD_ROBOT to
-                    NeoKeyMenu(
-                        keyHandler,
-                        display,
-                        listOf(
-                            MenuItem("Drops", icon = RobotImages.DROPS.image, buttonColor = Color.DARK_GRAY) {
-                                GripperActions.PICKUP()
-                            },
-                            MenuItem("Rtn", icon = RobotImages.RETURN.image, buttonColor = DARK_CYAN) {
-                                GripperActions.RETURN()
-                                if (::blinkyFuture.isInitialized) blinkyFuture.cancel(true)
-                            },
-                            homeItem,
-                            MenuItem(
-                                "Clear",
-                                icon = RobotImages.CLEAR.image,
-                                buttonColor = Color.BLUE,
-                                action = RosetteStatus::reset,
-                            ),
+                NeoKeyMenu(
+                    keyHandler,
+                    display,
+                    listOf(
+                        MenuItem("Drops", icon = RobotImages.DROPS.image, buttonColor = Color.DARK_GRAY) {
+                            GripperActions.PICKUP()
+                        },
+                        MenuItem("Rtn", icon = RobotImages.RETURN.image, buttonColor = DARK_CYAN) {
+                            GripperActions.RETURN()
+                            if (::blinkyFuture.isInitialized) blinkyFuture.cancel(true)
+                        },
+                        homeItem,
+                        MenuItem(
+                            "Clear",
+                            icon = RobotImages.CLEAR.image,
+                            buttonColor = Color.BLUE,
+                            action = RosetteStatus::reset,
                         ),
                     ),
+                ),
             FrontBenchActions.SHOW_OFF to
-                    NeoKeyMenu(
-                        keyHandler,
-                        display,
-                        listOf(
-                            homeItem,
-                            MenuItem("Excuse Me", "Sry", CANCEL_ICON, DARK_CYAN) { GripperActions.EXCUSE_ME() },
-                            MenuItem("Sleep", icon = HAImages.BED.image, buttonColor = Color.BLUE.darker()) {
-                                GripperActions.SLEEP()
-                            },
-                            MenuItem("Hi", icon = RobotImages.HI.image, buttonColor = DARK_CYAN) {
-                                GripperActions.SAY_HI()
-                            },
-                            MenuItem("Stop", icon = RobotImages.STOP_IT.image, buttonColor = ORANGISH) {
-                                GripperActions.STOP()
-                            },
-                            MenuItem("Flash", icon = RobotImages.FLASHLIGHT.image, buttonColor = Color.YELLOW) {
-                                GripperActions.FLASHLIGHT()
-                            },
-                        ),
+                NeoKeyMenu(
+                    keyHandler,
+                    display,
+                    listOf(
+                        homeItem,
+                        MenuItem("Excuse Me", "Sry", CANCEL_ICON, DARK_CYAN) { GripperActions.EXCUSE_ME() },
+                        MenuItem("Sleep", icon = HAImages.BED.image, buttonColor = Color.BLUE.darker()) {
+                            GripperActions.SLEEP()
+                        },
+                        MenuItem("Hi", icon = RobotImages.HI.image, buttonColor = DARK_CYAN) {
+                            GripperActions.SAY_HI()
+                        },
+                        MenuItem("Stop", icon = RobotImages.STOP_IT.image, buttonColor = ORANGISH) {
+                            GripperActions.STOP()
+                        },
+                        MenuItem("Flash", icon = RobotImages.FLASHLIGHT.image, buttonColor = Color.YELLOW) {
+                            GripperActions.FLASHLIGHT()
+                        },
                     ),
+                ),
             FrontBenchActions.MOPIDI to audioPlayMenu,
         )
 }
