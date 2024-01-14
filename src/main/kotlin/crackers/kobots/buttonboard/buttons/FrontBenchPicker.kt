@@ -16,107 +16,58 @@
 
 package crackers.kobots.buttonboard.buttons
 
-import crackers.kobots.app.AppCommon
-import crackers.kobots.buttonboard.RosetteStatus
-import crackers.kobots.buttonboard.TheActions.GripperActions
-import crackers.kobots.buttonboard.buttons.BenchPicker.Companion.HAImages
-import crackers.kobots.buttonboard.buttons.BenchPicker.Companion.RobotImages
-import crackers.kobots.parts.ORANGISH
+import crackers.kobots.buttonboard.Mode
 import crackers.kobots.parts.app.io.NeoKeyMenu
-import crackers.kobots.parts.app.io.NeoKeyMenu.MenuItem
-import crackers.kobots.parts.scheduleWithFixedDelay
-import java.awt.Color
-import java.util.concurrent.Future
-import kotlin.time.Duration.Companion.milliseconds
-
-enum class FrontBenchActions {
-    STANDARD_ROBOT,
-    SHOW_OFF,
-    MOPIDI,
-}
 
 /**
  * Handles what menu items are shown for the front "bench" (NeoKey) buttons.
  */
-object FrontBenchPicker : BenchPicker<FrontBenchActions>(0, 0) {
-    private val audioPlayMenu =
-        NeoKeyMenu(
-            keyHandler,
-            display,
-            listOf(
-                audioPlay,
-                audioPause,
-                volumeUp,
-                volumeDown,
-            ),
-        )
-
-    private val DARK_CYAN = Color.CYAN.darker()
-
-    private val homeItem =
-        MenuItem("Home", buttonColor = Color.GREEN, icon = RobotImages.HOME.image) {
-            GripperActions.HOME()
-        }
-
-    private lateinit var blinkyFuture: Future<*>
-    private var blinkyState = false
-
-    fun startBlinky() {
-        blinkyFuture =
-            AppCommon.executor.scheduleWithFixedDelay(500.milliseconds, 500.milliseconds) {
-                blinkyState = !blinkyState
-                if (blinkyState) {
-                    keyBoard[1] = Color.RED
-                } else {
-                    keyBoard[1] = Color.GREEN
-                }
-            }
-    }
-
+object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
     override val menuSelections =
         mapOf(
-            FrontBenchActions.STANDARD_ROBOT to
+            Mode.NIGHT to
                 NeoKeyMenu(
                     keyHandler,
                     display,
                     listOf(
-                        MenuItem("Drops", icon = RobotImages.DROPS.image, buttonColor = Color.DARK_GRAY) {
-                            GripperActions.PICKUP()
-                        },
-                        MenuItem("Rtn", icon = RobotImages.RETURN.image, buttonColor = DARK_CYAN) {
-                            GripperActions.RETURN()
-                            if (::blinkyFuture.isInitialized) blinkyFuture.cancel(true)
-                        },
-                        homeItem,
-                        MenuItem(
-                            "Clear",
-                            icon = RobotImages.CLEAR.image,
-                            buttonColor = Color.BLUE,
-                            action = RosetteStatus::reset,
-                        ),
+                        HomeAssistantMenus.allOn,
+                        HomeAssistantMenus.bedroomToggle,
+                        HomeAssistantMenus.whiteNoiseToggle,
+                        stahp,
                     ),
                 ),
-            FrontBenchActions.SHOW_OFF to
+            Mode.MORNING to
                 NeoKeyMenu(
                     keyHandler,
                     display,
                     listOf(
-                        homeItem,
-                        MenuItem("Excuse Me", "Sry", CANCEL_ICON, DARK_CYAN) { GripperActions.EXCUSE_ME() },
-                        MenuItem("Sleep", icon = HAImages.BED.image, buttonColor = Color.BLUE.darker()) {
-                            GripperActions.SLEEP()
-                        },
-                        MenuItem("Hi", icon = RobotImages.HI.image, buttonColor = DARK_CYAN) {
-                            GripperActions.SAY_HI()
-                        },
-                        MenuItem("Stop", icon = RobotImages.STOP_IT.image, buttonColor = ORANGISH) {
-                            GripperActions.STOP()
-                        },
-                        MenuItem("Flash", icon = RobotImages.FLASHLIGHT.image, buttonColor = Color.YELLOW) {
-                            GripperActions.FLASHLIGHT()
-                        },
+                        HomeAssistantMenus.fanControl,
+                        HomeAssistantMenus.allOn,
+                        HomeAssistantMenus.whiteNoiseToggle,
+                        stahp,
                     ),
                 ),
-            FrontBenchActions.MOPIDI to audioPlayMenu,
+            Mode.DAYTIME to
+                NeoKeyMenu(
+                    keyHandler,
+                    display,
+                    listOf(
+                        HomeAssistantMenus.fanControl,
+                        HomeAssistantMenus.bedroomToggle,
+                        HomeAssistantMenus.whiteNoiseToggle,
+                        stahp,
+                    ),
+                ),
+            Mode.EVENING to
+                NeoKeyMenu(
+                    keyHandler,
+                    display,
+                    listOf(
+                        HomeAssistantMenus.allOn,
+                        HomeAssistantMenus.bedroomToggle,
+                        HomeAssistantMenus.whiteNoiseToggle,
+                        stahp,
+                    ),
+                ),
         )
 }

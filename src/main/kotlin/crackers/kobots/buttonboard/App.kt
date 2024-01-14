@@ -21,7 +21,6 @@ import crackers.kobots.app.AppCommon.REMOTE_PI
 import crackers.kobots.app.AppCommon.mqttClient
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.buttons.BackBenchPicker
-import crackers.kobots.buttonboard.buttons.FrontBenchActions
 import crackers.kobots.buttonboard.buttons.FrontBenchPicker
 import crackers.kobots.buttonboard.buttons.RotoRegulator
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay
@@ -55,6 +54,7 @@ private val logger = LoggerFactory.getLogger("ButtonBox")
 private val _currentMode = AtomicReference(Mode.NONE)
 var currentMode: Mode
     get() = _currentMode.get()
+
     @Synchronized
     set(m) {
         if (_currentMode.get() != m) {
@@ -125,13 +125,13 @@ private fun startMqttStuff() =
                 logger.info("Kobots event: {}", payload)
                 // if the "arm" thingies completes an eye-drop, start blinking the return button
                 if (optString("source") == "TheArm" && optString("sequence") == "LocationPickup" && optBoolean("started")) {
-                    FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
-                    // TODO "zero" the rotor?
-                    FrontBenchPicker.startBlinky()
+//                    FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
+//                    // TODO "zero" the rotor?
+//                    FrontBenchPicker.startBlinky()
                 }
             }
         }
-        subscribeJSON("/kobots_auto/caseys_lamp/state") { payload ->
+        subscribeJSON("kobots_auto/caseys_lamp/state") { payload ->
             if (currentMode == Mode.MORNING && payload.optString("state", "off") == "on") currentMode = Mode.DAYTIME
         }
     }
@@ -158,6 +158,6 @@ private fun modeAndKeyboardCheck() {
         RotoRegulator.readTwist()
 
         // run the back bench button check
-        if (!BackBenchPicker.multiTaskingButtons()) FrontBenchPicker.currentMenu.firstButton()
+        BackBenchPicker.currentMenu.firstButton() || FrontBenchPicker.currentMenu.firstButton()
     }
 }

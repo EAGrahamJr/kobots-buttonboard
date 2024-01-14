@@ -23,11 +23,9 @@ import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.devices.lighting.PixelBuf
 import crackers.kobots.parts.app.io.NeoKeyHandler
 import crackers.kobots.parts.app.io.NeoKeyMenu
-import crackers.kobots.parts.loadImage
 import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
 import java.awt.Color
-import java.awt.image.BufferedImage
 import java.util.concurrent.Future
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -37,10 +35,11 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int) {
     val keyHandler: NeoKeyHandler
-    protected val keyBoard: NeoKey
-    protected val display: TheScreen
+    val keyBoard: NeoKey
+    val display: TheScreen
     protected abstract val menuSelections: Map<M, NeoKeyMenu>
     protected lateinit var _currentMenu: M
+    protected lateinit var menuEnumConstants: Array<M>
 
     private val logger = LoggerFactory.getLogger(this::class.java.simpleName)
 
@@ -54,13 +53,22 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
         }
     }
 
+    val stahp =
+        NeoKeyMenu.MenuItem("Stop", icon = HomeAssistantMenus.CANCEL_ICON, buttonColor = Color.RED) {
+            AppCommon.applicationRunning = false
+        }
+
     val currentMenu: NeoKeyMenu
         @Synchronized
         get() {
-            if (!::_currentMenu.isInitialized) _currentMenu = menuSelections.keys.first()
+            if (!::_currentMenu.isInitialized) {
+                _currentMenu = menuSelections.keys.first()
+                menuEnumConstants = _currentMenu.declaringJavaClass.enumConstants
+            }
             return menuSelections[_currentMenu] ?: run {
                 logger.error("No menu for $_currentMenu")
                 _currentMenu = menuSelections.keys.first()
+                logger.info("Switching to ${_currentMenu}")
                 menuSelections[_currentMenu]!!
             }
         }
@@ -77,9 +85,10 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
      */
     @Synchronized
     fun updateMenu() {
-        val next = (_currentMenu.ordinal + 1) % menuSelections.size
-        _currentMenu = _currentMenu.declaringJavaClass.enumConstants[next]
+        val next = (_currentMenu.ordinal + 1) % menuEnumConstants.size
+        _currentMenu = menuEnumConstants[next]
         currentMenu.displayMenu()
+        logger.info("Switching to ${_currentMenu}")
     }
 
     @Synchronized
@@ -89,31 +98,6 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
     }
 
     companion object {
-        val CANCEL_ICON = loadImage("/cancel.png")
-        val DARK_CYAN = Color.CYAN.darker()
-
-        enum class HAImages(val image: BufferedImage) {
-            BED(loadImage("/bed.png")),
-            EXIT(loadImage("/exit.png")),
-            LIGHTBULB(loadImage("/lightbulb.png")),
-            MOON(loadImage("/moon.png")),
-            MOVIE(loadImage("/movie.png")),
-            RESTAURANT(loadImage("/restaurant.png")),
-            SUN(loadImage("/sun.png")),
-            TV(loadImage("/tv.png")),
-            FAN(loadImage("/fan.png")),
-        }
-
-        enum class RobotImages(val image: BufferedImage) {
-            STOP(loadImage("/robot/dangerous.png")),
-            FLASHLIGHT(loadImage("/robot/flashlight_on.png")),
-            HI(loadImage("/robot/hail.png")),
-            STOP_IT(loadImage("/robot/halt.png")),
-            HOME(loadImage("/robot/home.png")),
-            RETURN(loadImage("/robot/redo.png")),
-            DROPS(loadImage("/robot/symptoms.png")),
-            CLEAR(loadImage("/robot/restart_alt.png")),
-        }
     }
 
     class Blinker(private val pixelBuf: PixelBuf, private val blinkOffColor: Color = Color.RED) {

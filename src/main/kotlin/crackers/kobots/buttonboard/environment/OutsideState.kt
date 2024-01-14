@@ -69,7 +69,7 @@ class OutsideState(val graphics2D: Graphics2D, val x: Int, val y: Int) {
             "mixed" to loadImage("/weather/mixed.png"),
             "partlycloudy" to loadImage("/weather/partly-cloudy.png"),
             "rainy" to loadImage("/weather/rain.png"),
-            "snow" to loadImage("/weather/snow.png"),
+            "snowy" to loadImage("/weather/snow.png"),
             "sunny" to loadImage("/weather/sunny.png"),
             "windy" to loadImage("/weather/windy.png"),
             "pouring" to loadImage("/weather/rainy_heavy.png"),

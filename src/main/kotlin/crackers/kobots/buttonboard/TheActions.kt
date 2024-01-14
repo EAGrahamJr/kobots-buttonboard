@@ -49,7 +49,7 @@ object TheActions {
     }
 
     enum class HassActions : Action {
-        TOP,
+        DAYTIME, // aka 'Top"
         MORNING,
         OFFICE,
         BEDROOM,
@@ -60,6 +60,8 @@ object TheActions {
         LATE_NIGHT,
         NOT_ALL,
         OFFICE_FAN,
+        TFE,
+        POST_TV,
         ;
 
         private fun HAssKClient.toggleOnSwitch(name: String) = if (switch(name).state().state == "off") on else off
@@ -72,7 +74,7 @@ object TheActions {
 
             with(AppCommon.hasskClient) {
                 when (action) {
-                    TOP -> scene("top_button") turn on
+                    DAYTIME -> scene("top_button") turn on
                     MORNING -> scene("early_morning") turn on
                     OFFICE -> group("office_group") turn toggleOnLight("paper")
                     BEDROOM -> group("bedroom_group") turn toggleOnLight("shelf_lamp")
@@ -89,6 +91,8 @@ object TheActions {
                     }
 
                     OFFICE_FAN -> switch("small_fan") turn toggleOnSwitch("small_fan")
+                    TFE -> scene("tfe") turn on
+                    POST_TV -> scene("post_tv") turn on
                 }
             }
         }

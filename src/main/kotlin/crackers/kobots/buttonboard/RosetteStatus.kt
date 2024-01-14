@@ -60,7 +60,7 @@ object RosetteStatus {
 
         // "reserve" pixel 7 and register it as a KobotLight for Home Assistant
         rosette[pixelOffset + 7] = Color.BLACK
-        object : KobotLight("crazy_light", SinglePixelLightController(rosette, pixelOffset + 7)) {
+        object : KobotLight("crazy_light", SinglePixelLightController(rosette, pixelOffset + 7), "My Little Pixel") {
             override val deviceIdentifier = DeviceIdentifier("Kobots", "NeoPixel")
         }.start()
 
