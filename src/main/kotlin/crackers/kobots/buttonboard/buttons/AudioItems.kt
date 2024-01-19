@@ -54,7 +54,10 @@ object AudioItems {
             TheActions.MopdiyActions.VOLUME_DOWN()
         }
 
-    fun audioPlayMenu(handler: NeoKeyHandler, display: SmallMenuDisplay) = NeoKeyMenu(
+    fun audioPlayMenu(
+        handler: NeoKeyHandler,
+        display: SmallMenuDisplay,
+    ) = NeoKeyMenu(
         handler,
         display,
         listOf(

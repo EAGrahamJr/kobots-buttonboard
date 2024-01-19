@@ -35,7 +35,7 @@ object ManualStuff {
             NeoKeyMenu.MenuItem(
                 "Back",
                 icon = KobotsMenus.RobotImages.RETURN.image,
-                buttonColor = HomeAssistantMenus.DARK_CYAN
+                buttonColor = HomeAssistantMenus.DARK_CYAN,
             ) {
                 blinker.stop()
                 RotoRegulator.mangageLight(null, 0)
