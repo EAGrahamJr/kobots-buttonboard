@@ -38,7 +38,7 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
     val keyBoard: NeoKey
     val display: TheScreen
     protected abstract val menuSelections: Map<M, NeoKeyMenu>
-    protected lateinit var _currentMenu: M
+    protected lateinit var nowMenu: M
     protected lateinit var menuEnumConstants: Array<M>
 
     private val logger = LoggerFactory.getLogger(this::class.java.simpleName)
@@ -61,15 +61,15 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
     val currentMenu: NeoKeyMenu
         @Synchronized
         get() {
-            if (!::_currentMenu.isInitialized) {
-                _currentMenu = menuSelections.keys.first()
-                menuEnumConstants = _currentMenu.declaringJavaClass.enumConstants
+            if (!::nowMenu.isInitialized) {
+                nowMenu = menuSelections.keys.first()
+                menuEnumConstants = nowMenu.declaringJavaClass.enumConstants
             }
-            return menuSelections[_currentMenu] ?: run {
-                logger.error("No menu for $_currentMenu")
-                _currentMenu = menuSelections.keys.first()
-                logger.info("Switching to ${_currentMenu}")
-                menuSelections[_currentMenu]!!
+            return menuSelections[nowMenu] ?: run {
+                logger.error("No menu for $nowMenu")
+                nowMenu = menuSelections.keys.first()
+                logger.info("Switching to $nowMenu")
+                menuSelections[nowMenu]!!
             }
         }
 
@@ -85,15 +85,15 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
      */
     @Synchronized
     fun updateMenu() {
-        val next = (_currentMenu.ordinal + 1) % menuEnumConstants.size
-        _currentMenu = menuEnumConstants[next]
+        val next = (nowMenu.ordinal + 1) % menuEnumConstants.size
+        nowMenu = menuEnumConstants[next]
         currentMenu.displayMenu()
-        logger.info("Switching to ${_currentMenu}")
+        logger.info("Switching to $nowMenu")
     }
 
     @Synchronized
     fun selectMenu(whichOne: M) {
-        _currentMenu = whichOne
+        nowMenu = whichOne
         currentMenu.displayMenu()
     }
 
@@ -101,7 +101,7 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
     }
 
     class Blinker(private val pixelBuf: PixelBuf, private val blinkOffColor: Color = Color.RED) {
-        private val RUNNING = -1
+        private val notRunning = -1
 
         // TODO allow more than one button to blink
         private var blinkyFuture: Future<*>? = null
@@ -109,14 +109,14 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
         private lateinit var ogColor: Color
 
         @Volatile
-        private var blinkingKeyIndex: Int = RUNNING
+        private var blinkingKeyIndex: Int = notRunning
 
         fun start(
             index: Int,
             color: Color? = null,
             blinkTime: Duration = 500.milliseconds,
         ) {
-            require(blinkingKeyIndex == RUNNING) { "Blinker already started" }
+            require(blinkingKeyIndex == notRunning) { "Blinker already started" }
             ogColor = color ?: pixelBuf[index].color
             blinkingKeyIndex = index
             blinkyFuture =
@@ -129,9 +129,9 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
         }
 
         fun stop() {
-            if (blinkingKeyIndex > RUNNING) {
+            if (blinkingKeyIndex > notRunning) {
                 pixelBuf[blinkingKeyIndex] = ogColor
-                blinkingKeyIndex = RUNNING
+                blinkingKeyIndex = notRunning
                 blinkyFuture?.cancel(true)
                 blinkyFuture = null
             }

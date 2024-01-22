@@ -70,9 +70,9 @@ var currentMode: Mode
         }
     }
 
-private var _remote: Boolean = false
+private var runningRemote: Boolean = false
 internal val isRemote: Boolean
-    get() = _remote
+    get() = runningRemote
 
 internal val i2cMultiplexer: I2CMultiplexer by lazy { I2CMultiplexer() }
 
@@ -86,7 +86,7 @@ fun killAllTheThings() {
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
 fun main(args: Array<String>) {
-    _remote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
+    runningRemote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
 
     TheStrip.start()
     EnvironmentDisplay.start()

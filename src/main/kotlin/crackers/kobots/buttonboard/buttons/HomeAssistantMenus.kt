@@ -18,7 +18,8 @@ import java.awt.Color
 object HomeAssistantMenus {
     val CANCEL_ICON = loadImage("/cancel.png")
     val DARK_CYAN = Color.CYAN.darker()
-    val OLIVE_GREEN = Color(.39f, .38f, .23f)
+    val OLIVE_GREEN = Color(.39f, .38f, .23f) // blech
+    val LIGHT_GREEN = Color(125, 255, 0)
 
     val IMAGE_BED = loadImage("/bed.png")
     val IMAGE_EXIT = loadImage("/exit.png")
@@ -33,6 +34,7 @@ object HomeAssistantMenus {
     val IMAGE_SKULL = loadImage("/skull.png")
     val IMAGE_LIGHTGROUP = loadImage("/light_group.png")
     val IMAGE_EAR = loadImage("/hearing.png")
+    val IMAGE_RELAX = loadImage("/relax.png")
 
     val nightOffFunction =
         MenuItem("Off", icon = IMAGE_EXIT, buttonColor = ORANGISH) {
@@ -86,8 +88,8 @@ object HomeAssistantMenus {
         MenuItem("TFE", icon = IMAGE_SKULL, buttonColor = Color.RED.darker()) { HassActions.TFE() }
 
     val bedroomToggle = MenuItem("BRm", icon = IMAGE_BED, buttonColor = Color.PINK) { HassActions.BEDROOM() }
-    val allOn = MenuItem("All", icon = IMAGE_LIGHTGROUP, buttonColor = Color(125, 255, 0)) {}
+    val allOn = MenuItem("All", icon = IMAGE_LIGHTGROUP, buttonColor = LIGHT_GREEN) {}
 
     val whiteNoiseToggle = MenuItem("EAR", icon = IMAGE_EAR, buttonColor = ORANGISH) {}
-    val postTVScene = MenuItem("Post", buttonColor = Color.YELLOW) { HassActions.POST_TV() }
+    val postTVScene = MenuItem("Post", icon = IMAGE_RELAX, buttonColor = Color.YELLOW) { HassActions.POST_TV() }
 }

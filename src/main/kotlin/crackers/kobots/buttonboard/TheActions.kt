@@ -109,9 +109,11 @@ object TheActions {
         FLASHLIGHT,
         ;
 
-        val GRIPOMATIC_TOPIC = "kobots/gripOMatic"
-
         override fun invoke() = mqttClient.publish(GRIPOMATIC_TOPIC, name)
+
+        companion object {
+            val GRIPOMATIC_TOPIC = "kobots/gripOMatic"
+        }
     }
 
     enum class ServoMaticActions : Action {
@@ -125,9 +127,11 @@ object TheActions {
         WAKEY,
         ;
 
-        val SERVOMATIC_TOPIC = "kobots/servoMatic"
-
         override fun invoke() = mqttClient.publish(SERVOMATIC_TOPIC, name)
+
+        companion object {
+            val SERVOMATIC_TOPIC = "kobots/servoMatic"
+        }
     }
 
     enum class MopdiyActions : Action {
