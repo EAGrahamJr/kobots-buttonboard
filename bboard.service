@@ -1,0 +1,12 @@
+[Unit]
+Description=Master Control Board
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/home/crackers/java -jar /home/crackers/bboard.jar
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

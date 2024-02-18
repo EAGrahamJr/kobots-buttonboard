@@ -17,6 +17,7 @@
 package crackers.kobots.buttonboard.buttons
 
 import com.diozero.api.I2CDeviceInterface
+import com.diozero.devices.oled.MonochromeSsdOled
 import com.diozero.devices.oled.SSD1306
 import com.diozero.devices.oled.SsdOledCommunicationChannel
 import crackers.kobots.buttonboard.Mode
@@ -31,7 +32,7 @@ class TheScreen(i2cDevice: I2CDeviceInterface) : SmallMenuDisplay(DisplayMode.IC
     val screen =
         let {
             val channel = SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice)
-            SSD1306(channel, SSD1306.Height.SHORT).apply {
+            SSD1306(channel, MonochromeSsdOled.Height.SHORT).apply {
                 clear()
                 setDisplayOn(true)
                 setContrast(0x20.toByte())

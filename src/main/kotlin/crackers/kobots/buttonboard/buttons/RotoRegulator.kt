@@ -73,6 +73,7 @@ object RotoRegulator {
     private var lastCount = 0
 
     fun readTwist() {
+        // pressing the button allows switching to and from "manual" mode
         buttonDown =
             (encoder button PRESSED).also { pressed ->
                 if (pressed && !buttonDown) {
