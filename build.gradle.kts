@@ -13,7 +13,7 @@ repositories {
     mavenLocal()
 }
 
-val DIOZERO_VER = "1.4.0"
+val DIOZERO_VER = "1.4.1"
 
 val DEVICES_VER = "0.2+"
 val PARTS_VER = "0.0+"

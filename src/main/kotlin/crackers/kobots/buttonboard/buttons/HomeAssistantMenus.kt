@@ -5,11 +5,11 @@ import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.TheActions.HassActions
 import crackers.kobots.buttonboard.TheActions.MopdiyActions
 import crackers.kobots.buttonboard.currentMode
+import crackers.kobots.graphics.loadImage
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.ORANGISH
 import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.app.io.NeoKeyMenu.MenuItem
-import crackers.kobots.parts.loadImage
 import java.awt.Color
 
 /**

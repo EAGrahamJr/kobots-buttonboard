@@ -20,7 +20,7 @@ import crackers.hassk.EntityState
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay.scaleImageAt
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay.temperatureColor
-import crackers.kobots.parts.loadImage
+import crackers.kobots.graphics.loadImage
 import org.json.JSONObject
 import java.awt.Color
 import java.awt.Font

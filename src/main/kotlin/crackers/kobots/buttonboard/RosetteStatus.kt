@@ -21,8 +21,7 @@ import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.lighting.WS2811
 import crackers.kobots.mqtt.KobotsMQTT
-import crackers.kobots.mqtt.homeassistant.DeviceIdentifier
-import crackers.kobots.mqtt.homeassistant.KobotLight
+import crackers.kobots.mqtt.homeassistant.KobotRGBLight
 import crackers.kobots.mqtt.homeassistant.SinglePixelLightController
 import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
@@ -60,11 +59,11 @@ object RosetteStatus {
 
         // "reserve" pixel 7 and register it as a KobotLight for Home Assistant
         rosette[pixelOffset + 7] = Color.BLACK
-        KobotLight(
+        KobotRGBLight(
             "crazy_light",
             SinglePixelLightController(rosette, pixelOffset + 7),
             "My Little Pixel",
-            deviceIdentifier = DeviceIdentifier("Kobots", "NeoPixel"),
+            deviceIdentifier = haDevice,
         )
             .start()
 

@@ -5,9 +5,9 @@ import crackers.kobots.buttonboard.RosetteStatus
 import crackers.kobots.buttonboard.TheActions
 import crackers.kobots.buttonboard.buttons.AudioItems.audioPlayMenu
 import crackers.kobots.buttonboard.buttons.HomeAssistantMenus.IMAGE_BED
+import crackers.kobots.graphics.loadImage
 import crackers.kobots.parts.ORANGISH
 import crackers.kobots.parts.app.io.NeoKeyMenu
-import crackers.kobots.parts.loadImage
 import crackers.kobots.parts.scheduleWithFixedDelay
 import java.awt.Color
 import java.awt.image.BufferedImage

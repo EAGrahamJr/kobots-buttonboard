@@ -26,10 +26,14 @@ import crackers.kobots.buttonboard.buttons.RotoRegulator
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay
 import crackers.kobots.devices.expander.I2CMultiplexer
 import crackers.kobots.mqtt.KobotsMQTT
+import crackers.kobots.mqtt.homeassistant.DeviceIdentifier
 import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -75,12 +79,15 @@ internal val isRemote: Boolean
     get() = runningRemote
 
 internal val i2cMultiplexer: I2CMultiplexer by lazy { I2CMultiplexer() }
+internal val haDevice = DeviceIdentifier("Kobots", "ButtonBoard")
 
 fun killAllTheThings() {
     TheActions.GripperActions.STOP()
     TheActions.ServoMaticActions.STOP()
     AppCommon.applicationRunning = false
 }
+
+private val shutdownHook = CountDownLatch(1)
 
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
@@ -98,6 +105,9 @@ fun main(args: Array<String>) {
         val theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 50.milliseconds, ::modeAndKeyboardCheck)
         // start the MQTT client
         startMqttStuff()
+
+        Runtime.getRuntime().addShutdownHook(thread(start = false) { shutdown() })
+
         AppCommon.awaitTermination()
         theFuture.cancel(true)
 
@@ -111,7 +121,13 @@ fun main(args: Array<String>) {
     TheStrip.stop()
 
     AppCommon.executor.shutdownNow()
+    shutdownHook.countDown()
     exitProcess(0)
+}
+
+fun shutdown() {
+    AppCommon.applicationRunning = false
+    shutdownHook.await(5, TimeUnit.SECONDS)
 }
 
 private fun startMqttStuff() =

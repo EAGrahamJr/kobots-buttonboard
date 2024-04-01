@@ -16,13 +16,10 @@
 
 package crackers.kobots.buttonboard
 
-import crackers.kobots.app.AppCommon
-import crackers.kobots.app.AppCommon.mqttClient
 import crackers.kobots.devices.sensors.VCNL4040
-import crackers.kobots.mqtt.KobotsMQTT.Companion.KOBOTS_EVENTS
+import crackers.kobots.mqtt.homeassistant.KobotAnalogSensor
+import crackers.kobots.mqtt.homeassistant.KobotBinarySensor
 import crackers.kobots.parts.elapsed
-import crackers.kobots.parts.movement.SequenceExecutor.SequenceEvent
-import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
@@ -31,13 +28,34 @@ import java.time.Instant
  * Fire off events from a proximity sensor.
  */
 object GestureSensor : AutoCloseable {
-    private var lastStopCheck = false
-    private lateinit var lastStopCheckTime: Instant
-    private const val STOP_PROXIMITY = 20
+    private lateinit var lastAmbientSent: Instant
 
     private var proxTriggered = false
     private const val PROXIMITY_THRESHOLD = 4
     private lateinit var proxTriggeredTime: Instant
+
+    private val proxSensor =
+        object : KobotBinarySensor(
+            "proximity_alert",
+            "Proximity",
+            haDevice,
+            deviceClass = KobotBinarySensor.Companion.BinaryDevice.OCCUPANCY,
+        ) {
+            override val icon = "mdi:alert"
+        }
+
+    private val ambientSensor =
+        object : KobotAnalogSensor(
+            "ambient_light",
+            "Luminosity",
+            haDevice,
+            deviceClass =
+            KobotAnalogSensor.Companion.AnalogDevice
+                .ILLUMINANCE,
+            unitOfMeasurement = "lumens",
+        ) {
+            override val icon = "mdi:lightbulb-alert"
+        }
 
     private val sensor =
         VCNL4040(i2cMultiplexer.getI2CDevice(7, VCNL4040.DEFAULT_I2C_ADDRESS))
@@ -53,10 +71,12 @@ object GestureSensor : AutoCloseable {
     }
 
     fun whatAmIDoing() {
+        if (!::lastAmbientSent.isInitialized) {
+            lastAmbientSent = Instant.EPOCH
+            proxSensor.start()
+            ambientSensor.start()
+        }
         val prox = sensor.proximity.toInt()
-        val ambient = sensor.luminosity
-
-        if (prox > STOP_PROXIMITY) checkStopGesture() else lastStopCheck = false
 
         // if over the threshold and the trigger has not fired, fire it
         if (prox > PROXIMITY_THRESHOLD && !proxTriggered) {
@@ -67,28 +87,16 @@ object GestureSensor : AutoCloseable {
         if (proxTriggered && prox < PROXIMITY_THRESHOLD && proxTriggeredTime.elapsed().toSeconds() > 1) {
             fireEvent(false)
         }
+
+        // time to send the ambient light?
+        if (lastAmbientSent.elapsed() > Duration.ofMinutes(1)) {
+            lastAmbientSent = Instant.now()
+            ambientSensor.currentState = sensor.luminosity.toString()
+        }
     }
 
     private fun fireEvent(b: Boolean) {
         proxTriggered = b
-        val event = SequenceEvent("Proximity", "proxAlert", proxTriggered)
-        mqttClient.publish(KOBOTS_EVENTS, JSONObject(event))
-    }
-
-    private val FOUR_SECONDS = Duration.ofSeconds(4)
-
-    private fun checkStopGesture() {
-        if (lastStopCheck) {
-            val elapsed = lastStopCheckTime.elapsed()
-
-            if (elapsed > FOUR_SECONDS) {
-                logger.info("We're close, and we've been close for a while")
-                fireEvent(false)
-                AppCommon.applicationRunning = false
-            }
-        } else {
-            lastStopCheckTime = Instant.now()
-        }
-        lastStopCheck = true
+        proxSensor.currentState = b
     }
 }

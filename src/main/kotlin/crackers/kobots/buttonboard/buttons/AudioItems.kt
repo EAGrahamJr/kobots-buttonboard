@@ -17,13 +17,13 @@
 package crackers.kobots.buttonboard.buttons
 
 import crackers.kobots.buttonboard.TheActions
+import crackers.kobots.graphics.loadImage
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.ORANGISH
 import crackers.kobots.parts.app.io.NeoKeyHandler
 import crackers.kobots.parts.app.io.NeoKeyMenu
 import crackers.kobots.parts.app.io.NeoKeyMenu.MenuItem
 import crackers.kobots.parts.app.io.SmallMenuDisplay
-import crackers.kobots.parts.loadImage
 import java.awt.Color
 import java.awt.image.BufferedImage
 

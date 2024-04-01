@@ -17,7 +17,6 @@
 package crackers.kobots.buttonboard.environment
 
 import crackers.kobots.app.AppCommon
-import org.json.JSONObject
 import java.awt.Color
 import java.awt.Font
 import java.awt.FontMetrics
@@ -25,7 +24,10 @@ import java.awt.Graphics2D
 import kotlin.math.roundToInt
 
 class InsideTemps(val graphics: Graphics2D, val startDrawingAt: Int, val maxWidth: Int, val maxHeight: Int) {
-    private val inFont = Font(Font.SANS_SERIF, Font.PLAIN, 12)
+    private val inFont = // Font(Font.SANS_SERIF, Font.PLAIN, 12)
+        Font(Font.SERIF, Font.PLAIN, 12)
+
+    //        loadFont("/Oxanium-Regular.ttf").deriveFont(12f)
     private val inFM: FontMetrics
     private val lineHeight: Int
 
@@ -35,10 +37,10 @@ class InsideTemps(val graphics: Graphics2D, val startDrawingAt: Int, val maxWidt
     }
 
     private val insideSensors =
-        listOf(
-            "sensor.lr_enviro_temperature",
-            "sensor.office_enviro_temperature",
-            "sensor.bedroom_temperature",
+        mapOf(
+            "Living Room" to "sensor.lr_enviro_temperature",
+            "Office" to "sensor.office_enviro_temperature",
+            "Bedroom" to "sensor.bedroom_temperature",
         )
 
     /**
@@ -57,9 +59,9 @@ class InsideTemps(val graphics: Graphics2D, val startDrawingAt: Int, val maxWidt
 
             font = inFont
 
-            insideSensors.forEachIndexed { index, sensor ->
-                val y =
-                    startDrawingAt + (lineHeight * index) + inFM.ascent
+            insideSensors.keys.forEachIndexed { index, name ->
+                val sensor = insideSensors[name]!!
+                val y = startDrawingAt + (lineHeight * index) + inFM.ascent
 
                 val state = AppCommon.hasskClient.getState(sensor)
                 val temp =
@@ -70,9 +72,8 @@ class InsideTemps(val graphics: Graphics2D, val startDrawingAt: Int, val maxWidt
                     }
 
                 color = Color.WHITE
-                val name =
-                    JSONObject(state.attributes!!).getString("friendly_name")?.removeSuffix(" Temperature")
-                        ?: state.entityId.removeSuffix("_temperature")
+//                val name = JSONObject(state.attributes!!).getString("friendly_name")?.removeSuffix(" Temperature")
+//                    ?: state.entityId.removeSuffix("_temperature")
                 drawString(name, 0, y)
 
                 color = EnvironmentDisplay.temperatureColor(temp)

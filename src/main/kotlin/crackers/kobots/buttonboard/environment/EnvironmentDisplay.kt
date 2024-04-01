@@ -20,7 +20,7 @@ import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.devices.display.SSD1327
-import crackers.kobots.parts.center
+import crackers.kobots.graphics.center
 import crackers.kobots.parts.scheduleAtFixedRate
 import org.slf4j.LoggerFactory
 import java.awt.Color
