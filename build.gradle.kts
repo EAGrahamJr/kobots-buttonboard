@@ -78,7 +78,7 @@ tasks {
     create("deployApp") {
         dependsOn("shadowJar")
         doLast {
-            val sshTarget = System.getProperty("remote", "useless.local")
+            val sshTarget = System.getProperty("remote", "psyche.local")
             val name = JAR_NAME
 
             println("Sending $name to $sshTarget")
@@ -87,6 +87,7 @@ tasks {
                     "sh", "-c", """
                 scp build/libs/$name.jar $sshTarget:/home/crackers
                 scp *.sh $sshTarget:/home/crackers
+                scp *.service $sshTarget:/home/crackers                
                 """.trimIndent()
                 )
             }

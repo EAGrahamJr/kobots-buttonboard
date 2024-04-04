@@ -89,7 +89,7 @@ object GestureSensor : AutoCloseable {
         }
 
         // time to send the ambient light?
-        if (lastAmbientSent.elapsed() > Duration.ofMinutes(1)) {
+        if (lastAmbientSent.elapsed() > Duration.ofMinutes(5)) {
             lastAmbientSent = Instant.now()
             ambientSensor.currentState = sensor.luminosity.toString()
         }
