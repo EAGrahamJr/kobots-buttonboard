@@ -1,7 +1,7 @@
 [Unit]
 Description=Master Control Board
-Requires=network-online.target
-After=network-online.target
+#After=NetworkManager-wait-online.service
+#Requires=NetworkManager-wait-online.service
 
 [Service]
 Type=simple

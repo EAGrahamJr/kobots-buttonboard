@@ -22,7 +22,6 @@ import crackers.kobots.app.AppCommon.mqttClient
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.buttons.BackBenchPicker
 import crackers.kobots.buttonboard.buttons.FrontBenchPicker
-import crackers.kobots.buttonboard.buttons.RotoRegulator
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay
 import crackers.kobots.devices.expander.I2CMultiplexer
 import crackers.kobots.mqtt.KobotsMQTT
@@ -70,7 +69,6 @@ var currentMode: Mode
             // TODO or this?
             BackBenchPicker.currentMenu.displayMenu()
             FrontBenchPicker.currentMenu.displayMenu()
-            RotoRegulator.setPixelColor()
         }
     }
 
@@ -96,8 +94,8 @@ fun main(args: Array<String>) {
     runningRemote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
 
     TheStrip.start()
-    EnvironmentDisplay.start()
     i2cMultiplexer.use {
+        EnvironmentDisplay.start()
         FrontBenchPicker.start()
         BackBenchPicker.start()
 
@@ -115,9 +113,8 @@ fun main(args: Array<String>) {
 
         FrontBenchPicker.stop()
         BackBenchPicker.stop()
-        RotoRegulator.encoder.close()
+        EnvironmentDisplay.stop()
     }
-    EnvironmentDisplay.stop()
     TheStrip.stop()
 
     AppCommon.executor.shutdownNow()
@@ -171,7 +168,6 @@ private fun modeAndKeyboardCheck() {
         // ditto for the rotary encoder
         // *****************************
         GestureSensor.whatAmIDoing()
-        RotoRegulator.readTwist()
 
         // run the back bench button check
         BackBenchPicker.currentMenu.firstButton() || FrontBenchPicker.currentMenu.firstButton()

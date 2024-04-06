@@ -20,7 +20,7 @@ object ManualStuff {
 
     private class RotoAction(val entityId: String, val currentBrightness: Int = 0) : () -> Unit {
         override fun invoke() {
-            RotoRegulator.mangageLight(entityId, currentBrightness)
+//            RotoRegulator.mangageLight(entityId, currentBrightness)
         }
     }
 
@@ -38,7 +38,7 @@ object ManualStuff {
                 buttonColor = HomeAssistantMenus.DARK_CYAN,
             ) {
                 blinker.stop()
-                RotoRegulator.mangageLight(null, 0)
+//                RotoRegulator.mangageLight(null, 0)
                 currentMode = Mode.DAYTIME
             }
 
@@ -95,7 +95,7 @@ object ManualStuff {
         } else if (toggleActive.compareAndSet(button, NO_TOGGLE)) { // or it's the active button and we're toggling off
             // stop blinky
             blinker.stop()
-            RotoRegulator.mangageLight(null, 0)
+//            RotoRegulator.mangageLight(null, 0)
         }
         // ignored
     }

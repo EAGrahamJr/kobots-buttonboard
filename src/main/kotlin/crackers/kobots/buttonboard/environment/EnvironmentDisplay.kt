@@ -16,9 +16,11 @@
 
 package crackers.kobots.buttonboard.environment
 
+import com.diozero.devices.oled.SsdOledCommunicationChannel
 import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.currentMode
+import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.display.SSD1327
 import crackers.kobots.graphics.center
 import crackers.kobots.parts.scheduleAtFixedRate
@@ -41,7 +43,10 @@ object EnvironmentDisplay {
 
     private lateinit var future: Future<*>
 
-    private val screen by lazy { SSD1327() }
+    private val screen by lazy {
+        val i2cDevice = i2cMultiplexer.getI2CDevice(3, SSD1327.QWIIC_I2C_ADDRESS)
+        SSD1327(SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice))
+    }
     private val screenGraphics: Graphics2D
     private val image: BufferedImage
 

@@ -49,9 +49,7 @@ object GestureSensor : AutoCloseable {
             "ambient_light",
             "Luminosity",
             haDevice,
-            deviceClass =
-            KobotAnalogSensor.Companion.AnalogDevice
-                .ILLUMINANCE,
+            deviceClass = KobotAnalogSensor.Companion.AnalogDevice.ILLUMINANCE,
             unitOfMeasurement = "lumens",
         ) {
             override val icon = "mdi:lightbulb-alert"
