@@ -164,12 +164,7 @@ private fun modeAndKeyboardCheck() {
 
         // *****************************
         // ***** READ BUTTONS HERE *****
-        // because the sensor can be used as an independent control, check it first
-        // ditto for the rotary encoder
         // *****************************
-        GestureSensor.whatAmIDoing()
-
-        // run the back bench button check
         BackBenchPicker.currentMenu.firstButton() || FrontBenchPicker.currentMenu.firstButton()
     }
 }
