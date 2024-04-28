@@ -1,0 +1,10 @@
+[Unit]
+Description=Check for network availability
+
+[Service]
+Type=simple
+ExecStart=/home/crackers/network-test.sh
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
