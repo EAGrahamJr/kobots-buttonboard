@@ -24,13 +24,11 @@ import crackers.kobots.buttonboard.buttons.BackBenchPicker
 import crackers.kobots.buttonboard.buttons.FrontBenchPicker
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay
 import crackers.kobots.devices.expander.I2CMultiplexer
-import crackers.kobots.mqtt.KobotsMQTT
 import crackers.kobots.mqtt.homeassistant.DeviceIdentifier
 import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
@@ -40,13 +38,12 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Defines what various parts of the day are
  */
-enum class Mode(val frontBright: Float, val backBright: Float = frontBright) {
+enum class Mode(val brightness: Float) {
     NONE(0f),
     NIGHT(.005f),
     MORNING(.02f),
     DAYTIME(0.05f),
     EVENING(.03f),
-    MANUAL(.05f, 0.1f),
     ;
 
     fun isNight() = this == NIGHT || this == EVENING
@@ -62,13 +59,12 @@ var currentMode: Mode
     set(m) {
         if (_currentMode.get() != m) {
             _currentMode.set(m)
-            BackBenchPicker.selectMenu(m)
-            // TODO handler shouldn't be exposed?
-            FrontBenchPicker.keyHandler.brightness = m.frontBright
-            BackBenchPicker.keyHandler.brightness = m.backBright
-            // TODO or this?
-            BackBenchPicker.currentMenu.displayMenu()
-            FrontBenchPicker.currentMenu.displayMenu()
+
+            listOf(BackBenchPicker, FrontBenchPicker).forEach {
+                it.selectMenu(m)
+                it.keyHandler.brightness = m.brightness
+                it.currentMenu.displayMenu()
+            }
         }
     }
 
@@ -79,13 +75,7 @@ internal val isRemote: Boolean
 internal val i2cMultiplexer: I2CMultiplexer by lazy { I2CMultiplexer() }
 internal val haDevice = DeviceIdentifier("Kobots", "ButtonBoard")
 
-fun killAllTheThings() {
-    TheActions.GripperActions.STOP()
-    TheActions.ServoMaticActions.STOP()
-    AppCommon.applicationRunning = false
-}
-
-private val shutdownHook = CountDownLatch(1)
+lateinit var theFuture: ScheduledFuture<*>
 
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
@@ -100,50 +90,51 @@ fun main(args: Array<String>) {
         BackBenchPicker.start()
 
         // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
-        val theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 50.milliseconds, ::modeAndKeyboardCheck)
+        theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 50.milliseconds, ::modeAndKeyboardCheck)
         // start the MQTT client
         startMqttStuff()
 
-        Runtime.getRuntime().addShutdownHook(thread(start = false) { shutdown() })
-
+        Runtime.getRuntime().addShutdownHook(
+            thread(start = false) {
+                logger.error("Terminating")
+                shutdown()
+            },
+        )
         AppCommon.awaitTermination()
-        theFuture.cancel(true)
-
         logger.warn("Exiting ")
-
-        FrontBenchPicker.stop()
-        BackBenchPicker.stop()
-        EnvironmentDisplay.stop()
+        shutdown()
     }
-    TheStrip.stop()
 
     AppCommon.executor.shutdownNow()
-    shutdownHook.countDown()
     exitProcess(0)
 }
 
 fun shutdown() {
+    theFuture.cancel(true)
+
     AppCommon.applicationRunning = false
-    shutdownHook.await(5, TimeUnit.SECONDS)
+    FrontBenchPicker.stop()
+    BackBenchPicker.stop()
+    EnvironmentDisplay.stop()
+    TheStrip.stop()
 }
 
 private fun startMqttStuff() =
     with(mqttClient) {
         startAliveCheck()
-        subscribe(TheActions.BBOARD_TOPIC) { s -> if (s.equals("stop", true)) AppCommon.applicationRunning = false }
         allowEmergencyStop()
 
-        subscribeJSON(KobotsMQTT.KOBOTS_EVENTS) { payload ->
-            with(payload) {
-                logger.info("Kobots event: {}", payload)
-                // if the "arm" thingies completes an eye-drop, start blinking the return button
-                if (optString("source") == "TheArm" && optString("sequence") == "LocationPickup" && optBoolean("started")) {
+//        subscribeJSON(KobotsMQTT.KOBOTS_EVENTS) { payload ->
+//            with(payload) {
+//                logger.info("Kobots event: {}", payload)
+//                 if the "arm" thingies completes an eye-drop, start blinking the return button
+//                if (optString("source") == "TheArm" && optString("sequence") == "LocationPickup" && optBoolean("started")) {
 //                    FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
 //                    // TODO "zero" the rotor?
 //                    FrontBenchPicker.startBlinky()
-                }
-            }
-        }
+//                }
+//            }
+//        }
         subscribeJSON("kobots_auto/caseys_lamp/state") { payload ->
             if (currentMode == Mode.MORNING && payload.optString("state", "off") == "on") currentMode = Mode.DAYTIME
         }
@@ -155,7 +146,6 @@ private fun modeAndKeyboardCheck() {
         val hour = LocalTime.now().hour
         currentMode =
             when {
-                currentMode == Mode.MANUAL -> currentMode
                 hour in (0..6) -> Mode.NIGHT
                 hour <= 8 && currentMode != Mode.DAYTIME -> Mode.MORNING
                 hour <= 20 -> Mode.DAYTIME

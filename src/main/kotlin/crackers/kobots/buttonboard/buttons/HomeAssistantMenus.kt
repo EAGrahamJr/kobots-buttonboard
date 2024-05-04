@@ -1,10 +1,8 @@
 package crackers.kobots.buttonboard.buttons
 
 import crackers.kobots.app.AppCommon
-import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.TheActions.HassActions
 import crackers.kobots.buttonboard.TheActions.MopdiyActions
-import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.graphics.loadImage
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.ORANGISH
@@ -35,6 +33,7 @@ object HomeAssistantMenus {
     val IMAGE_LIGHTGROUP = loadImage("/light_group.png")
     val IMAGE_EAR = loadImage("/hearing.png")
     val IMAGE_RELAX = loadImage("/relax.png")
+    val IMAGE_PRINTER = loadImage("/print.png")
 
     val nightOffFunction =
         MenuItem("Off", icon = IMAGE_EXIT, buttonColor = ORANGISH) {
@@ -75,9 +74,9 @@ object HomeAssistantMenus {
             MopdiyActions.STOP()
         }
 
-    val manualMode =
-        MenuItem("Manual", icon = KobotsMenus.RobotImages.STOP_IT.image, buttonColor = DARK_CYAN) {
-            currentMode = Mode.MANUAL
+    val printerToggle =
+        MenuItem("Pntr", icon = IMAGE_PRINTER, buttonColor = GOLDENROD) {
+            HassActions.THING_PRINTER()
         }
 
     val bedtimeScene = MenuItem("BTime", icon = IMAGE_HOTEL, buttonColor = Color.PINK) { HassActions.BEDTIME() }

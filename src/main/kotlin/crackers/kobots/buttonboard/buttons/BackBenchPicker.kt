@@ -55,7 +55,7 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                         HomeAssistantMenus.daytimeScene,
                         HomeAssistantMenus.tvViewing,
                         HomeAssistantMenus.movieViewing,
-                        HomeAssistantMenus.fanControl,
+                        HomeAssistantMenus.kitchenLights,
                     ),
                 ),
             Mode.EVENING to

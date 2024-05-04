@@ -62,6 +62,7 @@ object TheActions {
         OFFICE_FAN,
         TFE,
         POST_TV,
+        THING_PRINTER,
         ;
 
         private fun HAssKClient.toggleOnSwitch(name: String) = if (switch(name).state().state == "off") on else off
@@ -91,6 +92,7 @@ object TheActions {
                     }
 
                     OFFICE_FAN -> switch("small_fan") turn toggleOnSwitch("small_fan")
+                    THING_PRINTER -> switch("tina_switch") turn toggleOnSwitch("tina_switch")
                     TFE -> scene("tfe") turn on
                     POST_TV -> scene("post_tv") turn on
                 }
