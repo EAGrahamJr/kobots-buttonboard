@@ -53,7 +53,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                     display,
                     listOf(
                         HomeAssistantMenus.fanControl,
-                        HomeAssistantMenus.bedroomToggle,
+                        HomeAssistantMenus.whiteNoiseToggle,
                         HomeAssistantMenus.printerToggle,
                         stahp,
                     ),

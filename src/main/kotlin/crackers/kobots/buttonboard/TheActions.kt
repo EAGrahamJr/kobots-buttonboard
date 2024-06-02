@@ -63,6 +63,7 @@ object TheActions {
         TFE,
         POST_TV,
         THING_PRINTER,
+        ALL_LIGHTS,
         ;
 
         private fun HAssKClient.toggleOnSwitch(name: String) = if (switch(name).state().state == "off") on else off
@@ -95,6 +96,7 @@ object TheActions {
                     THING_PRINTER -> switch("tina_switch") turn toggleOnSwitch("tina_switch")
                     TFE -> scene("tfe") turn on
                     POST_TV -> scene("post_tv") turn on
+                    ALL_LIGHTS -> light("all_lights") turn on
                 }
             }
         }
@@ -144,6 +146,7 @@ object TheActions {
         PREVIOUS,
         VOLUME_UP,
         VOLUME_DOWN,
+        TOGGLE,
         MUTE,
         UNMUTE,
         SHUFFLE,
@@ -153,6 +156,7 @@ object TheActions {
         ;
 
         override fun invoke() {
+            logger.info("Doing action {}", this)
             val action = this
             with(mopidyKlient) {
                 when (action) {
@@ -163,6 +167,7 @@ object TheActions {
                     PREVIOUS -> previous()
                     VOLUME_UP -> volumeUp()
                     VOLUME_DOWN -> volumeDown()
+                    TOGGLE -> if (state == MopidyKlient.PlayerState.PLAYING) pause() else play()
 //                    MUTE -> mute()
 //                    UNMUTE -> unmute()
 //                    SHUFFLE -> shuffle()

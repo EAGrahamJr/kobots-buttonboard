@@ -56,11 +56,7 @@ object HomeAssistantMenus {
         }
 
     val daytimeScene = MenuItem("Day", icon = IMAGE_BULB, buttonColor = Color.GREEN) { HassActions.DAYTIME() }
-
-    val kitchenLights =
-        MenuItem("Kit", icon = IMAGE_KITCHEN, buttonColor = Color.CYAN) {
-            HassActions.KITCHEN()
-        }
+    val kitchenLights = MenuItem("Kit", icon = IMAGE_KITCHEN, buttonColor = Color.CYAN) { HassActions.KITCHEN() }
 
     val tvViewing =
         MenuItem("TV", icon = IMAGE_TV, buttonColor = PURPLE) {
@@ -74,21 +70,12 @@ object HomeAssistantMenus {
             MopdiyActions.STOP()
         }
 
-    val printerToggle =
-        MenuItem("Pntr", icon = IMAGE_PRINTER, buttonColor = GOLDENROD) {
-            HassActions.THING_PRINTER()
-        }
-
+    val printerToggle = MenuItem("Pntr", icon = IMAGE_PRINTER, buttonColor = GOLDENROD) { HassActions.THING_PRINTER() }
     val bedtimeScene = MenuItem("BTime", icon = IMAGE_HOTEL, buttonColor = Color.PINK) { HassActions.BEDTIME() }
-
     val lateNightScene = MenuItem("Late", icon = IMAGE_MOON, buttonColor = DARK_CYAN) { HassActions.LATE_NIGHT() }
-
-    val tfeScene =
-        MenuItem("TFE", icon = IMAGE_SKULL, buttonColor = Color.RED.darker()) { HassActions.TFE() }
-
+    val tfeScene = MenuItem("TFE", icon = IMAGE_SKULL, buttonColor = Color.RED.darker()) { HassActions.TFE() }
     val bedroomToggle = MenuItem("BRm", icon = IMAGE_BED, buttonColor = Color.PINK) { HassActions.BEDROOM() }
-    val allOn = MenuItem("All", icon = IMAGE_LIGHTGROUP, buttonColor = LIGHT_GREEN) {}
-
-    val whiteNoiseToggle = MenuItem("EAR", icon = IMAGE_EAR, buttonColor = ORANGISH) {}
+    val allOn = MenuItem("All", icon = IMAGE_LIGHTGROUP, buttonColor = LIGHT_GREEN) { HassActions.ALL_LIGHTS() }
+    val whiteNoiseToggle = MenuItem("EAR", icon = IMAGE_EAR, buttonColor = ORANGISH) { MopdiyActions.TOGGLE() }
     val postTVScene = MenuItem("Post", icon = IMAGE_RELAX, buttonColor = Color.YELLOW) { HassActions.POST_TV() }
 }

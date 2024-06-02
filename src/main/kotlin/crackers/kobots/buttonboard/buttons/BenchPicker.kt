@@ -47,8 +47,7 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
         with(i2cMultiplexer) {
             val kbDevice = getI2CDevice(handlerChannel, NeoKey.DEFAULT_I2C_ADDRESS)
             keyBoard = NeoKey(kbDevice).apply { brightness = 0.01f }
-            keyHandler = NeoKeyHandler(keyBoard)
-
+            keyHandler = NeoKeyHandler(keyBoard, initialBrightness = 0.01f)
             display = TheScreen(getI2CDevice(screenChannel, SSD1306.DEFAULT_I2C_ADDRESS))
         }
     }

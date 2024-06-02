@@ -29,6 +29,7 @@ import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
 import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
@@ -75,7 +76,9 @@ internal val isRemote: Boolean
 internal val i2cMultiplexer: I2CMultiplexer by lazy { I2CMultiplexer() }
 internal val haDevice = DeviceIdentifier("Kobots", "ButtonBoard")
 
-lateinit var theFuture: ScheduledFuture<*>
+private lateinit var theFuture: ScheduledFuture<*>
+
+private val shutDown = AtomicBoolean(false)
 
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
@@ -110,6 +113,7 @@ fun main(args: Array<String>) {
 }
 
 fun shutdown() {
+    shutDown.compareAndSet(false, true) || return
     theFuture.cancel(true)
 
     AppCommon.applicationRunning = false
