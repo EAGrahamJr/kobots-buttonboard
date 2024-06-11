@@ -3,7 +3,6 @@ package crackers.kobots.buttonboard.buttons
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.RosetteStatus
 import crackers.kobots.buttonboard.TheActions
-import crackers.kobots.buttonboard.buttons.AudioItems.audioPlayMenu
 import crackers.kobots.buttonboard.buttons.HomeAssistantMenus.IMAGE_BED
 import crackers.kobots.graphics.loadImage
 import crackers.kobots.parts.ORANGISH
@@ -111,10 +110,10 @@ object KobotsMenus {
                         },
                     ),
                 ),
-            FrontBenchActions.MOPIDI to
-                audioPlayMenu(
-                    FrontBenchPicker.keyHandler,
-                    FrontBenchPicker.display,
-                ),
+//            FrontBenchActions.MOPIDI to
+//                audioPlayMenu(
+//                    FrontBenchPicker.keyHandler,
+//                    FrontBenchPicker.display,
+//                ),
         )
 }

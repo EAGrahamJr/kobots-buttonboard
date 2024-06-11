@@ -2,7 +2,7 @@ package crackers.kobots.buttonboard.buttons
 
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.TheActions.HassActions
-import crackers.kobots.buttonboard.TheActions.MopdiyActions
+import crackers.kobots.buttonboard.TheActions.MusicPlayActions
 import crackers.kobots.graphics.loadImage
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.ORANGISH
@@ -11,7 +11,7 @@ import crackers.kobots.parts.app.io.NeoKeyMenu.MenuItem
 import java.awt.Color
 
 /**
- * TODO fill this in
+ * Ibid
  */
 object HomeAssistantMenus {
     val CANCEL_ICON = loadImage("/cancel.png")
@@ -36,23 +36,23 @@ object HomeAssistantMenus {
     val IMAGE_PRINTER = loadImage("/print.png")
 
     val nightOffFunction =
-        MenuItem("Off", icon = IMAGE_EXIT, buttonColor = ORANGISH) {
+        MenuItem("Off", icon = IMAGE_EXIT, buttonColor = GOLDENROD) {
             HassActions.NOT_ALL()
-            MopdiyActions.STOP()
+            MusicPlayActions.STOP()
         }
 
     val fanControl =
         MenuItem("Fan", icon = IMAGE_FAN, buttonColor = Color.BLUE) {
             HassActions.OFFICE_FAN()
             with(AppCommon.hasskClient) {
-                (if (switch("small_fan").state().state == "off") MopdiyActions.PLAY else MopdiyActions.STOP)()
+                (if (switch("small_fan").state().state == "off") MusicPlayActions.PLAY else MusicPlayActions.STOP)()
             }
         }
 
     val morningScene =
         MenuItem("Morn", icon = IMAGE_SUN, buttonColor = GOLDENROD) {
             HassActions.MORNING()
-            MopdiyActions.PLAY()
+            MusicPlayActions.PLAY()
         }
 
     val daytimeScene = MenuItem("Day", icon = IMAGE_BULB, buttonColor = Color.GREEN) { HassActions.DAYTIME() }
@@ -61,13 +61,13 @@ object HomeAssistantMenus {
     val tvViewing =
         MenuItem("TV", icon = IMAGE_TV, buttonColor = PURPLE) {
             HassActions.TV()
-            MopdiyActions.STOP()
+            MusicPlayActions.STOP()
         }
 
     val movieViewing =
         MenuItem("Movie", icon = IMAGE_MOVIE, buttonColor = Color.RED.darker()) {
             HassActions.MOVIE()
-            MopdiyActions.STOP()
+            MusicPlayActions.STOP()
         }
 
     val printerToggle = MenuItem("Pntr", icon = IMAGE_PRINTER, buttonColor = GOLDENROD) { HassActions.THING_PRINTER() }
@@ -76,6 +76,6 @@ object HomeAssistantMenus {
     val tfeScene = MenuItem("TFE", icon = IMAGE_SKULL, buttonColor = Color.RED.darker()) { HassActions.TFE() }
     val bedroomToggle = MenuItem("BRm", icon = IMAGE_BED, buttonColor = Color.PINK) { HassActions.BEDROOM() }
     val allOn = MenuItem("All", icon = IMAGE_LIGHTGROUP, buttonColor = LIGHT_GREEN) { HassActions.ALL_LIGHTS() }
-    val whiteNoiseToggle = MenuItem("EAR", icon = IMAGE_EAR, buttonColor = ORANGISH) { MopdiyActions.TOGGLE() }
+    val whiteNoiseToggle = MenuItem("EAR", icon = IMAGE_EAR, buttonColor = ORANGISH) { MusicPlayActions.TOGGLE() }
     val postTVScene = MenuItem("Post", icon = IMAGE_RELAX, buttonColor = Color.YELLOW) { HassActions.POST_TV() }
 }

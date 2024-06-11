@@ -16,7 +16,7 @@
 
 package crackers.kobots.buttonboard.buttons
 
-import crackers.kobots.buttonboard.TheActions
+import crackers.kobots.buttonboard.TheActions.MusicPlayActions
 import crackers.kobots.graphics.loadImage
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.ORANGISH
@@ -39,19 +39,19 @@ object AudioItems {
      * Audio Menu items
      */
     val audioPlay =
-        MenuItem("Play", icon = AudioImages.PLAY.image, buttonColor = Color.GREEN) { TheActions.MopdiyActions.PLAY() }
+        MenuItem("Play", icon = AudioImages.PLAY.image, buttonColor = Color.GREEN) { MusicPlayActions.PLAY() }
 
     val audioPause =
-        MenuItem("Pause", icon = AudioImages.PAUSE.image, buttonColor = GOLDENROD) { TheActions.MopdiyActions.PAUSE() }
+        MenuItem("Pause", icon = AudioImages.PAUSE.image, buttonColor = GOLDENROD) { MusicPlayActions.PAUSE() }
 
     val volumeUp =
         MenuItem("Vol Up", abbrev = "V+", icon = AudioImages.VOLUME_UP.image, buttonColor = Color.GREEN) {
-            TheActions.MopdiyActions.VOLUME_UP()
+            MusicPlayActions.VOLUME_UP()
         }
 
     val volumeDown =
         MenuItem("Vol Down", abbrev = "V-", icon = AudioImages.VOLUME_DOWN.image, buttonColor = ORANGISH) {
-            TheActions.MopdiyActions.VOLUME_DOWN()
+            MusicPlayActions.VOLUME_DOWN()
         }
 
     fun audioPlayMenu(

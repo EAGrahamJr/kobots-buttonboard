@@ -18,6 +18,7 @@ package crackers.kobots.buttonboard.environment
 
 import com.diozero.devices.oled.SsdOledCommunicationChannel
 import crackers.kobots.app.AppCommon
+import crackers.kobots.app.AppCommon.ignoreErrors
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.buttonboard.i2cMultiplexer
@@ -43,10 +44,7 @@ object EnvironmentDisplay {
 
     private lateinit var future: Future<*>
 
-    private val screen by lazy {
-        val i2cDevice = i2cMultiplexer.getI2CDevice(3, SSD1327.QWIIC_I2C_ADDRESS)
-        SSD1327(SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice))
-    }
+    private lateinit var screen: SSD1327
     private val screenGraphics: Graphics2D
     private val image: BufferedImage
 
@@ -64,8 +62,6 @@ object EnvironmentDisplay {
                         dateFontMetrics = it.getFontMetrics(dateFont)
                     }
             }
-        screen.displayOn = false
-        screen.clear()
     }
 
     private val dateBottom = TEMP_HEIGHT + dateFontMetrics.height
@@ -73,15 +69,25 @@ object EnvironmentDisplay {
     private val outsideState = OutsideState(screenGraphics, 0, 0)
 
     fun start() {
-        future = AppCommon.executor.scheduleAtFixedRate(15.seconds, 5.minutes, ::updateDisplay)
+        val block = {
+            val i2cDevice = i2cMultiplexer.getI2CDevice(3, SSD1327.QWIIC_I2C_ADDRESS)
+            screen = SSD1327(SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice))
+
+            screen.displayOn = false
+            screen.clear()
+
+            future = AppCommon.executor.scheduleAtFixedRate(15.seconds, 5.minutes, ::updateDisplay)
+        }
+        ignoreErrors(block, true)
     }
 
     fun stop() {
-        future.cancel(false)
-        try {
-            screen.displayOn = false
-            screen.close()
-        } catch (_: Exception) {
+        if (::future.isInitialized) {
+            future.cancel(false)
+            ignoreErrors({
+                             screen.displayOn = false
+                             screen.close()
+                         })
         }
     }
 

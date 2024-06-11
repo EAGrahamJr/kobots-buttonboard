@@ -16,13 +16,11 @@
 
 package crackers.kobots.buttonboard
 
-import com.typesafe.config.ConfigFactory
 import crackers.hassk.Constants.off
 import crackers.hassk.Constants.on
 import crackers.hassk.HAssKClient
 import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.mqttClient
-import crackers.mopidykontrol.MopidyKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
 
@@ -34,7 +32,7 @@ object TheActions {
         operator fun invoke()
     }
 
-    val mopidyKlient: MopidyKlient
+    //    val mopidyKlient: MopidyKlient
     private val logger = LoggerFactory.getLogger("TheActions")
 
     // remote control of this thing
@@ -43,9 +41,12 @@ object TheActions {
 
     init {
 
-        with(ConfigFactory.load()) {
-            mopidyKlient = MopidyKlient(getString("mopidy.host"), getInt("mopidy.port"))
-        }
+//        with(ConfigFactory.load()) {
+//            mopidyKlient =
+//                MopidyKlient(getString("mopidy.host"), getInt("mopidy.port")).apply {
+//                    eventHandler = { logger.debug(it) }
+//                }
+//        }
     }
 
     enum class HassActions : Action {
@@ -138,7 +139,7 @@ object TheActions {
         }
     }
 
-    enum class MopdiyActions : Action {
+    enum class MusicPlayActions : Action {
         STOP,
         PLAY,
         PAUSE,
@@ -158,25 +159,25 @@ object TheActions {
         override fun invoke() {
             logger.info("Doing action {}", this)
             val action = this
-            with(mopidyKlient) {
-                when (action) {
-                    STOP -> stop()
-                    PLAY -> play()
-                    PAUSE -> pause()
-                    NEXT -> next()
-                    PREVIOUS -> previous()
-                    VOLUME_UP -> volumeUp()
-                    VOLUME_DOWN -> volumeDown()
-                    TOGGLE -> if (state == MopidyKlient.PlayerState.PLAYING) pause() else play()
-//                    MUTE -> mute()
-//                    UNMUTE -> unmute()
-//                    SHUFFLE -> shuffle()
-//                    REPEAT -> repeat()
-//                    REPEAT_OFF -> repeatOff()
-//                    REPEAT_ONE -> repeatOne()
-                    else -> logger.warn("Mopidy action {} not implemented", action)
-                }
-            }
+//            with(mopidyKlient) {
+//                when (action) {
+//                    STOP -> stop()
+//                    PLAY -> play()
+//                    PAUSE -> pause()
+//                    NEXT -> next()
+//                    PREVIOUS -> previous()
+//                    VOLUME_UP -> volumeUp()
+//                    VOLUME_DOWN -> volumeDown()
+//                    TOGGLE -> if (state == MopidyKlient.PlayerState.PLAYING) pause() else play()
+            //                    MUTE -> mute()
+            //                    UNMUTE -> unmute()
+            //                    SHUFFLE -> shuffle()
+            //                    REPEAT -> repeat()
+            //                    REPEAT_OFF -> repeatOff()
+            //                    REPEAT_ONE -> repeatOne()
+//                    else -> logger.warn("Mopidy action {} not implemented", action)
+//                }
+//            }
         }
     }
 }

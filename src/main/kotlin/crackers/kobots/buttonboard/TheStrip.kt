@@ -21,6 +21,7 @@ import crackers.kobots.app.AppCommon.mqttClient
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.devices.getOrCreateI2CDevice
 import crackers.kobots.devices.lighting.NeoPixel
+import crackers.kobots.devices.lighting.WS2811.PixelColor
 import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.PURPLE
@@ -68,7 +69,10 @@ object TheStrip {
 
     fun showIt() {
         whileRunning {
-            if (currentMode == Mode.DAYTIME) showRainbow()
+            // do this **all** the time if it's daytime
+            if (currentMode == Mode.DAYTIME) specialDaytimeEffect()
+
+            // so we only do this once
             if (currentMode != lastMode) {
                 lastMode = currentMode
                 when (currentMode) {
@@ -82,7 +86,7 @@ object TheStrip {
                     }
 
                     Mode.DAYTIME -> {
-                        strip.brightness = 0.4f
+                        // handled by the daytime effect
                     }
 
                     Mode.EVENING -> {
@@ -117,7 +121,7 @@ object TheStrip {
     }
 
     val whichColors =
-        rainbowColors
+        rainbowColors.map { PixelColor(it, brightness = .4f) }
     // xmas
 //         List(30) { index -> if (index % 2 == 0) Color.RED else Color.GREEN }
     // casey's birthday
@@ -129,7 +133,7 @@ object TheStrip {
 //            }
 //        }
 
-    private fun showRainbow() {
+    private fun specialDaytimeEffect() {
         for (count in stripOffset..stripLast) {
             AppCommon.applicationRunning || return
             strip[count] = whichColors[lastRainbowColorIndex++]
