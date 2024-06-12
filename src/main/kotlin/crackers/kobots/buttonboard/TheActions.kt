@@ -159,25 +159,27 @@ object TheActions {
         override fun invoke() {
             logger.info("Doing action {}", this)
             val action = this
-//            with(mopidyKlient) {
-//                when (action) {
-//                    STOP -> stop()
-//                    PLAY -> play()
-//                    PAUSE -> pause()
-//                    NEXT -> next()
-//                    PREVIOUS -> previous()
-//                    VOLUME_UP -> volumeUp()
-//                    VOLUME_DOWN -> volumeDown()
-//                    TOGGLE -> if (state == MopidyKlient.PlayerState.PLAYING) pause() else play()
-            //                    MUTE -> mute()
-            //                    UNMUTE -> unmute()
-            //                    SHUFFLE -> shuffle()
-            //                    REPEAT -> repeat()
-            //                    REPEAT_OFF -> repeatOff()
-            //                    REPEAT_ONE -> repeatOne()
-//                    else -> logger.warn("Mopidy action {} not implemented", action)
-//                }
-//            }
+            with(AppCommon.hasskClient) {
+                media("spotify").let { mp ->
+                    when (action) {
+                        STOP -> mp.stop()
+                        PLAY -> mp.play()
+                        PAUSE -> mp.pause()
+                        NEXT -> mp.next()
+                        PREVIOUS -> mp.previous()
+                        VOLUME_UP -> mp.volumeUp()
+                        VOLUME_DOWN -> mp.volumeDown()
+                        TOGGLE -> mp.run { if (state().state != "playing") play() else pause() }
+                        //                    MUTE -> mute()
+                        //                    UNMUTE -> unmute()
+                        //                    SHUFFLE -> shuffle()
+                        //                    REPEAT -> repeat()
+                        //                    REPEAT_OFF -> repeatOff()
+                        //                    REPEAT_ONE -> repeatOne()
+                        else -> logger.warn("Mopidy action {} not implemented", action)
+                    }
+                }
+            }
         }
     }
 }

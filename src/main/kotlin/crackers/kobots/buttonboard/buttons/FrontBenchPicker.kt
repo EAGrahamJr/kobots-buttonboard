@@ -30,7 +30,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                     keyHandler,
                     display,
                     listOf(
-                        HomeAssistantMenus.allOn,
+                        NeoKeyMenu.NO_KEY,
                         HomeAssistantMenus.bedroomToggle,
                         HomeAssistantMenus.whiteNoiseToggle,
                         stahp,
@@ -42,7 +42,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                     display,
                     listOf(
                         HomeAssistantMenus.fanControl,
-                        HomeAssistantMenus.allOn,
+                        NeoKeyMenu.NO_KEY,
                         HomeAssistantMenus.whiteNoiseToggle,
                         stahp,
                     ),
@@ -63,7 +63,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                     keyHandler,
                     display,
                     listOf(
-                        HomeAssistantMenus.allOn,
+                        NeoKeyMenu.NO_KEY,
                         HomeAssistantMenus.bedroomToggle,
                         HomeAssistantMenus.whiteNoiseToggle,
                         stahp,

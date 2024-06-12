@@ -88,8 +88,8 @@ fun main(args: Array<String>) {
 
     TheStrip.start()
     i2cMultiplexer.use {
+        Rooty.start()
         EnvironmentDisplay.start()
-        Segmund.start()
         FrontBenchPicker.start()
         BackBenchPicker.start()
 
@@ -118,11 +118,11 @@ fun shutdown() {
     theFuture.cancel(true)
 
     AppCommon.applicationRunning = false
+    Rooty.stop()
     FrontBenchPicker.stop()
     BackBenchPicker.stop()
     EnvironmentDisplay.stop()
     TheStrip.stop()
-    Segmund.stop()
 }
 
 private fun startMqttStuff() =
@@ -161,8 +161,7 @@ private fun modeAndKeyboardCheck() {
         // *****************************
         // ***** READ BUTTONS HERE *****
         // *****************************
-        (BackBenchPicker.currentMenu.firstButton() || FrontBenchPicker.currentMenu.firstButton()).let {
-            if (it) Segmund.showTime()
-        }
+        Rooty.clickOrTwist()
+        (BackBenchPicker.currentMenu.firstButton() || FrontBenchPicker.currentMenu.firstButton())
     }
 }

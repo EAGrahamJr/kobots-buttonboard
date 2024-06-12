@@ -18,6 +18,7 @@ package crackers.kobots.buttonboard.buttons
 
 import com.diozero.devices.oled.SSD1306
 import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.GraphicsStuff
 import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.devices.lighting.PixelBuf
@@ -53,7 +54,7 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
     }
 
     val stahp =
-        NeoKeyMenu.MenuItem("Stop", icon = HomeAssistantMenus.CANCEL_ICON, buttonColor = Color.RED) {
+        NeoKeyMenu.MenuItem("Stop", icon = GraphicsStuff.CANCEL_ICON, buttonColor = Color.RED) {
             AppCommon.applicationRunning = false
         }
 

@@ -1,9 +1,25 @@
 package crackers.kobots.buttonboard.buttons
 
 import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.GraphicsStuff.DARK_CYAN
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_BED
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_BULB
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_EAR
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_EXIT
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_FAN
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_HOTEL
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_KITCHEN
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_LIGHTGROUP
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_MOON
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_MOVIE
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_PRINTER
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_RELAX
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SUN
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_TV
+import crackers.kobots.buttonboard.GraphicsStuff.LIGHT_GREEN
 import crackers.kobots.buttonboard.TheActions.HassActions
 import crackers.kobots.buttonboard.TheActions.MusicPlayActions
-import crackers.kobots.graphics.loadImage
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.ORANGISH
 import crackers.kobots.parts.PURPLE
@@ -14,27 +30,6 @@ import java.awt.Color
  * Ibid
  */
 object HomeAssistantMenus {
-    val CANCEL_ICON = loadImage("/cancel.png")
-    val DARK_CYAN = Color.CYAN.darker()
-    val OLIVE_GREEN = Color(.39f, .38f, .23f) // blech
-    val LIGHT_GREEN = Color(125, 255, 0)
-
-    val IMAGE_BED = loadImage("/bed.png")
-    val IMAGE_EXIT = loadImage("/exit.png")
-    val IMAGE_BULB = loadImage("/lightbulb.png")
-    val IMAGE_HOTEL = loadImage("/hotel.png")
-    val IMAGE_MOON = loadImage("/moon.png")
-    val IMAGE_MOVIE = loadImage("/movie.png")
-    val IMAGE_KITCHEN = loadImage("/restaurant.png")
-    val IMAGE_SUN = loadImage("/sun.png")
-    val IMAGE_TV = loadImage("/tv.png")
-    val IMAGE_FAN = loadImage("/fan.png")
-    val IMAGE_SKULL = loadImage("/skull.png")
-    val IMAGE_LIGHTGROUP = loadImage("/light_group.png")
-    val IMAGE_EAR = loadImage("/hearing.png")
-    val IMAGE_RELAX = loadImage("/relax.png")
-    val IMAGE_PRINTER = loadImage("/print.png")
-
     val nightOffFunction =
         MenuItem("Off", icon = IMAGE_EXIT, buttonColor = GOLDENROD) {
             HassActions.NOT_ALL()

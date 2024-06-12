@@ -1,9 +1,9 @@
 package crackers.kobots.buttonboard.buttons
 
 import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.GraphicsStuff
 import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.buttons.BackBenchPicker.keyHandler
-import crackers.kobots.buttonboard.buttons.HomeAssistantMenus.IMAGE_BULB
 import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.parts.ORANGISH
 import crackers.kobots.parts.app.io.NeoKeyMenu
@@ -35,7 +35,7 @@ object ManualStuff {
             NeoKeyMenu.MenuItem(
                 "Back",
                 icon = KobotsMenus.RobotImages.RETURN.image,
-                buttonColor = HomeAssistantMenus.DARK_CYAN,
+                buttonColor = GraphicsStuff.DARK_CYAN,
             ) {
                 blinker.stop()
 //                RotoRegulator.mangageLight(null, 0)
@@ -55,7 +55,7 @@ object ManualStuff {
                 val item =
                     NeoKeyMenu.MenuItem(
                         name = name.take(4),
-                        icon = IMAGE_BULB,
+                        icon = GraphicsStuff.IMAGE_BULB,
                         buttonColor = buttonColor,
                         action = RotoAction(id, brightness),
                     )

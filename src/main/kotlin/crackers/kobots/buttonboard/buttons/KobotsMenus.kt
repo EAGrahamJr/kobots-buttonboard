@@ -1,9 +1,9 @@
 package crackers.kobots.buttonboard.buttons
 
 import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.GraphicsStuff
 import crackers.kobots.buttonboard.RosetteStatus
 import crackers.kobots.buttonboard.TheActions
-import crackers.kobots.buttonboard.buttons.HomeAssistantMenus.IMAGE_BED
 import crackers.kobots.graphics.loadImage
 import crackers.kobots.parts.ORANGISH
 import crackers.kobots.parts.app.io.NeoKeyMenu
@@ -66,7 +66,7 @@ object KobotsMenus {
                         NeoKeyMenu.MenuItem(
                             "Rtn",
                             icon = RobotImages.RETURN.image,
-                            buttonColor = HomeAssistantMenus.DARK_CYAN,
+                            buttonColor = GraphicsStuff.DARK_CYAN,
                         ) {
                             TheActions.GripperActions.RETURN()
                             if (::blinkyFuture.isInitialized) blinkyFuture.cancel(true)
@@ -89,16 +89,21 @@ object KobotsMenus {
                         NeoKeyMenu.MenuItem(
                             "Excuse Me",
                             "Sry",
-                            HomeAssistantMenus.CANCEL_ICON,
-                            HomeAssistantMenus.DARK_CYAN,
+                            GraphicsStuff.CANCEL_ICON,
+                            GraphicsStuff.DARK_CYAN,
                         ) { TheActions.GripperActions.EXCUSE_ME() },
-                        NeoKeyMenu.MenuItem("Sleep", icon = IMAGE_BED, buttonColor = Color.BLUE.darker()) {
+                        NeoKeyMenu.MenuItem(
+                            "Sleep", icon = GraphicsStuff.IMAGE_BED,
+                            buttonColor =
+                            Color.BLUE.darker
+                                (),
+                        ) {
                             TheActions.GripperActions.SLEEP()
                         },
                         NeoKeyMenu.MenuItem(
                             "Hi",
                             icon = RobotImages.HI.image,
-                            buttonColor = HomeAssistantMenus.DARK_CYAN,
+                            buttonColor = GraphicsStuff.DARK_CYAN,
                         ) {
                             TheActions.GripperActions.SAY_HI()
                         },
