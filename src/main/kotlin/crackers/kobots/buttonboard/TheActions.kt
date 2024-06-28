@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 by E. A. Graham, Jr.
+ * Copyright 2022-2024 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import crackers.hassk.Constants.off
 import crackers.hassk.Constants.on
 import crackers.hassk.HAssKClient
 import crackers.kobots.app.AppCommon
-import crackers.kobots.app.AppCommon.mqttClient
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
 
@@ -38,16 +37,6 @@ object TheActions {
     // remote control of this thing
     const val BBOARD_TOPIC = "kobots/buttonboard"
     val TEN_THIRTY = LocalTime.of(20, 30, 0)
-
-    init {
-
-//        with(ConfigFactory.load()) {
-//            mopidyKlient =
-//                MopidyKlient(getString("mopidy.host"), getInt("mopidy.port")).apply {
-//                    eventHandler = { logger.debug(it) }
-//                }
-//        }
-    }
 
     enum class HassActions : Action {
         DAYTIME, // aka 'Top"
@@ -103,42 +92,6 @@ object TheActions {
         }
     }
 
-    enum class GripperActions : Action {
-        PICKUP,
-        RETURN,
-        HOME,
-        SAY_HI,
-        STOP,
-        EXCUSE_ME,
-        SLEEP,
-        FLASHLIGHT,
-        ;
-
-        override fun invoke() = mqttClient.publish(GRIPOMATIC_TOPIC, name)
-
-        companion object {
-            val GRIPOMATIC_TOPIC = "kobots/gripOMatic"
-        }
-    }
-
-    enum class ServoMaticActions : Action {
-        STOP,
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-        CENTER,
-        SLEEP,
-        WAKEY,
-        ;
-
-        override fun invoke() = mqttClient.publish(SERVOMATIC_TOPIC, name)
-
-        companion object {
-            val SERVOMATIC_TOPIC = "kobots/servoMatic"
-        }
-    }
-
     enum class MusicPlayActions : Action {
         STOP,
         PLAY,
@@ -160,9 +113,10 @@ object TheActions {
             logger.info("Doing action {}", this)
             val action = this
             with(AppCommon.hasskClient) {
-                media("spotify").let { mp ->
+                (media("spotify") as HAssKClient.SpotifyPlayer).let { mp ->
+                    mp.currentPlayer = Rooty.currentMediaSource
                     when (action) {
-                        STOP -> mp.stop()
+                        STOP -> mp.pause() // stop() -- spotify don't do this
                         PLAY -> mp.play()
                         PAUSE -> mp.pause()
                         NEXT -> mp.next()

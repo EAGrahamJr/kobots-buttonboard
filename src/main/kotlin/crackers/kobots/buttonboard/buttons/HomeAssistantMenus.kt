@@ -1,3 +1,19 @@
+/*
+ * Copyright 2022-2024 by E. A. Graham, Jr.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
 package crackers.kobots.buttonboard.buttons
 
 import crackers.kobots.app.AppCommon
@@ -18,6 +34,10 @@ import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
 import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SUN
 import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_TV
 import crackers.kobots.buttonboard.GraphicsStuff.LIGHT_GREEN
+import crackers.kobots.buttonboard.GraphicsStuff.MEDIA_NEXT
+import crackers.kobots.buttonboard.GraphicsStuff.MEDIA_PAUSE
+import crackers.kobots.buttonboard.GraphicsStuff.MEDIA_PLAY
+import crackers.kobots.buttonboard.GraphicsStuff.MEDIA_PREV
 import crackers.kobots.buttonboard.TheActions.HassActions
 import crackers.kobots.buttonboard.TheActions.MusicPlayActions
 import crackers.kobots.parts.GOLDENROD
@@ -73,4 +93,9 @@ object HomeAssistantMenus {
     val allOn = MenuItem("All", icon = IMAGE_LIGHTGROUP, buttonColor = LIGHT_GREEN) { HassActions.ALL_LIGHTS() }
     val whiteNoiseToggle = MenuItem("EAR", icon = IMAGE_EAR, buttonColor = ORANGISH) { MusicPlayActions.TOGGLE() }
     val postTVScene = MenuItem("Post", icon = IMAGE_RELAX, buttonColor = Color.YELLOW) { HassActions.POST_TV() }
+
+    val mediaPrevious = MenuItem("Prev", icon = MEDIA_PREV, buttonColor = Color.CYAN) { MusicPlayActions.PREVIOUS() }
+    val mediaPause = MenuItem("Pause", icon = MEDIA_PAUSE, buttonColor = GOLDENROD) { MusicPlayActions.PAUSE() }
+    val mediaPlay = MenuItem("Play", icon = MEDIA_PLAY, buttonColor = Color.GREEN) { MusicPlayActions.PLAY() }
+    val mediaNext = MenuItem("Next", icon = MEDIA_NEXT, buttonColor = Color.CYAN) { MusicPlayActions.NEXT() }
 }

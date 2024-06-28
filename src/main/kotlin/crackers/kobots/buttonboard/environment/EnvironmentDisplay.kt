@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 by E. A. Graham, Jr.
+ * Copyright 2022-2024 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.display.SSD1327
+import crackers.kobots.graphics.animation.MatrixRain
 import crackers.kobots.graphics.center
 import crackers.kobots.parts.scheduleAtFixedRate
 import org.slf4j.LoggerFactory
@@ -60,6 +61,7 @@ object EnvironmentDisplay {
                 screenGraphics =
                     (img.graphics as Graphics2D).also {
                         dateFontMetrics = it.getFontMetrics(dateFont)
+                        it.background = Color.BLACK
                     }
             }
     }
@@ -67,6 +69,16 @@ object EnvironmentDisplay {
     private val dateBottom = TEMP_HEIGHT + dateFontMetrics.height
     private val insideStuff = InsideTemps(screenGraphics, dateBottom + 10, MAX_W, MAX_H)
     private val outsideState = OutsideState(screenGraphics, 0, 0)
+
+    // @formatter:off
+    private val rain =
+        MatrixRain(
+            screenGraphics,
+            0, 0, MAX_W, MAX_H,
+            displayFont = Font(Font.MONOSPACED, Font.PLAIN, 8),
+            useBold = false,
+        )
+    // @formatter:on
 
     fun start() {
         val block = {
@@ -91,37 +103,46 @@ object EnvironmentDisplay {
         }
     }
 
+    private var lastEnvironmentUpdate = false
+
     fun updateDisplay() {
         whileRunning {
             // leave it off at night
             if (currentMode.isNight()) {
                 screen.displayOn = false
             } else {
-                if (!screen.displayOn) {
-                    screen.displayOn = true
-                    // assuming this happens once a day, update the date
+                if (!screen.displayOn) screen.displayOn = true
+                if (!lastEnvironmentUpdate) {
+                    rain.stop()
                     showDate()
-                }
-                outsideState.show()
-                insideStuff.show()
-
-                with(screen) {
-                    display(image)
-                    show()
+                    outsideState.show()
+                    insideStuff.show()
+                    lastEnvironmentUpdate = true
+                    updateScreen()
+                } else {
+                    rain.start {
+                        lastEnvironmentUpdate = false
+                        updateScreen()
+                    }
                 }
             }
         }
     }
+
+    private fun updateScreen() =
+        with(screen) {
+            display(image)
+            show()
+        }
 
     /**
      * Shows the date in the top line for the agenda block.
      */
     private fun showDate() =
         with(screenGraphics) {
-            val now = LocalDateTime.now()
-            color = Color.BLACK
-            fillRect(0, 0, MAX_W, MAX_H)
+            clearRect(0, 0, MAX_W, MAX_H)
 
+            val now = LocalDateTime.now()
             color = Color.WHITE
             font = dateFont
             val date = "${now.dayOfWeek.name.substring(0, 3)}  ${now.month.name.substring(0, 3)} ${now.dayOfMonth}"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 by E. A. Graham, Jr.
+ * Copyright 2022-2024 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,7 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
     override val menuSelections =
         mapOf(
             Mode.NIGHT to
-                NeoKeyMenu(
-                    keyHandler,
-                    display,
+                makeAMenu(
                     listOf(
                         HomeAssistantMenus.nightOffFunction,
                         HomeAssistantMenus.fanControl,
@@ -37,9 +35,7 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                     ),
                 ),
             Mode.MORNING to
-                NeoKeyMenu(
-                    keyHandler,
-                    display,
+                makeAMenu(
                     listOf(
                         HomeAssistantMenus.daytimeScene,
                         HomeAssistantMenus.kitchenLights,
@@ -48,9 +44,7 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                     ),
                 ),
             Mode.DAYTIME to
-                NeoKeyMenu(
-                    keyHandler,
-                    display,
+                makeAMenu(
                     listOf(
                         HomeAssistantMenus.daytimeScene,
                         HomeAssistantMenus.movieViewing,
@@ -59,9 +53,7 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                     ),
                 ),
             Mode.EVENING to
-                NeoKeyMenu(
-                    keyHandler,
-                    display,
+                makeAMenu(
                     listOf(
                         HomeAssistantMenus.bedtimeScene,
                         HomeAssistantMenus.lateNightScene,
@@ -69,12 +61,14 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                         HomeAssistantMenus.fanControl,
                     ),
                 ),
-// TODO we'll get back to this later
-//            Mode.MANUAL to
-//                NeoKeyMenu(
-//                    keyHandler,
-//                    display,
-//                    manualLightMenu(),
-//                ),
+            Mode.AUDIO to
+                makeAMenu(
+                    listOf(
+                        HomeAssistantMenus.mediaPrevious,
+                        HomeAssistantMenus.mediaPause,
+                        HomeAssistantMenus.mediaPlay,
+                        HomeAssistantMenus.mediaNext,
+                    ),
+                ),
         )
 }

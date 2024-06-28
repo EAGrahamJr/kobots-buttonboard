@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 by E. A. Graham, Jr.
+ * Copyright 2022-2024 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ enum class Mode(val brightness: Float) {
     MORNING(.02f),
     DAYTIME(0.05f),
     EVENING(.03f),
+    AUDIO(0.05f),
     ;
 
     fun isNight() = this == NIGHT || this == EVENING
@@ -154,7 +155,7 @@ private fun modeAndKeyboardCheck() {
             when {
                 hour in (0..6) -> Mode.NIGHT
                 hour <= 8 && currentMode != Mode.DAYTIME -> Mode.MORNING
-                hour <= 20 -> Mode.DAYTIME
+                hour <= 20 -> if (currentMode != Mode.AUDIO) Mode.DAYTIME else currentMode
                 else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
             }
 
