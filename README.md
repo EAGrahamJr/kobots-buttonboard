@@ -6,10 +6,11 @@ The world's most expensive remote control for HomeAssistant. Uses
 - [kobots-devices](https://github.com/EAGrahamJr/kobots-devices)
   - and by extension [diozero](https://www.diozero.com/)
 - Lightbend's [Typesafe config](https://github.com/lightbend/config) for the configuration.
+- [Kobots "Parts"](https://github.com/EAGrahamJr/kobots-parts) for application management, control, and all the pretty graphical elements.
 
 ### Cost
 
-And counting (discounting the LEGO pieces) and does **not** count the Raspberry Pi<sup>**1**</sup>:
+Does **not** count the Raspberry Pi, as it's been swapped out a few times.
 
 | Item                      |   ~Price |
 |---------------------------|---------:|
@@ -23,12 +24,11 @@ And counting (discounting the LEGO pieces) and does **not** count the Raspberry 
 | Neopixel strip, 1/2 meter |      $13 |
 | Neopixel ring (8 pixels)  |       $4 |
 | Neopixel controller       |       $8 |
-| ToF sensor                |      $14 |
+| SparkFun Qwiic Twist      |      $25 |
 | Swirly board              |      $11 |
 | Extra STEMMA cables       |      $12 |
-| **TOTAL**                 | **$140** |
+| **TOTAL**                 | **$151** |
 
-<sup>**1**</sup> Bought a Raspberry Pi 4 mid-COVID lockdown for a silly price of $225
 
 ### V1, Mk 2
 
@@ -68,3 +68,19 @@ Added an I2C multiplexer and a lot more "self-handling" code. The "front bench" 
 ![Industrial V1](V6.png)
 
 ToF to handle menu switching and built on a "swirly plate" for a new **`Industrial`** look.
+
+### V7+
+
+This is likely the last hardware iteration as it's now quite easy to re-arrange buttons on whims...
+
+![Clean up](V7.png)
+
+Removed ToF (not working that well), re-arranged stuff and added some 3D printed frames to make it look less janky. Added the rotary encoder for additional media support when I get to it.
+
+And, just for grins, added a ["Matrix Rain" animation](make-it-rain.mp4) (from the `kobots-parts` library).
+
+#### Prints
+
+- Frame for large OLED - https://www.printables.com/model/923637-15-oled-frame-for-m25
+- Cover for NeoKeys - https://www.printables.com/model/904353-neokey-1x4-cover
+- Frame for small OLED - https://www.printables.com/model/927362-ssd-1306-frame
