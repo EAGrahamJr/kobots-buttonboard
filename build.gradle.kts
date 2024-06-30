@@ -1,6 +1,22 @@
+/*
+ * Copyright 2022-2024 by E. A. Graham, Jr.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
 plugins {
     application
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "2.0.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.jmailen.kotlinter") version "4.1.1"
 }
@@ -16,8 +32,7 @@ repositories {
 val DIOZERO_VER = "1.4.1"
 
 val DEVICES_VER = "0.2+"
-val PARTS_VER = "0.0+"
-val MOPIDY_VER = "0.0+"
+val PARTS_VER = "0.1+"
 val HASSK_VER = "0+"
 
 val JAR_NAME = "bboard"
@@ -28,7 +43,6 @@ dependencies {
 
     implementation("crackers.kobots:kobots-devices:$DEVICES_VER")
     implementation("crackers.kobots:kobots-parts:$PARTS_VER")
-    implementation("crackers.automation:mopidy-kontrol:$MOPIDY_VER")
 
 //    implementation("com.diozero:diozero-provider-remote:$DIOZERO_VER")
     implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
