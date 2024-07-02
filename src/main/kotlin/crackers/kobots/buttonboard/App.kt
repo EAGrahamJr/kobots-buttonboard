@@ -95,7 +95,7 @@ fun main(args: Array<String>) {
         BackBenchPicker.start()
 
         // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
-        theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 50.milliseconds, ::modeAndKeyboardCheck)
+        theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 10.milliseconds, ::modeAndKeyboardCheck)
         // start the MQTT client
         startMqttStuff()
 
