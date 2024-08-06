@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 by E. A. Graham, Jr.
+ * Copyright 2022-2024 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,28 +76,13 @@ object TheStrip {
             if (currentMode != lastMode) {
                 lastMode = currentMode
                 when (currentMode) {
-                    Mode.NIGHT -> {
-                        strip[stripOffset, stripLast] = Color.BLACK
+                    Mode.MORNING -> strip[stripOffset, stripLast] = PixelColor(GOLDENROD, brightness = 0.03f)
+                    Mode.EVENING -> strip[stripOffset, stripLast] = PixelColor(Color.RED, brightness = 0.03f)
+                    Mode.NIGHT -> strip[stripOffset, stripLast] = Color.BLACK
+                    Mode.DAYTIME -> { /* handled by the daytime effect */
                     }
 
-                    Mode.MORNING -> {
-                        strip.brightness = 0.03f
-                        strip[stripOffset, stripLast] = GOLDENROD
-                    }
-
-                    Mode.DAYTIME -> {
-                        // handled by the daytime effect
-                    }
-
-                    Mode.EVENING -> {
-                        strip.brightness = 0.03f
-                        strip[stripOffset, stripLast] = Color.RED
-                    }
-
-                    else -> {
-                        strip.brightness = 0.01f
-                        strip[stripOffset, stripLast] = PURPLE
-                    }
+                    else -> strip[stripOffset, stripLast] = PixelColor(PURPLE, brightness = .7f)
                 }
 
                 RosetteStatus.goToSleep.set(currentMode == Mode.NIGHT)

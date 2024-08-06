@@ -117,8 +117,8 @@ object TheActions {
                     mp.currentPlayer = Rooty.currentMediaSource
                     when (action) {
                         STOP -> mp.pause() // stop() -- spotify don't do this
-                        PLAY -> mp.play()
-                        PAUSE -> mp.pause()
+                        PLAY -> mp.run { if (state().state != "playing") play() }
+                        PAUSE -> mp.run { if (state().state == "playing") pause() }
                         NEXT -> mp.next()
                         PREVIOUS -> mp.previous()
                         VOLUME_UP -> mp.volumeUp()

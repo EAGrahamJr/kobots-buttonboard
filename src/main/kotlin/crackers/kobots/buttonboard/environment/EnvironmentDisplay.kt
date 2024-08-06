@@ -34,6 +34,7 @@ import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.time.LocalDateTime
 import java.util.concurrent.Future
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -74,9 +75,13 @@ object EnvironmentDisplay {
     private val rain =
         MatrixRain(
             screenGraphics,
-            0, 0, MAX_W, MAX_H,
+            0,
+            0,
+            MAX_W,
+            MAX_H,
             displayFont = Font(Font.MONOSPACED, Font.PLAIN, 8),
             useBold = false,
+            updateSpeed = 10.milliseconds,
         )
     // @formatter:on
 

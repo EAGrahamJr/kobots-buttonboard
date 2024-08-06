@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 by E. A. Graham, Jr.
+ * Copyright 2022-2024 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import kotlin.time.Duration.Companion.seconds
 object RosetteStatus {
     private val lastCheckIn = ConcurrentHashMap<String, ZonedDateTime>()
     private val hostList = listOf("brainz", "marvin", "useless", "zeke", "ringo", "murphy", "psyche")
-    private val logger = LoggerFactory.getLogger("RosetteStatus")
+    private val logger by lazy { LoggerFactory.getLogger("RosetteStatus") }
     internal val goToSleep = AtomicBoolean(false)
     lateinit var rosette: NeoPixel
     var rosetteOffset by Delegates.notNull<Int>()
@@ -97,7 +97,10 @@ object RosetteStatus {
                         goToSleep.get() -> WS2811.PixelColor(Color.BLACK, brightness = 0.0f)
                         lastGasp < 60 -> WS2811.PixelColor(Color.GREEN, brightness = 0.005f)
                         lastGasp < 120 -> WS2811.PixelColor(Color.YELLOW, brightness = 0.01f)
-                        else -> WS2811.PixelColor(Color.RED, brightness = 0.1f)
+                        else -> {
+                            logger.error("$host is not responding")
+                            WS2811.PixelColor(Color.RED, brightness = 0.1f)
+                        }
                     }
             }
         }
