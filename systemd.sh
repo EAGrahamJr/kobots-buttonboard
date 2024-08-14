@@ -1,14 +1,3 @@
-# Source this file to get shell aliases
-#alias spinstall='sudo cp /home/crackers/*.service /etc/systemd/user/'
-#alias sysr='systemctl --user daemon-reload'
-#alias syslinger='loginctl enable-linger'
-
-#alias sparkle='systemctl --user start nightlight.service'
-#alias spstop='systemctl --user stop nightlight.service'
-#alias spstat='systemctl --user status nightlight.service'
-#alias spenable='systemctl --user enable nightlight.service'
-#alias spdisable='systemctl --user disable nightlight.service'
-
 #!/bin/bash
 
 # Check if the command-line parameter is provided
