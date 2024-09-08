@@ -70,7 +70,7 @@ object TheStrip {
     fun showIt() {
         whileRunning {
             // do this **all** the time if it's daytime
-            if (currentMode == Mode.DAYTIME) specialDaytimeEffect()
+            if (currentMode.isDaytime()) specialDaytimeEffect()
 
             // so we only do this once
             if (currentMode != lastMode) {
@@ -79,7 +79,10 @@ object TheStrip {
                     Mode.MORNING -> strip[stripOffset, stripLast] = PixelColor(GOLDENROD, brightness = 0.03f)
                     Mode.EVENING -> strip[stripOffset, stripLast] = PixelColor(Color.RED, brightness = 0.03f)
                     Mode.NIGHT -> strip[stripOffset, stripLast] = Color.BLACK
-                    Mode.DAYTIME -> { /* handled by the daytime effect */
+                    Mode.DAYTIME -> { // handled by the daytime effect
+                    }
+
+                    Mode.DISABLED -> { // ditto
                     }
 
                     else -> strip[stripOffset, stripLast] = PixelColor(PURPLE, brightness = .7f)

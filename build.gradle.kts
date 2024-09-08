@@ -32,7 +32,7 @@ repositories {
 val DIOZERO_VER = "1.4.1"
 
 val DEVICES_VER = "0.2+"
-val PARTS_VER = "0.1+"
+val PARTS_VER = "0+"
 val HASSK_VER = "0+"
 
 val JAR_NAME = "bboard"
@@ -55,7 +55,7 @@ application {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 kotlinter {

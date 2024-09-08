@@ -70,5 +70,7 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                         HomeAssistantMenus.mediaNext,
                     ),
                 ),
+            Mode.DISABLED to
+                makeAMenu(List(4) { i -> NeoKeyMenu.NO_KEY }),
         )
 }

@@ -82,5 +82,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                         NeoKeyMenu.NO_KEY,
                     ),
                 ),
+            Mode.DISABLED to
+                makeAMenu(List(4) { i -> if (i == 3) stahp else NeoKeyMenu.NO_KEY }),
         )
 }

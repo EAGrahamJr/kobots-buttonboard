@@ -1,7 +1,7 @@
 [Unit]
 Description=Master Control Board
-After=network-test.service
-Requires=network-test.service
+#After=network-test.service
+#Requires=network-test.service
 
 [Service]
 Type=simple

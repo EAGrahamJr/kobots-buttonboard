@@ -25,6 +25,7 @@ import crackers.kobots.buttonboard.buttons.FrontBenchPicker
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay
 import crackers.kobots.devices.expander.I2CMultiplexer
 import crackers.kobots.mqtt.homeassistant.DeviceIdentifier
+import crackers.kobots.mqtt.homeassistant.KobotSwitch
 import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
@@ -46,9 +47,12 @@ enum class Mode(val brightness: Float) {
     DAYTIME(0.05f),
     EVENING(.03f),
     AUDIO(0.05f),
+    DISABLED(0.01f),
     ;
 
     fun isNight() = this == NIGHT || this == EVENING
+
+    fun isDaytime() = this == DAYTIME || this == DISABLED
 }
 
 private val logger = LoggerFactory.getLogger("ButtonBox")
@@ -80,6 +84,7 @@ internal val haDevice = DeviceIdentifier("Kobots", "ButtonBoard")
 private lateinit var theFuture: ScheduledFuture<*>
 
 private val shutDown = AtomicBoolean(false)
+private val buttonsEnabled = AtomicBoolean(true)
 
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
@@ -89,13 +94,24 @@ fun main(args: Array<String>) {
 
     TheStrip.start()
     i2cMultiplexer.use {
-        Rooty.start()
         EnvironmentDisplay.start()
         FrontBenchPicker.start()
         BackBenchPicker.start()
 
+        // anti-cat device: disable buttons (enabled by default)
+        val switch =
+            object : KobotSwitch.Companion.OnOffDevice {
+                override var isOn: Boolean
+                    get() = buttonsEnabled.get()
+                    set(v) {
+                        buttonsEnabled.set(v)
+                    }
+                override val name = "Enable Buttons"
+            }
+        KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).start()
+
         // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
-        theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 10.milliseconds, ::modeAndKeyboardCheck)
+        theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 30.milliseconds, ::modeAndKeyboardCheck)
         // start the MQTT client
         startMqttStuff()
 
@@ -119,7 +135,6 @@ fun shutdown() {
     theFuture.cancel(true)
 
     AppCommon.applicationRunning = false
-    Rooty.stop()
     FrontBenchPicker.stop()
     BackBenchPicker.stop()
     EnvironmentDisplay.stop()
@@ -129,19 +144,6 @@ fun shutdown() {
 private fun startMqttStuff() =
     with(mqttClient) {
         startAliveCheck()
-        allowEmergencyStop()
-
-//        subscribeJSON(KobotsMQTT.KOBOTS_EVENTS) { payload ->
-//            with(payload) {
-//                logger.info("Kobots event: {}", payload)
-//                 if the "arm" thingies completes an eye-drop, start blinking the return button
-//                if (optString("source") == "TheArm" && optString("sequence") == "LocationPickup" && optBoolean("started")) {
-//                    FrontBenchPicker.selectMenu(FrontBenchActions.STANDARD_ROBOT)
-//                    // TODO "zero" the rotor?
-//                    FrontBenchPicker.startBlinky()
-//                }
-//            }
-//        }
         subscribeJSON("kobots_auto/caseys_lamp/state") { payload ->
             if (currentMode == Mode.MORNING && payload.optString("state", "off") == "on") currentMode = Mode.DAYTIME
         }
@@ -153,6 +155,7 @@ private fun modeAndKeyboardCheck() {
         val hour = LocalTime.now().hour
         currentMode =
             when {
+                !buttonsEnabled.get() -> Mode.DISABLED
                 hour in (0..6) -> Mode.NIGHT
                 hour <= 8 && currentMode != Mode.DAYTIME -> Mode.MORNING
                 hour <= 20 -> if (currentMode != Mode.AUDIO) Mode.DAYTIME else currentMode
@@ -162,7 +165,6 @@ private fun modeAndKeyboardCheck() {
         // *****************************
         // ***** READ BUTTONS HERE *****
         // *****************************
-        Rooty.clickOrTwist()
         (BackBenchPicker.currentMenu.firstButton() || FrontBenchPicker.currentMenu.firstButton())
     }
 }
