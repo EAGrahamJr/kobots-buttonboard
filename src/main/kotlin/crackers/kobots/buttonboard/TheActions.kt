@@ -114,7 +114,7 @@ object TheActions {
             val action = this
             with(AppCommon.hasskClient) {
                 (media("spotify") as HAssKClient.SpotifyPlayer).let { mp ->
-                    mp.currentPlayer = Rooty.currentMediaSource
+                    mp.currentPlayer = "edlap"
                     when (action) {
                         STOP -> mp.pause() // stop() -- spotify don't do this
                         PLAY -> mp.run { if (state().state != "playing") play() }
