@@ -16,12 +16,12 @@
 
 package crackers.kobots.buttonboard.environment
 
+import com.diozero.api.I2CDevice
 import com.diozero.devices.oled.SsdOledCommunicationChannel
 import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.ignoreErrors
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.currentMode
-import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.display.SSD1327
 import crackers.kobots.graphics.animation.MatrixRain
 import crackers.kobots.graphics.center
@@ -87,7 +87,7 @@ object EnvironmentDisplay {
 
     fun start() {
         val block = {
-            val i2cDevice = i2cMultiplexer.getI2CDevice(3, SSD1327.QWIIC_I2C_ADDRESS)
+            val i2cDevice = I2CDevice(1, SSD1327.QWIIC_I2C_ADDRESS)
             screen = SSD1327(SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice))
 
             screen.displayOn = false
