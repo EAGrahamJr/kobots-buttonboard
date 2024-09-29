@@ -30,7 +30,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                     listOf(
                         NeoKeyMenu.NO_KEY,
                         HomeAssistantMenus.bedroomToggle,
-                        HomeAssistantMenus.whiteNoiseToggle,
+                        NeoKeyMenu.NO_KEY,
                         stahp,
                     ),
                 ),
@@ -39,7 +39,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                     listOf(
                         HomeAssistantMenus.fanControl,
                         NeoKeyMenu.NO_KEY,
-                        HomeAssistantMenus.whiteNoiseToggle,
+                        NeoKeyMenu.NO_KEY,
                         stahp,
                     ),
                 ),
@@ -47,7 +47,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                 makeAMenu(
                     listOf(
                         HomeAssistantMenus.fanControl,
-                        HomeAssistantMenus.whiteNoiseToggle,
+                        NeoKeyMenu.NO_KEY,
 //                        with(AppCommon.hasskClient) {
 //                            (media("spotify") as HAssKClient.SpotifyPlayer).let { mp ->
 //                                if (mp.state().state == "playing") {
@@ -69,7 +69,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                     listOf(
                         NeoKeyMenu.NO_KEY,
                         HomeAssistantMenus.bedroomToggle,
-                        HomeAssistantMenus.whiteNoiseToggle,
+                        NeoKeyMenu.NO_KEY,
                         stahp,
                     ),
                 ),

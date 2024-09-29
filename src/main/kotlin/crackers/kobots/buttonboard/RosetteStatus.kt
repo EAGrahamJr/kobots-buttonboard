@@ -99,7 +99,7 @@ object RosetteStatus {
                         lastGasp < 120 -> WS2811.PixelColor(Color.YELLOW, brightness = 0.01f)
                         else -> {
                             logger.error("$host is not responding")
-                            WS2811.PixelColor(Color.RED, brightness = 0.1f)
+                            WS2811.PixelColor(Color.RED, brightness = 0.02f)
                         }
                     }
             }
