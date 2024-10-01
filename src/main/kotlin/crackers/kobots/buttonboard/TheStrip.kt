@@ -27,9 +27,11 @@ import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.app.KobotSleep
 import crackers.kobots.parts.colorIntervalFromHSB
-import crackers.kobots.parts.scheduleWithFixedDelay
+import crackers.kobots.parts.scheduleWithDelay
 import org.slf4j.LoggerFactory
 import java.awt.Color
+import java.time.LocalDateTime
+import java.time.Month
 import java.util.concurrent.Future
 import kotlin.time.Duration.Companion.seconds
 
@@ -40,10 +42,6 @@ object TheStrip {
     private val logger = LoggerFactory.getLogger("TheStrip")
     private lateinit var seeSaw: AdafruitSeeSaw
     private lateinit var strip: NeoPixel
-
-    // run it all the way 'round
-    private val rainbowColors = colorIntervalFromHSB(0f, 359f, 30)
-    private var lastRainbowColorIndex: Int = 0
 
     private var lastMode: Mode? = null
 
@@ -63,7 +61,7 @@ object TheStrip {
                 brightness = 0.1f
                 autoWrite = true
             }
-        future = AppCommon.executor.scheduleWithFixedDelay(10.seconds, 10.seconds, ::showIt)
+        future = AppCommon.executor.scheduleWithDelay(10.seconds, ::showIt)
         RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
     }
 
@@ -82,13 +80,11 @@ object TheStrip {
                     Mode.DAYTIME -> { // handled by the daytime effect
                     }
 
-                    Mode.DISABLED -> { // ditto
-                    }
-
+                    Mode.DISABLED -> strip[stripOffset, stripLast] = PixelColor(Color.BLUE.darker(), brightness = 0.03f)
                     else -> strip[stripOffset, stripLast] = PixelColor(PURPLE, brightness = .7f)
                 }
 
-                RosetteStatus.goToSleep.set(currentMode == Mode.NIGHT)
+                RosetteStatus.goToSleep.set(currentMode == Mode.NIGHT || currentMode == Mode.DISABLED)
             }
         }
     }
@@ -108,27 +104,43 @@ object TheStrip {
         }
     }
 
-    val whichColors =
-        rainbowColors.map { PixelColor(it, brightness = .4f) }
-    // xmas
-//         List(30) { index -> if (index % 2 == 0) Color.RED else Color.GREEN }
-    // casey's birthday
-//        List(30) { index ->
-//            when (index % 3) {
-//                0 -> Color.GRAY
-//                1 -> PURPLE
-//                else -> Color.BLACK
-//            }
-//        }
+    // run it all the way 'round
+    private val rainbowColors = colorIntervalFromHSB(0f, 359f, 30).map { PixelColor(it, brightness = .6f) }
+    private val xmasColors =
+        List(30) { index -> if (index % 2 == 0) Color.RED else Color.GREEN }
+            .map { PixelColor(it, brightness = .3f) }
+    private val caseyColors =
+        List(30) { index ->
+            when (index % 3) {
+                0 -> Color.GRAY
+                1 -> PURPLE
+                else -> Color.BLACK
+            }
+        }.map { PixelColor(it, brightness = .5f) }
+
+    private var lastIndexUsed: Int = 0
+
+    private val whichColors: List<PixelColor>
+        get() {
+            val now = LocalDateTime.now()
+            return when {
+                // casey's birthday
+                now.month == Month.DECEMBER && now.dayOfMonth == 31 -> caseyColors
+                // xmas day just because
+                now.month == Month.DECEMBER && now.dayOfMonth == 25 -> xmasColors
+                // otherwise rainbow
+                else -> rainbowColors
+            }
+        }
 
     private fun specialDaytimeEffect() {
         for (count in stripOffset..stripLast) {
             AppCommon.applicationRunning || return
-            strip[count] = whichColors[lastRainbowColorIndex++]
-            if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
+            strip[count] = whichColors[lastIndexUsed++]
+            if (lastIndexUsed >= 30) lastIndexUsed = 0
             KobotSleep.millis(75)
         }
-        lastRainbowColorIndex++
-        if (lastRainbowColorIndex >= 30) lastRainbowColorIndex = 0
+        lastIndexUsed++
+        if (lastIndexUsed >= 30) lastIndexUsed = 0
     }
 }

@@ -52,7 +52,7 @@ enum class Mode(val brightness: Float) {
 
     fun isNight() = this == NIGHT || this == EVENING
 
-    fun isDaytime() = this == DAYTIME || this == DISABLED
+    fun isDaytime() = this == DAYTIME
 }
 
 private val logger = LoggerFactory.getLogger("ButtonBox")
