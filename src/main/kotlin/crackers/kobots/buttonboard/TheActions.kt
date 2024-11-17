@@ -116,14 +116,14 @@ object TheActions {
                 (media("spotify") as HAssKClient.SpotifyPlayer).let { mp ->
                     mp.currentPlayer = "edlap"
                     when (action) {
-                        STOP -> mp.pause() // stop() -- spotify don't do this
-                        PLAY -> mp.run { if (state().state != "playing") play() }
-                        PAUSE -> mp.run { if (state().state == "playing") pause() }
-                        NEXT -> mp.next()
-                        PREVIOUS -> mp.previous()
-                        VOLUME_UP -> mp.volumeUp()
-                        VOLUME_DOWN -> mp.volumeDown()
-                        TOGGLE -> mp.run { if (state().state != "playing") play() else pause() }
+                        // STOP -> mp.pause() // stop() -- spotify don't do this
+                        // PLAY -> mp.run { if (state().state != "playing") play() }
+                        // PAUSE -> mp.run { if (state().state == "playing") pause() }
+                        // NEXT -> mp.next()
+                        // PREVIOUS -> mp.previous()
+                        // VOLUME_UP -> mp.volumeUp()
+                        // VOLUME_DOWN -> mp.volumeDown()
+                        // TOGGLE -> mp.run { if (state().state != "playing") play() else pause() }
                         //                    MUTE -> mute()
                         //                    UNMUTE -> unmute()
                         //                    SHUFFLE -> shuffle()

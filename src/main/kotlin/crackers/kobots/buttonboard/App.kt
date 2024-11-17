@@ -93,52 +93,48 @@ fun main(args: Array<String>) {
     runningRemote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
 
     TheStrip.start()
-    i2cMultiplexer.use {
-        EnvironmentDisplay.start()
-        FrontBenchPicker.start()
-        BackBenchPicker.start()
+    EnvironmentDisplay.start()
+    FrontBenchPicker.start()
+    BackBenchPicker.start()
 
-        // anti-cat device: disable buttons (enabled by default)
-        val switch =
-            object : KobotSwitch.Companion.OnOffDevice {
-                override var isOn: Boolean
-                    get() = buttonsEnabled.get()
-                    set(v) {
-                        buttonsEnabled.set(v)
-                    }
-                override val name = "Enable Buttons"
-            }
-        KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).start()
+    // anti-cat device: disable buttons (enabled by default)
+    val switch =
+        object : KobotSwitch.Companion.OnOffDevice {
+            override var isOn: Boolean
+                get() = buttonsEnabled.get()
+                set(v) {
+                    buttonsEnabled.set(v)
+                }
+            override val name = "Enable Buttons"
+        }
+    KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).start()
 
-        // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
-        theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 30.milliseconds, ::modeAndKeyboardCheck)
-        // start the MQTT client
-        startMqttStuff()
+    // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
+    theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 30.milliseconds, ::modeAndKeyboardCheck)
+    // start the MQTT client
+    startMqttStuff()
 
-        Runtime.getRuntime().addShutdownHook(
-            thread(start = false) {
-                logger.error("Terminating")
-                shutdown()
-            },
-        )
-        AppCommon.awaitTermination()
-        logger.warn("Exiting ")
-        shutdown()
-    }
-
-    AppCommon.executor.shutdownNow()
+    Runtime.getRuntime().addShutdownHook(thread(start = false, block = ::shutdown))
+    AppCommon.awaitTermination()
+    logger.warn("Exiting ")
     exitProcess(0)
 }
 
 fun shutdown() {
-    shutDown.compareAndSet(false, true) || return
+    if (!shutDown.compareAndSet(false, true)) {
+        logger.error("Already stopped")
+        return
+    }
     theFuture.cancel(true)
+    logger.error("Shutdown")
 
     AppCommon.applicationRunning = false
     FrontBenchPicker.stop()
     BackBenchPicker.stop()
     EnvironmentDisplay.stop()
     TheStrip.stop()
+
+    i2cMultiplexer.close()
 }
 
 private fun startMqttStuff() =

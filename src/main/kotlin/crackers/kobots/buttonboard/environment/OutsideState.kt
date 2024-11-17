@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 by E. A. Graham, Jr.
+ * Copyright 2022-2024 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,39 +22,41 @@ import crackers.kobots.buttonboard.environment.EnvironmentDisplay.scaleImageAt
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay.temperatureColor
 import crackers.kobots.graphics.loadImage
 import org.json.JSONObject
-import java.awt.Color
 import java.awt.Font
 import java.awt.FontMetrics
 import java.awt.Graphics2D
 
 internal const val TEMP_HEIGHT = 40
-internal const val TEMP_WIDTH = 128
 
 /**
  * Show the outside temperature and weather icon. This is currently scaled to fit in a 40x128 pixel area.
  */
-class OutsideState(val graphics2D: Graphics2D, val x: Int, val y: Int) {
+class OutsideState(val graphics2D: Graphics2D, val tempWidth: Int) {
     private val theFont = Font(Font.SANS_SERIF, Font.PLAIN, 32)
     private val theFM: FontMetrics
+    val tempHeight: Int
 
     init {
         theFM = graphics2D.getFontMetrics(theFont)
+        tempHeight = theFM.height + 1
     }
 
-    internal fun show() =
-        with(graphics2D) {
-            val outsideTemp = AppCommon.hasskClient.getState("weather.home")
-            val temp = outsideTemp.temperature()
+    internal fun show(
+        x: Int = 0,
+        y: Int = 0,
+    ) = with(graphics2D) {
+        val outsideTemp = AppCommon.hasskClient.getState("weather.home")
+        val temp = outsideTemp.temperature()
 
-            // clear the top area
-            color = Color.BLACK
-            fillRect(x, y, TEMP_WIDTH, TEMP_HEIGHT)
+        scaleImageAt(outsideTemp.icon()!!, x, y, TEMP_HEIGHT)
 
-            scaleImageAt(outsideTemp.icon()!!, x, y, TEMP_HEIGHT)
-            font = theFont
-            color = temperatureColor(temp)
-            drawString("$temp\u2109", x + 50, theFM.ascent)
-        }
+        // the temp goes at the top/left of the area
+        font = theFont
+        color = temperatureColor(temp)
+        val tempString = "$temp\u2109"
+        val xString = tempWidth - fontMetrics.stringWidth(tempString) - 3
+        drawString(tempString, xString, y + theFM.ascent)
+    }
 
     private fun EntityState.icon() =
         images[state] ?: images["default"].also {

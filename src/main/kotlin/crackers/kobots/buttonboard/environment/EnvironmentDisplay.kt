@@ -50,11 +50,16 @@ object EnvironmentDisplay {
     private val screenGraphics: Graphics2D
     private val image: BufferedImage
 
-    internal val dateFont = Font(Font.SANS_SERIF, Font.BOLD, 14)
+    internal val dateFont = Font(Font.SANS_SERIF, Font.BOLD, 16)
     internal val dateFontMetrics: FontMetrics
 
     internal const val MAX_W = 128
     internal const val MAX_H = 128
+
+    private val insideStuff: InsideTemps
+    private val outsideState: OutsideState
+    private val dateBottom: Int
+    private val outsideTop: Int
 
     init {
         image =
@@ -65,11 +70,11 @@ object EnvironmentDisplay {
                         it.background = Color.BLACK
                     }
             }
+        insideStuff = InsideTemps(screenGraphics, MAX_W)
+        outsideState = OutsideState(screenGraphics, MAX_W)
+        outsideTop = MAX_H - (outsideState.tempHeight + 1)
+        dateBottom = (insideStuff.tempHeight + outsideTop + dateFontMetrics.height) / 2
     }
-
-    private val dateBottom = TEMP_HEIGHT + dateFontMetrics.height
-    private val insideStuff = InsideTemps(screenGraphics, dateBottom + 10, MAX_W, MAX_H)
-    private val outsideState = OutsideState(screenGraphics, 0, 0)
 
     // @formatter:off
     private val rain =
@@ -99,13 +104,11 @@ object EnvironmentDisplay {
     }
 
     fun stop() {
-        if (::future.isInitialized) {
-            future.cancel(false)
-            ignoreErrors({
-                             screen.displayOn = false
-                             screen.close()
-                         })
-        }
+        if (::future.isInitialized) future.cancel(true)
+        ignoreErrors({
+                         screen.displayOn = false
+                         screen.close()
+                     })
     }
 
     private var lastEnvironmentUpdate = false
@@ -119,8 +122,9 @@ object EnvironmentDisplay {
                 if (!screen.displayOn) screen.displayOn = true
                 if (!lastEnvironmentUpdate) {
                     rain.stop()
+                    screenGraphics.clearRect(0, 0, MAX_W, MAX_H)
                     showDate()
-                    outsideState.show()
+                    outsideState.show(y = outsideTop)
                     insideStuff.show()
                     lastEnvironmentUpdate = true
                     updateScreen()
@@ -145,8 +149,6 @@ object EnvironmentDisplay {
      */
     private fun showDate() =
         with(screenGraphics) {
-            clearRect(0, 0, MAX_W, MAX_H)
-
             val now = LocalDateTime.now()
             color = Color.WHITE
             font = dateFont
