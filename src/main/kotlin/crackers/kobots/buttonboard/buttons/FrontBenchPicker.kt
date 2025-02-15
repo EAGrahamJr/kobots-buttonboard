@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package crackers.kobots.buttonboard.buttons
 
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
 import crackers.kobots.buttonboard.Mode
+import crackers.kobots.buttonboard.RosetteStatus
 import crackers.kobots.parts.app.io.NeoKeyMenu
 
 /**
@@ -47,19 +49,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                 makeAMenu(
                     listOf(
                         HomeAssistantMenus.fanControl,
-                        NeoKeyMenu.NO_KEY,
-//                        with(AppCommon.hasskClient) {
-//                            (media("spotify") as HAssKClient.SpotifyPlayer).let { mp ->
-//                                if (mp.state().state == "playing") {
-//                                    MenuItem("Pse", icon = GraphicsStuff.NOT_NOTE, buttonColor = ORANGISH) {
-//                                        TheActions.MusicPlayActions.PAUSE()
-//                                    }
-//                                }
-//
-// //                            if (mp.state)
-//                                NeoKeyMenu.NO_KEY
-//                            }
-//                        },
+                        NeoKeyMenu.MenuItem("Stat", icon = IMAGE_SKULL, action = { RosetteStatus.reset() }),
                         HomeAssistantMenus.printerToggle,
                         stahp,
                     ),

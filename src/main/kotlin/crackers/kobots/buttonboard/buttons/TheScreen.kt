@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class TheScreen(i2cDevice: I2CDeviceInterface) : SmallMenuDisplay(DisplayMode.IC
             val channel = SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice)
             SSD1306(channel, MonochromeSsdOled.Height.SHORT).apply {
                 clear()
-                setDisplayOn(true)
+                display = true
                 setContrast(0x20.toByte())
             }
         }
@@ -46,7 +46,6 @@ class TheScreen(i2cDevice: I2CDeviceInterface) : SmallMenuDisplay(DisplayMode.IC
 
     override fun close() {
         screen.clear()
-        screen.setDisplayOn(false)
         screen.close()
     }
 }

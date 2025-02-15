@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.REMOTE_PI
+import crackers.kobots.app.AppCommon.ignoreErrors
 import crackers.kobots.app.AppCommon.mqttClient
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.buttons.BackBenchPicker
@@ -86,16 +87,15 @@ private lateinit var theFuture: ScheduledFuture<*>
 private val shutDown = AtomicBoolean(false)
 private val buttonsEnabled = AtomicBoolean(true)
 
+private val schtuff = listOf(TheStrip, EnvironmentDisplay, FrontBenchPicker, BackBenchPicker)
+
 /**
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
 fun main(args: Array<String>) {
     runningRemote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
 
-    TheStrip.start()
-    EnvironmentDisplay.start()
-    FrontBenchPicker.start()
-    BackBenchPicker.start()
+    schtuff.forEach(AppCommon.Startable::start)
 
     // anti-cat device: disable buttons (enabled by default)
     val switch =
@@ -128,11 +128,7 @@ fun shutdown() {
     theFuture.cancel(true)
     logger.error("Shutdown")
 
-    AppCommon.applicationRunning = false
-    FrontBenchPicker.stop()
-    BackBenchPicker.stop()
-    EnvironmentDisplay.stop()
-    TheStrip.stop()
+    schtuff.forEach { ignoreErrors(it::stop) }
 
     i2cMultiplexer.close()
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Synchronize screen, menu, and keyboard.
  */
-abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int) {
+abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int) : AppCommon.Startable {
     val keyHandler: NeoKeyHandler
     val keyBoard: NeoKey
     val display: TheScreen
@@ -73,9 +73,9 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
             }
         }
 
-    fun start() = currentMenu.displayMenu()
+    override fun start() = currentMenu.displayMenu()
 
-    fun stop() {
+    override fun stop() {
         keyHandler.buttonColors = listOf(Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK)
         display.close()
     }

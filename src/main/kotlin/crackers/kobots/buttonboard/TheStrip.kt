@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Run pretty stuff on the Neopixel strip.
  */
-object TheStrip {
+object TheStrip : AppCommon.Startable {
     private val logger = LoggerFactory.getLogger("TheStrip")
     private lateinit var seeSaw: AdafruitSeeSaw
     private lateinit var strip: NeoPixel
@@ -50,7 +50,7 @@ object TheStrip {
     private val stripOffset = 8
     private val stripLast = stripOffset + 29
 
-    fun start() {
+    override fun start() {
         if (isRemote) return
 
         // because this can conflict with a thing on the multiplexer
@@ -89,7 +89,7 @@ object TheStrip {
         }
     }
 
-    fun stop() {
+    override fun stop() {
         if (isRemote) return
 
         if (::future.isInitialized) {
