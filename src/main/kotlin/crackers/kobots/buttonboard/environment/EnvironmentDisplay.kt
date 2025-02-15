@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package crackers.kobots.buttonboard.environment
 
-import com.diozero.api.I2CDevice
+import com.diozero.devices.oled.SH1106
 import com.diozero.devices.oled.SsdOledCommunicationChannel
 import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.ignoreErrors
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.currentMode
-import crackers.kobots.devices.display.SSD1327
+import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.graphics.animation.MatrixRain
 import crackers.kobots.graphics.center
 import crackers.kobots.parts.scheduleAtFixedRate
@@ -34,6 +34,7 @@ import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.time.LocalDateTime
 import java.util.concurrent.Future
+import kotlin.random.Random.Default.nextInt
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -41,12 +42,12 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Weather and agenda display.
  */
-object EnvironmentDisplay {
+object EnvironmentDisplay : AppCommon.Startable {
     val logger = LoggerFactory.getLogger(this::class.java)
 
     private lateinit var future: Future<*>
 
-    private lateinit var screen: SSD1327
+    private lateinit var screen: SH1106
     private val screenGraphics: Graphics2D
     private val image: BufferedImage
 
@@ -54,7 +55,7 @@ object EnvironmentDisplay {
     internal val dateFontMetrics: FontMetrics
 
     internal const val MAX_W = 128
-    internal const val MAX_H = 128
+    internal const val MAX_H = 64
 
     private val insideStuff: InsideTemps
     private val outsideState: OutsideState
@@ -73,7 +74,7 @@ object EnvironmentDisplay {
         insideStuff = InsideTemps(screenGraphics, MAX_W)
         outsideState = OutsideState(screenGraphics, MAX_W)
         outsideTop = MAX_H - (outsideState.tempHeight + 1)
-        dateBottom = (insideStuff.tempHeight + outsideTop + dateFontMetrics.height) / 2
+        dateBottom = MAX_H
     }
 
     // @formatter:off
@@ -86,54 +87,67 @@ object EnvironmentDisplay {
             MAX_H,
             displayFont = Font(Font.MONOSPACED, Font.PLAIN, 8),
             useBold = false,
-            updateSpeed = 10.milliseconds,
+            updateSpeed = 20.milliseconds,
         )
     // @formatter:on
 
-    fun start() {
+    override fun start() {
         val block = {
-            val i2cDevice = I2CDevice(1, SSD1327.QWIIC_I2C_ADDRESS)
-            screen = SSD1327(SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice))
-
-            screen.displayOn = false
-            screen.clear()
+            val i2cDevice = i2cMultiplexer.getI2CDevice(7, SH1106.DEFAULT_I2C_ADDRESS)
+            screen =
+                SH1106(SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice)).apply {
+                    display = false
+                    clear()
+                    setContrast(0x20.toByte())
+                }
 
             future = AppCommon.executor.scheduleAtFixedRate(15.seconds, 5.minutes, ::updateDisplay)
         }
         ignoreErrors(block, true)
     }
 
-    fun stop() {
+    override fun stop() {
         if (::future.isInitialized) future.cancel(true)
         ignoreErrors({
-                         screen.displayOn = false
+                         screen.display = false
                          screen.close()
                      })
     }
 
-    private var lastEnvironmentUpdate = false
+    private var lastGraphicShown = -1
+    private const val RAIN = 0
 
     fun updateDisplay() {
         whileRunning {
             // leave it off at night
             if (currentMode.isNight()) {
-                screen.displayOn = false
+                screen.display = false
             } else {
-                if (!screen.displayOn) screen.displayOn = true
-                if (!lastEnvironmentUpdate) {
-                    rain.stop()
-                    screenGraphics.clearRect(0, 0, MAX_W, MAX_H)
-                    showDate()
-                    outsideState.show(y = outsideTop)
-                    insideStuff.show()
-                    lastEnvironmentUpdate = true
-                    updateScreen()
-                } else {
-                    rain.start {
-                        lastEnvironmentUpdate = false
+                if (!screen.display) screen.display = true
+                var next = nextInt(3)
+                while (next == lastGraphicShown) next = nextInt(4)
+                if (lastGraphicShown == RAIN) rain.stop()
+
+                screenGraphics.clearRect(0, 0, MAX_W, MAX_H)
+                when (next) {
+                    RAIN ->
+                        rain.start {
+                            ignoreErrors(::updateScreen)
+                        }
+
+                    1 -> {
+                        outsideState.show()
+                        showDate()
+                        updateScreen()
+                    }
+
+                    else -> {
+                        insideStuff.show()
                         updateScreen()
                     }
                 }
+                logger.debug("Switched to $next")
+                lastGraphicShown = next
             }
         }
     }
