@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import java.awt.Color
 import java.awt.image.BufferedImage
 
 object AudioItems {
-    enum class AudioImages(val image: BufferedImage) {
+    enum class AudioImages(
+        val image: BufferedImage,
+    ) {
         PLAY(loadImage("/media/music_note.png")),
         PAUSE(loadImage("/media/music_off.png")),
         VOLUME_UP(loadImage("/media/volume_up.png")),

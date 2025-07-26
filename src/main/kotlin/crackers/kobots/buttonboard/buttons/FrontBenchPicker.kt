@@ -16,22 +16,21 @@
 
 package crackers.kobots.buttonboard.buttons
 
-import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
 import crackers.kobots.buttonboard.Mode
-import crackers.kobots.buttonboard.RosetteStatus
 import crackers.kobots.parts.app.io.NeoKeyMenu
 
 /**
  * Handles what menu items are shown for the front "bench" (NeoKey) buttons.
  */
 object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
+    private val disabledMenu = List(4) { i -> if (i == 3) stahp else NeoKeyMenu.NO_KEY }
     override val menuSelections =
         mapOf(
             Mode.NIGHT to
                 makeAMenu(
                     listOf(
-                        NeoKeyMenu.NO_KEY,
-                        HomeAssistantMenus.bedroomToggle,
+                        HomeAssistantMenus.fanControl,
+                        HomeAssistantMenus.morningScene,
                         NeoKeyMenu.NO_KEY,
                         stahp,
                     ),
@@ -40,8 +39,8 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                 makeAMenu(
                     listOf(
                         HomeAssistantMenus.fanControl,
-                        NeoKeyMenu.NO_KEY,
-                        NeoKeyMenu.NO_KEY,
+                        HomeAssistantMenus.morningScene,
+                        statusReset,
                         stahp,
                     ),
                 ),
@@ -49,15 +48,15 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                 makeAMenu(
                     listOf(
                         HomeAssistantMenus.fanControl,
-                        NeoKeyMenu.MenuItem("Stat", icon = IMAGE_SKULL, action = { RosetteStatus.reset() }),
                         HomeAssistantMenus.printerToggle,
+                        statusReset,
                         stahp,
                     ),
                 ),
             Mode.EVENING to
                 makeAMenu(
                     listOf(
-                        NeoKeyMenu.NO_KEY,
+                        HomeAssistantMenus.fanControl,
                         HomeAssistantMenus.bedroomToggle,
                         NeoKeyMenu.NO_KEY,
                         stahp,
@@ -73,6 +72,6 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                     ),
                 ),
             Mode.DISABLED to
-                makeAMenu(List(4) { i -> if (i == 3) stahp else NeoKeyMenu.NO_KEY }),
+                makeAMenu(disabledMenu),
         )
 }

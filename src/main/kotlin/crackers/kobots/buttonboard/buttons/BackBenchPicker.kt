@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,15 @@ import crackers.kobots.parts.app.io.NeoKeyMenu
  * Handles what menu items are shown for the back "bench" (NeoKey) buttons.
  */
 object BackBenchPicker : BenchPicker<Mode>(1, 1) {
+    private val disabledMenu = List(4) { i -> NeoKeyMenu.NO_KEY }
     override val menuSelections =
         mapOf(
             Mode.NIGHT to
                 makeAMenu(
                     listOf(
                         HomeAssistantMenus.nightOffFunction,
-                        HomeAssistantMenus.fanControl,
-                        HomeAssistantMenus.morningScene,
+                        HomeAssistantMenus.bedroomToggle,
+                        NeoKeyMenu.NO_KEY,
                         HomeAssistantMenus.daytimeScene,
                     ),
                 ),
@@ -39,8 +40,8 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                     listOf(
                         HomeAssistantMenus.daytimeScene,
                         HomeAssistantMenus.kitchenLights,
-                        HomeAssistantMenus.morningScene,
                         NeoKeyMenu.NO_KEY,
+                        HomeAssistantMenus.morningScene,
                     ),
                 ),
             Mode.DAYTIME to
@@ -56,9 +57,9 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                 makeAMenu(
                     listOf(
                         HomeAssistantMenus.bedtimeScene,
-                        HomeAssistantMenus.lateNightScene,
                         HomeAssistantMenus.nightOffFunction,
-                        HomeAssistantMenus.fanControl,
+                        NeoKeyMenu.NO_KEY,
+                        HomeAssistantMenus.lateNightScene,
                     ),
                 ),
             Mode.AUDIO to
@@ -71,6 +72,6 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                     ),
                 ),
             Mode.DISABLED to
-                makeAMenu(List(4) { i -> NeoKeyMenu.NO_KEY }),
+                makeAMenu(disabledMenu),
         )
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,10 @@ import java.awt.FontMetrics
 import java.awt.Graphics2D
 import kotlin.math.roundToInt
 
-class InsideTemps(val graphics: Graphics2D, val maxWidth: Int) {
+class InsideTemps(
+    val graphics: Graphics2D,
+    val maxWidth: Int,
+) {
     private val inFont = // Font(Font.SANS_SERIF, Font.PLAIN, 12)
         Font(Font.SERIF, Font.PLAIN, 12)
 

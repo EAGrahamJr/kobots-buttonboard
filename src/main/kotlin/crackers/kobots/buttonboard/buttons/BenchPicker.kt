@@ -19,6 +19,8 @@ package crackers.kobots.buttonboard.buttons
 import com.diozero.devices.oled.SSD1306
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.GraphicsStuff
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
+import crackers.kobots.buttonboard.RosetteStatus
 import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.devices.lighting.PixelBuf
@@ -34,13 +36,17 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Synchronize screen, menu, and keyboard.
  */
-abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int) : AppCommon.Startable {
+abstract class BenchPicker<M : Enum<M>>(
+    handlerChannel: Int,
+    screenChannel: Int,
+) : AppCommon.Startable {
     val keyHandler: NeoKeyHandler
     val keyBoard: NeoKey
     val display: TheScreen
     protected abstract val menuSelections: Map<M, NeoKeyMenu>
     protected lateinit var nowMenu: M
     protected lateinit var menuEnumConstants: Array<M>
+    protected val statusReset = NeoKeyMenu.MenuItem("Stat", icon = IMAGE_SKULL, action = { RosetteStatus.reset() })
 
     private val logger = LoggerFactory.getLogger(this::class.java.simpleName)
 
@@ -102,7 +108,10 @@ abstract class BenchPicker<M : Enum<M>>(handlerChannel: Int, screenChannel: Int)
     companion object {
     }
 
-    class Blinker(private val pixelBuf: PixelBuf, private val blinkOffColor: Color = Color.RED) {
+    class Blinker(
+        private val pixelBuf: PixelBuf,
+        private val blinkOffColor: Color = Color.RED,
+    ) {
         private val notRunning = -1
 
         // TODO allow more than one button to blink

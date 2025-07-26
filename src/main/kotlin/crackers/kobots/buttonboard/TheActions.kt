@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ object TheActions {
                     MORNING -> scene("early_morning") turn on
                     OFFICE -> group("office_group") turn toggleOnLight("paper")
                     BEDROOM -> group("bedroom_group") turn toggleOnLight("shelf_lamp")
-                    KITCHEN -> light("kitchen_lights") turn toggleOnLight("kitchen_lights")
+                    KITCHEN -> light("pot_lights") turn toggleOnLight("pot_lights")
                     TV -> scene("daytime_tv") turn on
                     MOVIE -> scene("movie_time") turn on
                     BEDTIME -> scene("bed_time") turn on
@@ -83,7 +83,7 @@ object TheActions {
                     }
 
                     OFFICE_FAN -> switch("small_fan") turn toggleOnSwitch("small_fan")
-                    THING_PRINTER -> switch("tina_switch") turn toggleOnSwitch("tina_switch")
+                    THING_PRINTER -> switch("3d_printer_switch") turn toggleOnSwitch("3d_printer_switch")
                     TFE -> scene("tfe") turn on
                     POST_TV -> scene("post_tv") turn on
                     ALL_LIGHTS -> light("all_lights") turn on

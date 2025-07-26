@@ -4,7 +4,7 @@ Description=Master Control Board
 [Service]
 Type=simple
 ExecStartPre=/usr/bin/sh -c "until ping -c 1 192.168.1.4; do sleep 1; done"
-ExecStart=/home/crackers/java -jar /home/crackers/bboard.jar
+ExecStart=/usr/bin/java -jar /home/crackers/bboard.jar
 Restart=on-failure
 
 [Install]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,7 @@ object RosetteStatus {
             SinglePixelLightController(rosette, pixelOffset + 7),
             "My Little Pixel",
             deviceIdentifier = haDevice,
-        )
-            .start()
+        ).start()
 
         // store everybody's last time
         mqtt.subscribe(KobotsMQTT.KOBOTS_ALIVE) { s: String -> lastCheckIn[s] = ZonedDateTime.now() }

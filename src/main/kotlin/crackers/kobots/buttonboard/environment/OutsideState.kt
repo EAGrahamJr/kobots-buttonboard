@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,10 @@ internal const val TEMP_HEIGHT = 40
 /**
  * Show the outside temperature and weather icon. This is currently scaled to fit in a 40x128 pixel area.
  */
-class OutsideState(val graphics2D: Graphics2D, val tempWidth: Int) {
+class OutsideState(
+    val graphics2D: Graphics2D,
+    val tempWidth: Int,
+) {
     private val theFont = Font(Font.SANS_SERIF, Font.PLAIN, 32)
     private val theFM: FontMetrics
     val tempHeight: Int

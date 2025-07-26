@@ -28,7 +28,10 @@ import java.awt.image.BufferedImage
 /**
  * Show menus
  */
-class TheScreen(i2cDevice: I2CDeviceInterface) : SmallMenuDisplay(DisplayMode.ICONS), AutoCloseable {
+class TheScreen(
+    i2cDevice: I2CDeviceInterface,
+) : SmallMenuDisplay(DisplayMode.ICONS),
+    AutoCloseable {
     val screen =
         let {
             val channel = SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice)

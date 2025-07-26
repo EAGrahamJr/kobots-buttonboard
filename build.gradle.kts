@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2025 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 plugins {
     application
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.2.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.jmailen.kotlinter") version "4.1.1"
+    id("org.jmailen.kotlinter") version "5.1.1"
+    id("com.github.ben-manes.versions") version "0.52.0"
 }
 
 group = "crackers.kobots"
@@ -32,22 +33,20 @@ repositories {
 val DIOZERO_VER = "1.4.1"
 
 val DEVICES_VER = "0.2+"
-val PARTS_VER = "0+"
+val PARTS_VER = "0.2+"
 val HASSK_VER = "0+"
 
 val JAR_NAME = "bboard"
 
 dependencies {
-    implementation("com.diozero:diozero-core:$DIOZERO_VER")
-    implementation("org.tinylog:slf4j-tinylog:2.6.2")
-
     implementation("crackers.kobots:kobots-devices:$DEVICES_VER")
     implementation("crackers.kobots:kobots-parts:$PARTS_VER")
-
-//    implementation("com.diozero:diozero-provider-remote:$DIOZERO_VER")
-    implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
+    implementation("com.diozero:diozero-core:$DIOZERO_VER")
     implementation("crackers.automation:hassk:$HASSK_VER")
-    implementation("com.typesafe:config:1.4.2")
+
+    implementation("com.typesafe:config:1.4.3")
+
+    implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
 }
 
 application {
@@ -59,8 +58,19 @@ kotlin {
 }
 
 kotlinter {
-    ignoreFailures = true
+
 }
+
+val sshTarget = System.getProperty("remote", "psyche.local")
+val shipIt: Provider<String> = providers.exec {
+    commandLine(
+        "sh", "-c", """
+                rsync -avz build/libs/$JAR_NAME.jar $sshTarget:/home/crackers/
+                rsync -avz *.sh $sshTarget:/home/crackers/
+                rsync -avz *.service $sshTarget:/home/crackers/                
+                """.trimIndent()
+    )
+}.standardError.asText
 
 tasks {
     check {
@@ -89,22 +99,10 @@ tasks {
     /**
      * Deploy said shadow-jar to a remote Pi for runtime fun
      */
-    create("deployApp") {
+    register("deployApp") {
         dependsOn("shadowJar")
         doLast {
-            val sshTarget = System.getProperty("remote", "psyche.local")
-            val name = JAR_NAME
-
-            println("Sending $name to $sshTarget")
-            exec {
-                commandLine(
-                    "sh", "-c", """
-                scp build/libs/$name.jar $sshTarget:/home/crackers
-                scp *.sh $sshTarget:/home/crackers
-                scp *.service $sshTarget:/home/crackers                
-                """.trimIndent()
-                )
-            }
+            println("Sending $JAR_NAME to $sshTarget = ${shipIt.get()}")
         }
     }
 }

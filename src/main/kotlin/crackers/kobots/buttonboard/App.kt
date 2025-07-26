@@ -41,7 +41,9 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Defines what various parts of the day are
  */
-enum class Mode(val brightness: Float) {
+enum class Mode(
+    val brightness: Float,
+) {
     NONE(0f),
     NIGHT(.005f),
     MORNING(.02f),
@@ -58,14 +60,14 @@ enum class Mode(val brightness: Float) {
 
 private val logger = LoggerFactory.getLogger("ButtonBox")
 
-private val _currentMode = AtomicReference(Mode.NONE)
+private val myCurrentMode = AtomicReference(Mode.NONE)
 var currentMode: Mode
-    get() = _currentMode.get()
+    get() = myCurrentMode.get()
 
     @Synchronized
     set(m) {
-        if (_currentMode.get() != m) {
-            _currentMode.set(m)
+        if (myCurrentMode.get() != m) {
+            myCurrentMode.set(m)
 
             listOf(BackBenchPicker, FrontBenchPicker).forEach {
                 it.selectMenu(m)
@@ -136,7 +138,7 @@ fun shutdown() {
 private fun startMqttStuff() =
     with(mqttClient) {
         startAliveCheck()
-        subscribeJSON("kobots_auto/caseys_lamp/state") { payload ->
+        subscribeJSON("kobots_auto/bedroom_lamp/state") { payload ->
             if (currentMode == Mode.MORNING && payload.optString("state", "off") == "on") currentMode = Mode.DAYTIME
         }
     }

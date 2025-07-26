@@ -34,7 +34,6 @@ import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.time.LocalDateTime
 import java.util.concurrent.Future
-import kotlin.random.Random.Default.nextInt
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -116,6 +115,8 @@ object EnvironmentDisplay : AppCommon.Startable {
 
     private var lastGraphicShown = -1
     private const val RAIN = 0
+    private const val INSIDE = 1
+    private const val OUTSIDE = 2
 
     fun updateDisplay() {
         whileRunning {
@@ -124,9 +125,7 @@ object EnvironmentDisplay : AppCommon.Startable {
                 screen.display = false
             } else {
                 if (!screen.display) screen.display = true
-                var next = nextInt(3)
-                while (next == lastGraphicShown) next = nextInt(4)
-                if (lastGraphicShown == RAIN) rain.stop()
+                val next = if (lastGraphicShown == INSIDE) OUTSIDE else INSIDE
 
                 screenGraphics.clearRect(0, 0, MAX_W, MAX_H)
                 when (next) {
@@ -135,7 +134,7 @@ object EnvironmentDisplay : AppCommon.Startable {
                             ignoreErrors(::updateScreen)
                         }
 
-                    1 -> {
+                    OUTSIDE -> {
                         outsideState.show()
                         showDate()
                         updateScreen()
