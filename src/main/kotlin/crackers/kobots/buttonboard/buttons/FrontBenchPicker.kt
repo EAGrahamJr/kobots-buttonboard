@@ -29,9 +29,9 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
             Mode.NIGHT to
                 makeAMenu(
                     listOf(
-                        HomeAssistantMenus.fanControl,
                         HomeAssistantMenus.morningScene,
                         NeoKeyMenu.NO_KEY,
+                        HomeAssistantMenus.fanControl,
                         stahp,
                     ),
                 ),
@@ -39,7 +39,7 @@ object FrontBenchPicker : BenchPicker<Mode>(0, 0) {
                 makeAMenu(
                     listOf(
                         HomeAssistantMenus.fanControl,
-                        HomeAssistantMenus.morningScene,
+                        NeoKeyMenu.NO_KEY,
                         statusReset,
                         stahp,
                     ),

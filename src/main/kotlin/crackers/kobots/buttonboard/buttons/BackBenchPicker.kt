@@ -30,8 +30,8 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
                 makeAMenu(
                     listOf(
                         HomeAssistantMenus.nightOffFunction,
-                        HomeAssistantMenus.bedroomToggle,
                         NeoKeyMenu.NO_KEY,
+                        HomeAssistantMenus.bedroomToggle,
                         HomeAssistantMenus.daytimeScene,
                     ),
                 ),
@@ -56,9 +56,9 @@ object BackBenchPicker : BenchPicker<Mode>(1, 1) {
             Mode.EVENING to
                 makeAMenu(
                     listOf(
-                        HomeAssistantMenus.bedtimeScene,
                         HomeAssistantMenus.nightOffFunction,
                         NeoKeyMenu.NO_KEY,
+                        HomeAssistantMenus.bedtimeScene,
                         HomeAssistantMenus.lateNightScene,
                     ),
                 ),

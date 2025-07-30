@@ -17,7 +17,7 @@
 plugins {
     application
     kotlin("jvm") version "2.2.0"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "9.0.0-rc2"
     id("org.jmailen.kotlinter") version "5.1.1"
     id("com.github.ben-manes.versions") version "0.52.0"
 }
