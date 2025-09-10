@@ -48,7 +48,7 @@ class OutsideState(
         x: Int = 0,
         y: Int = 0,
     ) = with(graphics2D) {
-        val outsideTemp = AppCommon.hasskClient.getState("weather.home")
+        val outsideTemp = AppCommon.hasskClient.getState("weather.kbfi")
         val temp = outsideTemp.temperature()
 
         scaleImageAt(outsideTemp.icon()!!, x, y, TEMP_HEIGHT)
