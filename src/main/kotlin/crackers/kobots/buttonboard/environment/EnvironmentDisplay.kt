@@ -108,9 +108,9 @@ object EnvironmentDisplay : AppCommon.Startable {
     override fun stop() {
         if (::future.isInitialized) future.cancel(true)
         ignoreErrors({
-                         screen.display = false
-                         screen.close()
-                     })
+            screen.display = false
+            screen.close()
+        })
     }
 
     private var lastGraphicShown = -1
