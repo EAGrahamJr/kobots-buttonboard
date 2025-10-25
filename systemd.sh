@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright 2022-2024 by E. A. Graham, Jr.
+# Copyright 2022-2025 by E. A. Graham, Jr.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -58,6 +58,12 @@ case "$1" in
       ;;
     log)
       journalctl --user-unit $2.service -f
+      ;;
+    restart)
+      systemctl --user stop $2.service
+      sleep 5
+      systemctl --user start $2.service
+      echo "Service $2 started successfully"
       ;;
     *)
         echo "Invalid argument"

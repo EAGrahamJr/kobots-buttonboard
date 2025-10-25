@@ -33,7 +33,7 @@ repositories {
 val DIOZERO_VER = "1.4.1"
 
 val DEVICES_VER = "0.2+"
-val PARTS_VER = "0.2+"
+val PARTS_VER = "0.3+"
 val HASSK_VER = "0+"
 
 val JAR_NAME = "bboard"
@@ -43,6 +43,7 @@ dependencies {
     implementation("crackers.kobots:kobots-parts:$PARTS_VER")
     implementation("com.diozero:diozero-core:$DIOZERO_VER")
     implementation("crackers.automation:hassk:$HASSK_VER")
+    implementation("ch.qos.logback:logback-classic:1.5.13")
 
     implementation("com.typesafe:config:1.4.3")
 

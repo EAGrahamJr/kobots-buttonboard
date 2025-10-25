@@ -66,7 +66,7 @@ object TheActions {
 
             with(AppCommon.hasskClient) {
                 when (action) {
-                    DAYTIME -> scene("top_button") turn on
+                    DAYTIME -> scene("daily") turn on
                     MORNING -> scene("early_morning") turn on
                     OFFICE -> group("office_group") turn toggleOnLight("paper")
                     BEDROOM -> group("bedroom_group") turn toggleOnLight("shelf_lamp")

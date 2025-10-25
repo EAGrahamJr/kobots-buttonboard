@@ -78,6 +78,7 @@ class OutsideState(
             "sunny" to loadImage("/weather/sunny.png"),
             "windy" to loadImage("/weather/windy.png"),
             "pouring" to loadImage("/weather/rainy_heavy.png"),
+            "exceptional" to loadImage("/weather/exceptional.png"),
             "default" to loadImage("/screaming.png"),
         )
     }
