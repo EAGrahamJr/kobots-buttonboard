@@ -27,12 +27,12 @@ import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.app.KobotSleep
 import crackers.kobots.parts.colorIntervalFromHSB
-import crackers.kobots.parts.scheduleWithDelay
+import crackers.kobots.parts.movement.async.AppScope
+import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.LocalDateTime
 import java.time.Month
-import java.util.concurrent.Future
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -45,7 +45,7 @@ object TheStrip : AppCommon.Startable {
 
     private var lastMode: Mode? = null
 
-    private lateinit var future: Future<*>
+    private lateinit var future: Job
 
     private val stripOffset = 8
     private val stripLast = stripOffset + 29
@@ -61,7 +61,7 @@ object TheStrip : AppCommon.Startable {
                 brightness = 0.1f
                 autoWrite = true
             }
-        future = AppCommon.executor.scheduleWithDelay(10.seconds, ::showIt)
+        future = AppScope.scheduleWithFixedDelay(10.seconds, 10.seconds, ::showIt)
         RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
     }
 
@@ -93,7 +93,7 @@ object TheStrip : AppCommon.Startable {
         if (isRemote) return
 
         if (::future.isInitialized) {
-            future.cancel(true)
+            future.cancel()
         }
         try {
             strip.fill(Color.BLACK)

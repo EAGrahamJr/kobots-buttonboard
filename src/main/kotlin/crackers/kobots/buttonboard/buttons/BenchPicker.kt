@@ -20,32 +20,28 @@ import com.diozero.devices.oled.SSD1306
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.GraphicsStuff
 import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
+import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.RosetteStatus
 import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.io.NeoKey
-import crackers.kobots.devices.lighting.PixelBuf
 import crackers.kobots.parts.app.io.NeoKeyHandler
 import crackers.kobots.parts.app.io.NeoKeyMenu
-import crackers.kobots.parts.scheduleWithFixedDelay
 import org.slf4j.LoggerFactory
 import java.awt.Color
-import java.util.concurrent.Future
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Synchronize screen, menu, and keyboard.
  */
-abstract class BenchPicker<M : Enum<M>>(
+abstract class BenchPicker(
     handlerChannel: Int,
     screenChannel: Int,
 ) : AppCommon.Startable {
     val keyHandler: NeoKeyHandler
     val keyBoard: NeoKey
     val display: TheScreen
-    protected abstract val menuSelections: Map<M, NeoKeyMenu>
-    protected lateinit var nowMenu: M
-    protected lateinit var menuEnumConstants: Array<M>
+    protected abstract val menuSelections: Map<Mode, NeoKeyMenu>
+    protected val nowMenu = AtomicReference<Mode>()
     protected val statusReset = NeoKeyMenu.MenuItem("Stat", icon = IMAGE_SKULL, action = { RosetteStatus.reset() })
 
     private val logger = LoggerFactory.getLogger(this::class.java.simpleName)
@@ -64,88 +60,47 @@ abstract class BenchPicker<M : Enum<M>>(
             AppCommon.applicationRunning = false
         }
 
-    val currentMenu: NeoKeyMenu
-        @Synchronized
-        get() {
-            if (!::nowMenu.isInitialized) {
-                nowMenu = menuSelections.keys.first()
-                menuEnumConstants = nowMenu.declaringJavaClass.enumConstants
-            }
-            return menuSelections[nowMenu] ?: run {
-                logger.error("No menu for $nowMenu")
-                nowMenu = menuSelections.keys.first()
-                logger.info("Switching to $nowMenu")
-                menuSelections[nowMenu]!!
-            }
-        }
-
-    override fun start() = currentMenu.displayMenu()
+    override fun start() {
+        menuSelections.values.forEach { it.startAsync() }
+        selectMenu(menuSelections.keys.first())
+    }
 
     override fun stop() {
         keyHandler.buttonColors = listOf(Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK)
         display.close()
     }
 
-    /**
-     * "Rotates" to the next menu item in ordinal order.
-     */
     @Synchronized
-    fun updateMenu() {
-        val next = (nowMenu.ordinal + 1) % menuEnumConstants.size
-        nowMenu = menuEnumConstants[next]
-        currentMenu.displayMenu()
-        logger.info("Switching to $nowMenu")
+    fun selectMenu(whichOne: Mode) {
+        val keys = menuSelections.keys
+        val selected = if (keys.contains(whichOne)) whichOne else keys.first()
+        nowMenu.set(selected)
+        keyHandler.brightness = selected.brightness
+        menuSelections[selected]!!.displayMenu()
     }
 
-    @Synchronized
-    fun selectMenu(whichOne: M) {
-        nowMenu = whichOne
-        currentMenu.displayMenu()
-    }
-
-    protected fun makeAMenu(items: List<NeoKeyMenu.MenuItem>) = NeoKeyMenu(keyHandler, display, items)
-
-    companion object {
-    }
-
-    class Blinker(
-        private val pixelBuf: PixelBuf,
-        private val blinkOffColor: Color = Color.RED,
-    ) {
-        private val notRunning = -1
-
-        // TODO allow more than one button to blink
-        private var blinkyFuture: Future<*>? = null
-        private var blinkyState = false
-        private lateinit var ogColor: Color
-
-        @Volatile
-        private var blinkingKeyIndex: Int = notRunning
-
-        fun start(
-            index: Int,
-            color: Color? = null,
-            blinkTime: Duration = 500.milliseconds,
-        ) {
-            require(blinkingKeyIndex == notRunning) { "Blinker already started" }
-            ogColor = color ?: pixelBuf[index].color
-            blinkingKeyIndex = index
-            blinkyFuture =
-                AppCommon.executor.scheduleWithFixedDelay(blinkTime, blinkTime) {
-                    blinkyState =
-                        !blinkyState.also {
-                            pixelBuf[index] = if (it) blinkOffColor else ogColor
-                        }
+    protected fun makeAMenu(items: List<NeoKeyMenu.MenuItem>) =
+        items.let {
+            var menuRef: NeoKeyMenu? = null
+            val updatedItems =
+                it.map {
+                    NeoKeyMenu.MenuItem(
+                        it.name,
+                        it.abbrev,
+                        it.icon,
+                        it.buttonColor,
+                        action = {
+                            val m = nowMenu.get()
+                            logger.info("Validating $m - ${menuSelections[m]} vs $menuRef")
+                            if (menuSelections[m] == menuRef) {
+                                logger.warn("Running action")
+//                                it.action()
+                            }
+                        },
+                    )
                 }
-        }
-
-        fun stop() {
-            if (blinkingKeyIndex > notRunning) {
-                pixelBuf[blinkingKeyIndex] = ogColor
-                blinkingKeyIndex = notRunning
-                blinkyFuture?.cancel(true)
-                blinkyFuture = null
+            NeoKeyMenu(keyHandler, display, updatedItems).also {
+                menuRef = it
             }
         }
-    }
 }

@@ -16,14 +16,13 @@
 
 package crackers.kobots.buttonboard
 
-import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.lighting.WS2811
 import crackers.kobots.mqtt.KobotsMQTT
 import crackers.kobots.mqtt.homeassistant.KobotRGBLight
 import crackers.kobots.mqtt.homeassistant.SinglePixelLightController
-import crackers.kobots.parts.scheduleWithDelay
+import crackers.kobots.parts.movement.async.AppScope
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.Duration
@@ -70,7 +69,7 @@ object RosetteStatus {
         mqtt.subscribe(KobotsMQTT.KOBOTS_ALIVE) { s: String -> lastCheckIn[s] = ZonedDateTime.now() }
 
         // check for dead kobots
-        AppCommon.executor.scheduleWithDelay(15.seconds) {
+        AppScope.scheduleWithFixedDelay(15.seconds, 15.seconds) {
             whileRunning {
                 if (goToSleep.get()) {
                     (0 until hostList.size).forEach {

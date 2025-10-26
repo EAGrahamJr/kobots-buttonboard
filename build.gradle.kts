@@ -44,10 +44,10 @@ dependencies {
     implementation("com.diozero:diozero-core:$DIOZERO_VER")
     implementation("crackers.automation:hassk:$HASSK_VER")
     implementation("ch.qos.logback:logback-classic:1.5.13")
-
     implementation("com.typesafe:config:1.4.3")
 
     implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 }
 
 application {
