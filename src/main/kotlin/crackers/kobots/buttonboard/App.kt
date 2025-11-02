@@ -27,15 +27,16 @@ import crackers.kobots.buttonboard.environment.EnvironmentDisplay
 import crackers.kobots.devices.expander.I2CMultiplexer
 import crackers.kobots.mqtt.homeassistant.DeviceIdentifier
 import crackers.kobots.mqtt.homeassistant.KobotSwitch
-import crackers.kobots.parts.scheduleWithFixedDelay
+import crackers.kobots.parts.movement.async.AppScope
+import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
+import java.lang.Thread.sleep
 import java.time.LocalTime
-import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -71,8 +72,6 @@ var currentMode: Mode
 
             listOf(BackBenchPicker, FrontBenchPicker).forEach {
                 it.selectMenu(m)
-                it.keyHandler.brightness = m.brightness
-                it.currentMenu.displayMenu()
             }
         }
     }
@@ -84,7 +83,7 @@ internal val isRemote: Boolean
 internal val i2cMultiplexer: I2CMultiplexer by lazy { I2CMultiplexer() }
 internal val haDevice = DeviceIdentifier("Kobots", "ButtonBoard")
 
-private lateinit var theFuture: ScheduledFuture<*>
+private lateinit var theFuture: Job
 
 private val shutDown = AtomicBoolean(false)
 private val buttonsEnabled = AtomicBoolean(true)
@@ -111,8 +110,8 @@ fun main(args: Array<String>) {
         }
     KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).start()
 
-    // start the "main" loop -- note that the Java scheduler is more CPU efficient than simply looping and waiting
-    theFuture = AppCommon.executor.scheduleWithFixedDelay(1.seconds, 30.milliseconds, ::modeAndKeyboardCheck)
+    // start the "mode" loop
+    theFuture = AppScope.scheduleWithFixedDelay(15.seconds, 1.minutes, ::modeAndKeyboardCheck)
     // start the MQTT client
     startMqttStuff()
 
@@ -127,11 +126,12 @@ fun shutdown() {
         logger.error("Already stopped")
         return
     }
-    theFuture.cancel(true)
+    theFuture.cancel()
     logger.error("Shutdown")
 
     schtuff.forEach { ignoreErrors(it::stop) }
-
+    // because
+    sleep(1000)
     i2cMultiplexer.close()
 }
 
@@ -155,10 +155,5 @@ private fun modeAndKeyboardCheck() {
                 hour <= 20 -> if (currentMode != Mode.AUDIO) Mode.DAYTIME else currentMode
                 else -> if (currentMode != Mode.NIGHT) Mode.EVENING else currentMode
             }
-
-        // *****************************
-        // ***** READ BUTTONS HERE *****
-        // *****************************
-        (BackBenchPicker.currentMenu.firstButton() || FrontBenchPicker.currentMenu.firstButton())
     }
 }

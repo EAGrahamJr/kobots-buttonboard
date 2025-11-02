@@ -22,7 +22,7 @@ import crackers.kobots.parts.app.io.NeoKeyMenu
 /**
  * Handles what menu items are shown for the back "bench" (NeoKey) buttons.
  */
-object BackBenchPicker : BenchPicker<Mode>(1, 1) {
+object BackBenchPicker : BenchPicker(1, 1) {
     private val disabledMenu = List(4) { i -> NeoKeyMenu.NO_KEY }
     override val menuSelections =
         mapOf(

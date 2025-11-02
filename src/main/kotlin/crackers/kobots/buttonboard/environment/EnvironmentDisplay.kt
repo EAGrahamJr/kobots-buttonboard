@@ -25,7 +25,8 @@ import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.graphics.animation.MatrixRain
 import crackers.kobots.graphics.center
-import crackers.kobots.parts.scheduleAtFixedRate
+import crackers.kobots.parts.movement.async.AppScope
+import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.awt.Font
@@ -33,7 +34,6 @@ import java.awt.FontMetrics
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.time.LocalDateTime
-import java.util.concurrent.Future
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -44,7 +44,7 @@ import kotlin.time.Duration.Companion.seconds
 object EnvironmentDisplay : AppCommon.Startable {
     val logger = LoggerFactory.getLogger(this::class.java)
 
-    private lateinit var future: Future<*>
+    private lateinit var future: Job
 
     private lateinit var screen: SH1106
     private val screenGraphics: Graphics2D
@@ -100,13 +100,13 @@ object EnvironmentDisplay : AppCommon.Startable {
                     setContrast(0x20.toByte())
                 }
 
-            future = AppCommon.executor.scheduleAtFixedRate(15.seconds, 5.minutes, ::updateDisplay)
+            future = AppScope.scheduleWithFixedDelay(15.seconds, 5.minutes, ::updateDisplay)
         }
         ignoreErrors(block, true)
     }
 
     override fun stop() {
-        if (::future.isInitialized) future.cancel(true)
+        if (::future.isInitialized) future.cancel()
         ignoreErrors({
             screen.display = false
             screen.close()

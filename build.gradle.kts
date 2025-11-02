@@ -17,8 +17,8 @@
 plugins {
     application
     kotlin("jvm") version "2.2.0"
-    id("com.gradleup.shadow") version "9.0.0-rc2"
-    id("org.jmailen.kotlinter") version "5.1.1"
+    id("com.gradleup.shadow") version "9.2.2"
+    id("org.jmailen.kotlinter") version "5.2.0"
     id("com.github.ben-manes.versions") version "0.52.0"
 }
 
@@ -43,11 +43,11 @@ dependencies {
     implementation("crackers.kobots:kobots-parts:$PARTS_VER")
     implementation("com.diozero:diozero-core:$DIOZERO_VER")
     implementation("crackers.automation:hassk:$HASSK_VER")
-    implementation("ch.qos.logback:logback-classic:1.5.13")
-
-    implementation("com.typesafe:config:1.4.3")
+    implementation("ch.qos.logback:logback-classic:1.5.20")
+    implementation("com.typesafe:config:1.4.5")
 
     implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
 application {
