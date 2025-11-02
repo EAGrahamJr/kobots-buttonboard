@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -110,7 +111,7 @@ fun main(args: Array<String>) {
     KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).start()
 
     // start the "mode" loop
-    theFuture = AppScope.scheduleWithFixedDelay(1.seconds, 15.seconds, ::modeAndKeyboardCheck)
+    theFuture = AppScope.scheduleWithFixedDelay(15.seconds, 1.minutes, ::modeAndKeyboardCheck)
     // start the MQTT client
     startMqttStuff()
 

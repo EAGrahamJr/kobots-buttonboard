@@ -16,6 +16,8 @@
 
 package crackers.kobots.buttonboard.buttons
 
+import EventBus
+import NeoKeyEvent
 import com.diozero.devices.oled.SSD1306
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.GraphicsStuff
@@ -27,8 +29,10 @@ import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.parts.app.io.NeoKeyHandler
 import crackers.kobots.parts.app.io.NeoKeyMenu
 import org.slf4j.LoggerFactory
+import startAsync
 import java.awt.Color
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Synchronize screen, menu, and keyboard.
@@ -44,13 +48,14 @@ abstract class BenchPicker(
     protected val nowMenu = AtomicReference<Mode>()
     protected val statusReset = NeoKeyMenu.MenuItem("Stat", icon = IMAGE_SKULL, action = { RosetteStatus.reset() })
 
-    private val logger = LoggerFactory.getLogger(this::class.java.simpleName)
+    private val me = this.javaClass.simpleName
+    private val logger = LoggerFactory.getLogger(me)
 
     init {
         with(i2cMultiplexer) {
             val kbDevice = getI2CDevice(handlerChannel, NeoKey.DEFAULT_I2C_ADDRESS)
             keyBoard = NeoKey(kbDevice).apply { brightness = 0.01f }
-            keyHandler = NeoKeyHandler(keyBoard, initialBrightness = 0.01f)
+            keyHandler = NeoKeyHandler(keyBoard, initialBrightness = 0.01f, name = me)
             display = TheScreen(getI2CDevice(screenChannel, SSD1306.DEFAULT_I2C_ADDRESS))
         }
     }
@@ -61,7 +66,18 @@ abstract class BenchPicker(
         }
 
     override fun start() {
-        menuSelections.values.forEach { it.startAsync() }
+        // register an event listener on the EentBus for a NeioKey press
+        EventBus.subscribe<NeoKeyEvent>(name = me, onEvent = { event ->
+            menuSelections[nowMenu.get()]?.run {
+                event.buttons.forEachIndexed { index, yes ->
+                    if (yes) {
+                        logger.info("Button $index pressed in menu ${nowMenu.get()}")
+                        menuItems[index].action()
+                    }
+                }
+            }
+        })
+        keyHandler.startAsync(50.milliseconds)
         selectMenu(menuSelections.keys.first())
     }
 
@@ -79,28 +95,7 @@ abstract class BenchPicker(
         menuSelections[selected]!!.displayMenu()
     }
 
-    protected fun makeAMenu(items: List<NeoKeyMenu.MenuItem>) =
-        items.let {
-            var menuRef: NeoKeyMenu? = null
-            val updatedItems =
-                it.map {
-                    NeoKeyMenu.MenuItem(
-                        it.name,
-                        it.abbrev,
-                        it.icon,
-                        it.buttonColor,
-                        action = {
-                            val m = nowMenu.get()
-                            logger.info("Validating $m - ${menuSelections[m]} vs $menuRef")
-                            if (menuSelections[m] == menuRef) {
-                                logger.warn("Running action")
-//                                it.action()
-                            }
-                        },
-                    )
-                }
-            NeoKeyMenu(keyHandler, display, updatedItems).also {
-                menuRef = it
-            }
-        }
+    protected fun makeAMenu(items: List<NeoKeyMenu.MenuItem>) = NeoKeyMenu(keyHandler, display, items)
 }
+
+// 3644120 139312  35680 S  23.8  15.0
