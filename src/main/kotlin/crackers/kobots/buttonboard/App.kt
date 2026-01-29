@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 by E. A. Graham, Jr.
+ * Copyright 2022-2026 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ private var runningRemote: Boolean = false
 internal val isRemote: Boolean
     get() = runningRemote
 
-internal val i2cMultiplexer: I2CMultiplexer by lazy { I2CMultiplexer() }
+internal val i2cMultiplexer = I2CMultiplexer()
 internal val haDevice = DeviceIdentifier("Kobots", "ButtonBoard")
 
 private lateinit var theFuture: Job

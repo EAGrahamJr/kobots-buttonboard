@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 by E. A. Graham, Jr.
+ * Copyright 2022-2026 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,54 +24,56 @@ import crackers.kobots.parts.app.io.NeoKeyMenu
  */
 object FrontBenchPicker : BenchPicker(0, 0) {
     private val disabledMenu = List(4) { i -> if (i == 3) stahp else NeoKeyMenu.NO_KEY }
-    override val menuSelections =
-        mapOf(
-            Mode.NIGHT to
-                makeAMenu(
-                    listOf(
-                        HomeAssistantMenus.morningScene,
-                        NeoKeyMenu.NO_KEY,
-                        HomeAssistantMenus.fanControl,
-                        stahp,
+    override val menuSelections: Map<Mode, NeoKeyMenu>
+        get() {
+            return mapOf(
+                Mode.NIGHT to
+                    makeAMenu(
+                        listOf(
+                            HomeAssistantMenus.morningScene,
+                            NeoKeyMenu.NO_KEY,
+                            HomeAssistantMenus.fanControl,
+                            stahp,
+                        ),
                     ),
-                ),
-            Mode.MORNING to
-                makeAMenu(
-                    listOf(
-                        HomeAssistantMenus.fanControl,
-                        NeoKeyMenu.NO_KEY,
-                        statusReset,
-                        stahp,
+                Mode.MORNING to
+                    makeAMenu(
+                        listOf(
+                            HomeAssistantMenus.fanControl,
+                            NeoKeyMenu.NO_KEY,
+                            statusReset,
+                            stahp,
+                        ),
                     ),
-                ),
-            Mode.DAYTIME to
-                makeAMenu(
-                    listOf(
-                        HomeAssistantMenus.fanControl,
-                        HomeAssistantMenus.printerToggle,
-                        statusReset,
-                        stahp,
+                Mode.DAYTIME to
+                    makeAMenu(
+                        listOf(
+                            HomeAssistantMenus.fanControl,
+                            HomeAssistantMenus.printerToggle,
+                            statusReset,
+                            stahp,
+                        ),
                     ),
-                ),
-            Mode.EVENING to
-                makeAMenu(
-                    listOf(
-                        HomeAssistantMenus.fanControl,
-                        HomeAssistantMenus.bedroomToggle,
-                        NeoKeyMenu.NO_KEY,
-                        stahp,
+                Mode.EVENING to
+                    makeAMenu(
+                        listOf(
+                            HomeAssistantMenus.fanControl,
+                            HomeAssistantMenus.bedroomToggle,
+                            NeoKeyMenu.NO_KEY,
+                            stahp,
+                        ),
                     ),
-                ),
-            Mode.AUDIO to
-                makeAMenu(
-                    listOf(
-                        SystemMenus.deselectAudioItem,
-                        NeoKeyMenu.NO_KEY,
-                        NeoKeyMenu.NO_KEY,
-                        NeoKeyMenu.NO_KEY,
+                Mode.AUDIO to
+                    makeAMenu(
+                        listOf(
+                            SystemMenus.deselectAudioItem,
+                            NeoKeyMenu.NO_KEY,
+                            NeoKeyMenu.NO_KEY,
+                            NeoKeyMenu.NO_KEY,
+                        ),
                     ),
-                ),
-            Mode.DISABLED to
-                makeAMenu(disabledMenu),
-        )
+                Mode.DISABLED to
+                    makeAMenu(disabledMenu),
+            )
+        }
 }

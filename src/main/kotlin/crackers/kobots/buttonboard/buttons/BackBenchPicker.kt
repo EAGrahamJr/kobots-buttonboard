@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 by E. A. Graham, Jr.
+ * Copyright 2022-2026 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,54 +24,56 @@ import crackers.kobots.parts.app.io.NeoKeyMenu
  */
 object BackBenchPicker : BenchPicker(1, 1) {
     private val disabledMenu = List(4) { i -> NeoKeyMenu.NO_KEY }
-    override val menuSelections =
-        mapOf(
-            Mode.NIGHT to
-                makeAMenu(
-                    listOf(
-                        HomeAssistantMenus.nightOffFunction,
-                        NeoKeyMenu.NO_KEY,
-                        HomeAssistantMenus.bedroomToggle,
-                        HomeAssistantMenus.daytimeScene,
+    override val menuSelections: Map<Mode, NeoKeyMenu>
+        get() {
+            return mapOf(
+                Mode.NIGHT to
+                    makeAMenu(
+                        listOf(
+                            HomeAssistantMenus.nightOffFunction,
+                            NeoKeyMenu.NO_KEY,
+                            HomeAssistantMenus.bedroomToggle,
+                            HomeAssistantMenus.daytimeScene,
+                        ),
                     ),
-                ),
-            Mode.MORNING to
-                makeAMenu(
-                    listOf(
-                        HomeAssistantMenus.daytimeScene,
-                        HomeAssistantMenus.kitchenLights,
-                        NeoKeyMenu.NO_KEY,
-                        HomeAssistantMenus.morningScene,
+                Mode.MORNING to
+                    makeAMenu(
+                        listOf(
+                            HomeAssistantMenus.daytimeScene,
+                            HomeAssistantMenus.kitchenLights,
+                            NeoKeyMenu.NO_KEY,
+                            HomeAssistantMenus.morningScene,
+                        ),
                     ),
-                ),
-            Mode.DAYTIME to
-                makeAMenu(
-                    listOf(
-                        HomeAssistantMenus.daytimeScene,
-                        HomeAssistantMenus.movieViewing,
-                        HomeAssistantMenus.kitchenLights,
-                        HomeAssistantMenus.bedroomToggle,
+                Mode.DAYTIME to
+                    makeAMenu(
+                        listOf(
+                            HomeAssistantMenus.daytimeScene,
+                            HomeAssistantMenus.movieViewing,
+                            HomeAssistantMenus.kitchenLights,
+                            HomeAssistantMenus.bedroomToggle,
+                        ),
                     ),
-                ),
-            Mode.EVENING to
-                makeAMenu(
-                    listOf(
-                        HomeAssistantMenus.nightOffFunction,
-                        NeoKeyMenu.NO_KEY,
-                        HomeAssistantMenus.bedtimeScene,
-                        HomeAssistantMenus.lateNightScene,
+                Mode.EVENING to
+                    makeAMenu(
+                        listOf(
+                            HomeAssistantMenus.nightOffFunction,
+                            NeoKeyMenu.NO_KEY,
+                            HomeAssistantMenus.bedtimeScene,
+                            HomeAssistantMenus.lateNightScene,
+                        ),
                     ),
-                ),
-            Mode.AUDIO to
-                makeAMenu(
-                    listOf(
-                        HomeAssistantMenus.mediaPrevious,
-                        HomeAssistantMenus.mediaPause,
-                        HomeAssistantMenus.mediaPlay,
-                        HomeAssistantMenus.mediaNext,
+                Mode.AUDIO to
+                    makeAMenu(
+                        listOf(
+                            HomeAssistantMenus.mediaPrevious,
+                            HomeAssistantMenus.mediaPause,
+                            HomeAssistantMenus.mediaPlay,
+                            HomeAssistantMenus.mediaNext,
+                        ),
                     ),
-                ),
-            Mode.DISABLED to
-                makeAMenu(disabledMenu),
-        )
+                Mode.DISABLED to
+                    makeAMenu(disabledMenu),
+            )
+        }
 }

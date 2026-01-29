@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 by E. A. Graham, Jr.
+ * Copyright 2022-2026 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,9 @@ repositories {
 
 val DIOZERO_VER = "1.4.1"
 
-val DEVICES_VER = "0.2+"
-val PARTS_VER = "0.3+"
+// stuplidly trusting my own versioning scheme here
+val DEVICES_VER = "0+"
+val PARTS_VER = "0+"
 val HASSK_VER = "0+"
 
 val JAR_NAME = "bboard"

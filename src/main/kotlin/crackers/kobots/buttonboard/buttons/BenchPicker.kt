@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 by E. A. Graham, Jr.
+ * Copyright 2022-2026 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package crackers.kobots.buttonboard.buttons
 
-import EventBus
-import NeoKeyEvent
 import com.diozero.devices.oled.SSD1306
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.GraphicsStuff
@@ -28,8 +26,10 @@ import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.parts.app.io.NeoKeyHandler
 import crackers.kobots.parts.app.io.NeoKeyMenu
+import crackers.kobots.parts.movement.async.EventBus
+import crackers.kobots.parts.movement.async.NeoKeyEvent
+import crackers.kobots.parts.movement.async.startAsync
 import org.slf4j.LoggerFactory
-import startAsync
 import java.awt.Color
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration.Companion.milliseconds

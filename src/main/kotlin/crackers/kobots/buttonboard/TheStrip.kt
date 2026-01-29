@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 by E. A. Graham, Jr.
+ * Copyright 2022-2026 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,15 @@ import crackers.kobots.devices.lighting.WS2811.PixelColor
 import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.PURPLE
-import crackers.kobots.parts.app.KobotSleep
 import crackers.kobots.parts.colorIntervalFromHSB
 import crackers.kobots.parts.movement.async.AppScope
+import crackers.kobots.parts.sleep
 import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.time.LocalDateTime
 import java.time.Month
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -77,9 +78,7 @@ object TheStrip : AppCommon.Startable {
                     Mode.MORNING -> strip[stripOffset, stripLast] = PixelColor(GOLDENROD, brightness = 0.03f)
                     Mode.EVENING -> strip[stripOffset, stripLast] = PixelColor(Color.RED, brightness = 0.03f)
                     Mode.NIGHT -> strip[stripOffset, stripLast] = Color.BLACK
-                    Mode.DAYTIME -> { // handled by the daytime effect
-                    }
-
+                    Mode.DAYTIME -> logger.debug("No-op")
                     Mode.DISABLED -> strip[stripOffset, stripLast] = PixelColor(Color.BLUE.darker(), brightness = 0.03f)
                     else -> strip[stripOffset, stripLast] = PixelColor(PURPLE, brightness = .7f)
                 }
@@ -138,7 +137,7 @@ object TheStrip : AppCommon.Startable {
             AppCommon.applicationRunning || return
             strip[count] = whichColors[lastIndexUsed++]
             if (lastIndexUsed >= 30) lastIndexUsed = 0
-            KobotSleep.millis(75)
+            350.milliseconds.sleep()
         }
         lastIndexUsed++
         if (lastIndexUsed >= 30) lastIndexUsed = 0
