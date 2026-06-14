@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 by E. A. Graham, Jr.
+ * Copyright 2022-2026 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
 package crackers.kobots.buttonboard.environment
 
 import com.diozero.devices.oled.SH1106
-import com.diozero.devices.oled.SsdOledCommunicationChannel
+import com.diozero.devices.oled.SsdOledCommunicationChannel.I2cCommunicationChannel
 import crackers.kobots.app.AppCommon
-import crackers.kobots.app.AppCommon.ignoreErrors
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.buttonboard.i2cMultiplexer
@@ -91,26 +90,26 @@ object EnvironmentDisplay : AppCommon.Startable {
     // @formatter:on
 
     override fun start() {
-        val block = {
+        runCatching {
             val i2cDevice = i2cMultiplexer.getI2CDevice(7, SH1106.DEFAULT_I2C_ADDRESS)
-            screen =
-                SH1106(SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice)).apply {
-                    display = false
-                    clear()
-                    setContrast(0x20.toByte())
-                }
+            screen = SH1106(I2cCommunicationChannel(i2cDevice)).apply {
+                display = false
+                clear()
+                setContrast(0x20.toByte())
+            }
 
             future = AppScope.scheduleWithFixedDelay(15.seconds, 5.minutes, ::updateDisplay)
+            logger.warn("Display started")
         }
-        ignoreErrors(block, true)
+            .getOrElse { logger.error("Error starting", it) }
     }
 
     override fun stop() {
         if (::future.isInitialized) future.cancel()
-        ignoreErrors({
+        runCatching {
             screen.display = false
             screen.close()
-        })
+        }
     }
 
     private var lastGraphicShown = -1
@@ -131,7 +130,7 @@ object EnvironmentDisplay : AppCommon.Startable {
                 when (next) {
                     RAIN ->
                         rain.start {
-                            ignoreErrors(::updateScreen)
+                            runCatching { ::updateScreen }
                         }
 
                     OUTSIDE -> {

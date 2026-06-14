@@ -21,7 +21,6 @@ import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.GraphicsStuff
 import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
 import crackers.kobots.buttonboard.Mode
-import crackers.kobots.buttonboard.RosetteStatus
 import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.parts.app.io.NeoKeyHandler
@@ -46,7 +45,11 @@ abstract class BenchPicker(
     val display: TheScreen
     protected abstract val menuSelections: Map<Mode, NeoKeyMenu>
     protected val nowMenu = AtomicReference<Mode>()
-    protected val statusReset = NeoKeyMenu.MenuItem("Stat", icon = IMAGE_SKULL, action = { RosetteStatus.reset() })
+    protected val statusReset =
+        NeoKeyMenu.MenuItem("Stat", icon = IMAGE_SKULL, action = {
+            // RosetteStatus.reset(
+            println("ignore")
+        })
 
     private val me = this.javaClass.simpleName
     private val logger = LoggerFactory.getLogger(me)

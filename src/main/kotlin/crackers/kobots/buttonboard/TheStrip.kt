@@ -17,7 +17,6 @@
 package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
-import crackers.kobots.app.AppCommon.mqttClient
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.devices.getOrCreateI2CDevice
 import crackers.kobots.devices.lighting.NeoPixel
@@ -48,7 +47,7 @@ object TheStrip : AppCommon.Startable {
 
     private lateinit var future: Job
 
-    private val stripOffset = 8
+    private val stripOffset = 0
     private val stripLast = stripOffset + 29
 
     override fun start() {
@@ -63,7 +62,7 @@ object TheStrip : AppCommon.Startable {
                 autoWrite = true
             }
         future = AppScope.scheduleWithFixedDelay(10.seconds, 10.seconds, ::showIt)
-        RosetteStatus.manageAliveChecks(strip, mqttClient, 0)
+        logger.warn("Strip started")
     }
 
     fun showIt() {
@@ -82,8 +81,6 @@ object TheStrip : AppCommon.Startable {
                     Mode.DISABLED -> strip[stripOffset, stripLast] = PixelColor(Color.BLUE.darker(), brightness = 0.03f)
                     else -> strip[stripOffset, stripLast] = PixelColor(PURPLE, brightness = .7f)
                 }
-
-                RosetteStatus.goToSleep.set(currentMode == Mode.NIGHT || currentMode == Mode.DISABLED)
             }
         }
     }

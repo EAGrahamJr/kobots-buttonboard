@@ -18,8 +18,6 @@ package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.REMOTE_PI
-import crackers.kobots.app.AppCommon.ignoreErrors
-import crackers.kobots.app.AppCommon.mqttClient
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.buttons.BackBenchPicker
 import crackers.kobots.buttonboard.buttons.FrontBenchPicker
@@ -95,8 +93,12 @@ private val schtuff = listOf(TheStrip, EnvironmentDisplay, FrontBenchPicker, Bac
  */
 fun main(args: Array<String>) {
     runningRemote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
+    startMqttStuff()
+    logger.warn("Warmed up maybe")
 
     schtuff.forEach(AppCommon.Startable::start)
+
+    logger.warn("mostly started")
 
     // anti-cat device: disable buttons (enabled by default)
     val switch =
@@ -108,12 +110,11 @@ fun main(args: Array<String>) {
                 }
             override val name = "Enable Buttons"
         }
-    KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).start()
+//    KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).start()
 
     // start the "mode" loop
     theFuture = AppScope.scheduleWithFixedDelay(15.seconds, 1.minutes, ::modeAndKeyboardCheck)
     // start the MQTT client
-    startMqttStuff()
 
     Runtime.getRuntime().addShutdownHook(thread(start = false, block = ::shutdown))
     AppCommon.awaitTermination()
@@ -129,19 +130,20 @@ fun shutdown() {
     theFuture.cancel()
     logger.error("Shutdown")
 
-    schtuff.forEach { ignoreErrors(it::stop) }
+    schtuff.forEach { thing -> runCatching { (thing::stop)() } }
     // because
     sleep(1000)
     i2cMultiplexer.close()
 }
 
-private fun startMqttStuff() =
-    with(mqttClient) {
+private fun startMqttStuff() {
+    with(AppCommon.mqttClient) {
         startAliveCheck()
         subscribeJSON("kobots_auto/bedroom_lamp/state") { payload ->
             if (currentMode == Mode.MORNING && payload.optString("state", "off") == "on") currentMode = Mode.DAYTIME
         }
     }
+}
 
 private fun modeAndKeyboardCheck() {
     whileRunning {
