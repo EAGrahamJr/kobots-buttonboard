@@ -93,30 +93,19 @@ private val schtuff = listOf(TheStrip, EnvironmentDisplay, FrontBenchPicker, Bac
  */
 fun main(args: Array<String>) {
     runningRemote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
+
+    // start the MQTT client
     startMqttStuff()
     logger.warn("Warmed up maybe")
 
     schtuff.forEach(AppCommon.Startable::start)
-
     logger.warn("mostly started")
-
-    // anti-cat device: disable buttons (enabled by default)
-    val switch =
-        object : KobotSwitch.Companion.OnOffDevice {
-            override var isOn: Boolean
-                get() = buttonsEnabled.get()
-                set(v) {
-                    buttonsEnabled.set(v)
-                }
-            override val name = "Enable Buttons"
-        }
-//    KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).start()
 
     // start the "mode" loop
     theFuture = AppScope.scheduleWithFixedDelay(15.seconds, 1.minutes, ::modeAndKeyboardCheck)
-    // start the MQTT client
 
     Runtime.getRuntime().addShutdownHook(thread(start = false, block = ::shutdown))
+    logger.warn("And away we go...")
     AppCommon.awaitTermination()
     logger.warn("Exiting ")
     exitProcess(0)
@@ -143,6 +132,18 @@ private fun startMqttStuff() {
             if (currentMode == Mode.MORNING && payload.optString("state", "off") == "on") currentMode = Mode.DAYTIME
         }
     }
+
+    // anti-cat device: disable buttons (enabled by default)
+    val switch =
+        object : KobotSwitch.Companion.OnOffDevice {
+            override var isOn: Boolean
+                get() = buttonsEnabled.get()
+                set(v) {
+                    buttonsEnabled.set(v)
+                }
+            override val name = "Enable Buttons"
+        }
+    KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).start()
 }
 
 private fun modeAndKeyboardCheck() {

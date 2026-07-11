@@ -92,16 +92,16 @@ object EnvironmentDisplay : AppCommon.Startable {
     override fun start() {
         runCatching {
             val i2cDevice = i2cMultiplexer.getI2CDevice(7, SH1106.DEFAULT_I2C_ADDRESS)
-            screen = SH1106(I2cCommunicationChannel(i2cDevice)).apply {
-                display = false
-                clear()
-                setContrast(0x20.toByte())
-            }
+            screen =
+                SH1106(I2cCommunicationChannel(i2cDevice)).apply {
+                    display = false
+                    clear()
+                    setContrast(0x20.toByte())
+                }
 
             future = AppScope.scheduleWithFixedDelay(15.seconds, 5.minutes, ::updateDisplay)
             logger.warn("Display started")
-        }
-            .getOrElse { logger.error("Error starting", it) }
+        }.getOrElse { logger.error("Error starting", it) }
     }
 
     override fun stop() {

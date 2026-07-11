@@ -14,25 +14,9 @@
  * permissions and limitations under the License.
  */
 
-/*
- * Copyright 2022-2026 by E. A. Graham, Jr.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 plugins {
     application
-    kotlin("jvm") version "2.2.0"
+    kotlin("jvm") version "2.3.0"
     id("com.gradleup.shadow") version "9.2.2"
     id("org.jmailen.kotlinter") version "5.2.0"
     id("com.github.ben-manes.versions") version "0.52.0"
@@ -73,14 +57,14 @@ application {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
 }
 
 kotlinter {
 
 }
 
-val sshTarget = System.getProperty("remote", "psyche.local")
+val sshTarget = System.getProperty("remote", "zeke.local")
 val shipIt: Provider<String> = providers.exec {
     commandLine(
         "sh", "-c", """

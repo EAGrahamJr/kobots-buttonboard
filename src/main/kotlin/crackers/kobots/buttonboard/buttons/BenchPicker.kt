@@ -18,8 +18,6 @@ package crackers.kobots.buttonboard.buttons
 
 import com.diozero.devices.oled.SSD1306
 import crackers.kobots.app.AppCommon
-import crackers.kobots.buttonboard.GraphicsStuff
-import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
 import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.i2cMultiplexer
 import crackers.kobots.devices.io.NeoKey
@@ -45,11 +43,6 @@ abstract class BenchPicker(
     val display: TheScreen
     protected abstract val menuSelections: Map<Mode, NeoKeyMenu>
     protected val nowMenu = AtomicReference<Mode>()
-    protected val statusReset =
-        NeoKeyMenu.MenuItem("Stat", icon = IMAGE_SKULL, action = {
-            // RosetteStatus.reset(
-            println("ignore")
-        })
 
     private val me = this.javaClass.simpleName
     private val logger = LoggerFactory.getLogger(me)
@@ -62,11 +55,6 @@ abstract class BenchPicker(
             display = TheScreen(getI2CDevice(screenChannel, SSD1306.DEFAULT_I2C_ADDRESS))
         }
     }
-
-    val stahp =
-        NeoKeyMenu.MenuItem("Stop", icon = GraphicsStuff.CANCEL_ICON, buttonColor = Color.RED) {
-            AppCommon.applicationRunning = false
-        }
 
     override fun start() {
         // register an event listener on the EentBus for a NeioKey press

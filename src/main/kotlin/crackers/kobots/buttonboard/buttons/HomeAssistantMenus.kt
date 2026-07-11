@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 by E. A. Graham, Jr.
+ * Copyright 2022-2026 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package crackers.kobots.buttonboard.buttons
 
-import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.GraphicsStuff.DARK_CYAN
 import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_BED
 import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_BULB
@@ -53,21 +52,21 @@ object HomeAssistantMenus {
     val nightOffFunction =
         MenuItem("Off", icon = IMAGE_EXIT, buttonColor = GOLDENROD) {
             HassActions.NOT_ALL()
-            MusicPlayActions.STOP()
+//            MusicPlayActions.STOP()
         }
 
     val fanControl =
         MenuItem("Fan", icon = IMAGE_FAN, buttonColor = Color.BLUE) {
             HassActions.OFFICE_FAN()
-            with(AppCommon.hasskClient) {
-                (if (switch("small_fan").state().state == "off") MusicPlayActions.PLAY else MusicPlayActions.STOP)()
-            }
+//            with(AppCommon.hasskClient) {
+//                (if (switch("small_fan").state().state == "off") MusicPlayActions.PLAY else MusicPlayActions.STOP)()
+//            }
         }
 
     val morningScene =
         MenuItem("Morn", icon = IMAGE_SUN, buttonColor = GOLDENROD) {
             HassActions.MORNING()
-            MusicPlayActions.PLAY()
+//            MusicPlayActions.PLAY()
         }
 
     val daytimeScene = MenuItem("Day", icon = IMAGE_BULB, buttonColor = Color.GREEN) { HassActions.DAYTIME() }
@@ -76,13 +75,13 @@ object HomeAssistantMenus {
     val tvViewing =
         MenuItem("TV", icon = IMAGE_TV, buttonColor = PURPLE) {
             HassActions.TV()
-            MusicPlayActions.STOP()
+//            MusicPlayActions.STOP()
         }
 
     val movieViewing =
         MenuItem("Movie", icon = IMAGE_MOVIE, buttonColor = Color.RED.darker()) {
             HassActions.MOVIE()
-            MusicPlayActions.STOP()
+//            MusicPlayActions.STOP()
         }
 
     val printerToggle = MenuItem("Pntr", icon = IMAGE_PRINTER, buttonColor = GOLDENROD) { HassActions.THING_PRINTER() }

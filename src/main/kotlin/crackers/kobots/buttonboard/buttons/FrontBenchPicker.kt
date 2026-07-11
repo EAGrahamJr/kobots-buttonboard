@@ -16,14 +16,28 @@
 
 package crackers.kobots.buttonboard.buttons
 
+import crackers.kobots.app.AppCommon
+import crackers.kobots.buttonboard.GraphicsStuff
+import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
 import crackers.kobots.buttonboard.Mode
 import crackers.kobots.parts.app.io.NeoKeyMenu
+import java.awt.Color
 
 /**
  * Handles what menu items are shown for the front "bench" (NeoKey) buttons.
  */
 object FrontBenchPicker : BenchPicker(0, 0) {
-    private val disabledMenu = List(4) { i -> if (i == 3) stahp else NeoKeyMenu.NO_KEY }
+    private val stahp =
+        NeoKeyMenu.MenuItem("Stop", icon = GraphicsStuff.CANCEL_ICON, buttonColor = Color.RED) {
+            AppCommon.applicationRunning = false
+        }
+    private val sayGoodbye =
+        NeoKeyMenu.MenuItem("Bye", icon = IMAGE_SKULL, action = {
+            ProcessBuilder("sudo", "poweroff").start()
+        })
+
+    private val disabledMenu = List(4) { i -> if (i == 3) sayGoodbye else NeoKeyMenu.NO_KEY }
+
     override val menuSelections: Map<Mode, NeoKeyMenu>
         get() {
             return mapOf(
@@ -41,7 +55,7 @@ object FrontBenchPicker : BenchPicker(0, 0) {
                         listOf(
                             HomeAssistantMenus.fanControl,
                             NeoKeyMenu.NO_KEY,
-                            statusReset,
+                            sayGoodbye,
                             stahp,
                         ),
                     ),
@@ -50,7 +64,7 @@ object FrontBenchPicker : BenchPicker(0, 0) {
                         listOf(
                             HomeAssistantMenus.fanControl,
                             HomeAssistantMenus.printerToggle,
-                            statusReset,
+                            sayGoodbye,
                             stahp,
                         ),
                     ),

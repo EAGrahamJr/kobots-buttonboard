@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 by E. A. Graham, Jr.
+ * Copyright 2022-2026 by E. A. Graham, Jr.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,9 @@ object TheActions {
         ALL_LIGHTS,
         ;
 
-        private fun HAssKClient.toggleOnSwitch(name: String) = if (switch(name).state().state == "off") on else off
+        private fun HAssKClient.switchState(name: String) = switch(name).state().state != "off"
 
-        private fun HAssKClient.toggleOnLight(name: String) = if (light(name).state().state == "off") on else off
+        private fun HAssKClient.lightState(name: String) = light(name).state().state != "off"
 
         override fun invoke() {
             val action = this
@@ -68,9 +68,9 @@ object TheActions {
                 when (action) {
                     DAYTIME -> scene("daily") turn on
                     MORNING -> scene("early_morning") turn on
-                    OFFICE -> group("office_group") turn toggleOnLight("paper")
-                    BEDROOM -> group("bedroom_group") turn toggleOnLight("shelf_lamp")
-                    KITCHEN -> light("pot_lights") turn toggleOnLight("pot_lights")
+                    OFFICE -> group("office_group") turn !lightState("paper")
+                    BEDROOM -> group("bedroom_group") turn !lightState("shelf_lamp")
+                    KITCHEN -> light("pot_lights") turn !lightState("pot_lights")
                     TV -> scene("daytime_tv") turn on
                     MOVIE -> scene("movie_time") turn on
                     BEDTIME -> scene("bed_time") turn on
@@ -79,11 +79,11 @@ object TheActions {
                         if (LocalTime.now().isAfter(TEN_THIRTY)) {
                             currentMode = Mode.NIGHT
                         }
-                        group("not_bedroom_group") turn off
+                        light("not_bedroom_group") turn off
                     }
 
-                    OFFICE_FAN -> switch("small_fan") turn toggleOnSwitch("small_fan")
-                    THING_PRINTER -> switch("3d_printer_switch") turn toggleOnSwitch("3d_printer_switch")
+                    OFFICE_FAN -> switch("small_fan") turn !switchState("small_fan")
+                    THING_PRINTER -> switch("3d_printer_switch") turn !switchState("3d_printer_switch")
                     TFE -> scene("tfe") turn on
                     POST_TV -> scene("post_tv") turn on
                     ALL_LIGHTS -> light("all_lights") turn on
