@@ -35,14 +35,12 @@ class OutsideState(
     val graphics2D: Graphics2D,
     val tempWidth: Int,
 ) {
-    private val theFont = Font(Font.SANS_SERIF, Font.PLAIN, 32)
-    private val theFM: FontMetrics
-    val tempHeight: Int
-
-    init {
-        theFM = graphics2D.getFontMetrics(theFont)
-        tempHeight = theFM.height + 1
-    }
+    private val theFont =
+        javaClass.getResourceAsStream("/Oxanium-Regular.ttf")!!.use {
+            Font.createFont(Font.TRUETYPE_FONT, it).deriveFont(Font.PLAIN, 32f)
+        }
+    private val theFM = graphics2D.getFontMetrics(theFont)
+    val tempHeight = theFM.height + 1
 
     internal fun show(
         x: Int = 0,
@@ -56,7 +54,7 @@ class OutsideState(
         // the temp goes at the top/left of the area
         font = theFont
         color = temperatureColor(temp)
-        val tempString = "$temp\u2109"
+        val tempString = "${temp}F"
         val xString = tempWidth - fontMetrics.stringWidth(tempString) - 3
         drawString(tempString, xString, y + theFM.ascent)
     }

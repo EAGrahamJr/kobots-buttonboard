@@ -85,6 +85,7 @@ private lateinit var theFuture: Job
 
 private val shutDown = AtomicBoolean(false)
 private val buttonsEnabled = AtomicBoolean(true)
+private lateinit var schtopButton: KobotSwitch
 
 private val schtuff = listOf(TheStrip, EnvironmentDisplay, FrontBenchPicker, BackBenchPicker)
 
@@ -139,11 +140,13 @@ private fun startMqttStuff() {
             override var isOn: Boolean
                 get() = buttonsEnabled.get()
                 set(v) {
+                    logger.warn("Switch isOn: $isOn")
                     buttonsEnabled.set(v)
                 }
             override val name = "Enable Buttons"
         }
-    KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).start()
+
+    schtopButton = KobotSwitch(switch, "bb_enable", "Enable BB", haDevice).apply { start() }
 }
 
 private fun modeAndKeyboardCheck() {

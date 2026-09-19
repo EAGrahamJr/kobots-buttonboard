@@ -22,6 +22,7 @@ import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
 import crackers.kobots.buttonboard.Mode
 import crackers.kobots.parts.app.io.NeoKeyMenu
 import java.awt.Color
+import kotlin.system.exitProcess
 
 /**
  * Handles what menu items are shown for the front "bench" (NeoKey) buttons.
@@ -29,7 +30,7 @@ import java.awt.Color
 object FrontBenchPicker : BenchPicker(0, 0) {
     private val stahp =
         NeoKeyMenu.MenuItem("Stop", icon = GraphicsStuff.CANCEL_ICON, buttonColor = Color.RED) {
-            AppCommon.applicationRunning = false
+            exitProcess(1)
         }
     private val sayGoodbye =
         NeoKeyMenu.MenuItem("Bye", icon = IMAGE_SKULL, action = {

@@ -26,6 +26,8 @@ import crackers.kobots.parts.app.io.NeoKeyMenu
 import crackers.kobots.parts.movement.async.EventBus
 import crackers.kobots.parts.movement.async.NeoKeyEvent
 import crackers.kobots.parts.movement.async.startAsync
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.util.concurrent.atomic.AtomicReference
@@ -57,13 +59,13 @@ abstract class BenchPicker(
     }
 
     override fun start() {
-        // register an event listener on the EentBus for a NeioKey press
+        // register an event listener on the EventBus for a NeoKey press
         EventBus.subscribe<NeoKeyEvent>(name = me, onEvent = { event ->
             menuSelections[nowMenu.get()]?.run {
                 event.buttons.forEachIndexed { index, yes ->
                     if (yes) {
                         logger.info("Button $index pressed in menu ${nowMenu.get()}")
-                        menuItems[index].action()
+                        withContext(Dispatchers.IO) { menuItems[index].action() }
                     }
                 }
             }
