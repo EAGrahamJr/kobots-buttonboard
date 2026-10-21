@@ -20,12 +20,12 @@ import com.diozero.devices.oled.SSD1306
 import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.Mode
 import crackers.kobots.buttonboard.i2cMultiplexer
+import crackers.kobots.coroutine.EventBus
+import crackers.kobots.coroutine.NeoKeyEvent
+import crackers.kobots.coroutine.startAsync
 import crackers.kobots.devices.io.NeoKey
 import crackers.kobots.parts.app.io.NeoKeyHandler
 import crackers.kobots.parts.app.io.NeoKeyMenu
-import crackers.kobots.parts.movement.async.EventBus
-import crackers.kobots.parts.movement.async.NeoKeyEvent
-import crackers.kobots.parts.movement.async.startAsync
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory

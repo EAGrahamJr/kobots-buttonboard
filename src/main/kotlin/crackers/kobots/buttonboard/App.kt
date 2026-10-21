@@ -16,16 +16,20 @@
 
 package crackers.kobots.buttonboard
 
+import com.diozero.devices.Button
 import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.REMOTE_PI
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.buttons.BackBenchPicker
 import crackers.kobots.buttonboard.buttons.FrontBenchPicker
 import crackers.kobots.buttonboard.environment.EnvironmentDisplay
+import crackers.kobots.coroutine.AppScope
+import crackers.kobots.coroutine.EventBus
+import crackers.kobots.coroutine.KobotsButtonEvent
+import crackers.kobots.coroutine.startAsync
 import crackers.kobots.devices.expander.I2CMultiplexer
 import crackers.kobots.mqtt.homeassistant.DeviceIdentifier
 import crackers.kobots.mqtt.homeassistant.KobotSwitch
-import crackers.kobots.parts.movement.async.AppScope
 import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
@@ -34,6 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -82,6 +87,7 @@ internal val i2cMultiplexer = I2CMultiplexer()
 internal val haDevice = DeviceIdentifier("Kobots", "ButtonBoard")
 
 private lateinit var theFuture: Job
+private lateinit var killSwitchJob: Job
 
 private val shutDown = AtomicBoolean(false)
 private val buttonsEnabled = AtomicBoolean(true)
@@ -93,6 +99,7 @@ private val schtuff = listOf(TheStrip, EnvironmentDisplay, FrontBenchPicker, Bac
  * Uses NeoKey 1x4 as a HomeAssistant controller (and likely other things).
  */
 fun main(args: Array<String>) {
+    AppScope.withThreads(1)
     runningRemote = args.isNotEmpty().also { if (it) System.setProperty(REMOTE_PI, args[0]) }
 
     // start the MQTT client
@@ -104,6 +111,14 @@ fun main(args: Array<String>) {
 
     // start the "mode" loop
     theFuture = AppScope.scheduleWithFixedDelay(15.seconds, 1.minutes, ::modeAndKeyboardCheck)
+
+    killSwitchJob =
+        Button(17)
+            .also {
+                EventBus.subscribe<KobotsButtonEvent>(name = it.name) {
+                    ProcessBuilder("sudo", "reboot").start()
+                }
+            }.startAsync(100.milliseconds)
 
     Runtime.getRuntime().addShutdownHook(thread(start = false, block = ::shutdown))
     logger.warn("And away we go...")
@@ -117,6 +132,8 @@ fun shutdown() {
         logger.error("Already stopped")
         return
     }
+
+    killSwitchJob.cancel()
     theFuture.cancel()
     logger.error("Shutdown")
 

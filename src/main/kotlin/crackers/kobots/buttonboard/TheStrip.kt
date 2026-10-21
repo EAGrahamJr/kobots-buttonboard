@@ -18,6 +18,7 @@ package crackers.kobots.buttonboard
 
 import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.whileRunning
+import crackers.kobots.coroutine.AppScope
 import crackers.kobots.devices.getOrCreateI2CDevice
 import crackers.kobots.devices.lighting.NeoPixel
 import crackers.kobots.devices.lighting.WS2811.PixelColor
@@ -25,7 +26,6 @@ import crackers.kobots.devices.microcontroller.AdafruitSeeSaw
 import crackers.kobots.parts.GOLDENROD
 import crackers.kobots.parts.PURPLE
 import crackers.kobots.parts.colorIntervalFromHSB
-import crackers.kobots.parts.movement.async.AppScope
 import crackers.kobots.parts.sleep
 import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
@@ -45,10 +45,9 @@ object TheStrip : AppCommon.Startable {
 
     private var lastMode: Mode? = null
 
-    private lateinit var future: Job
+    private lateinit var stripJob: Job
 
-    private val stripOffset = 0
-    private val stripLast = stripOffset + 29
+    private const val STRIP_SIZE = 30
 
     override fun start() {
         if (isRemote) return
@@ -57,11 +56,12 @@ object TheStrip : AppCommon.Startable {
         val i2cDevice = getOrCreateI2CDevice(1, 0x60)
         seeSaw = AdafruitSeeSaw(i2cDevice)
         strip =
-            NeoPixel(seeSaw, 38, 15).apply {
+            NeoPixel(seeSaw, STRIP_SIZE, 15).apply {
                 brightness = 0.1f
                 autoWrite = true
             }
-        future = AppScope.scheduleWithFixedDelay(10.seconds, 10.seconds, ::showIt)
+
+        stripJob = AppScope.scheduleWithFixedDelay(10.seconds, 15.seconds, ::showIt)
         logger.warn("Strip started")
     }
 
@@ -74,12 +74,12 @@ object TheStrip : AppCommon.Startable {
             if (currentMode != lastMode) {
                 lastMode = currentMode
                 when (currentMode) {
-                    Mode.MORNING -> strip[stripOffset, stripLast] = PixelColor(GOLDENROD, brightness = 0.03f)
-                    Mode.EVENING -> strip[stripOffset, stripLast] = PixelColor(Color.RED, brightness = 0.03f)
-                    Mode.NIGHT -> strip[stripOffset, stripLast] = Color.BLACK
+                    Mode.MORNING -> strip[0, STRIP_SIZE - 1] = PixelColor(GOLDENROD, brightness = 0.03f)
+                    Mode.EVENING -> strip[0, STRIP_SIZE - 1] = PixelColor(Color.RED, brightness = 0.03f)
+                    Mode.NIGHT -> strip[0, STRIP_SIZE - 1] = Color.BLACK
                     Mode.DAYTIME -> logger.debug("No-op")
-                    Mode.DISABLED -> strip[stripOffset, stripLast] = PixelColor(Color.BLUE.darker(), brightness = 0.03f)
-                    else -> strip[stripOffset, stripLast] = PixelColor(PURPLE, brightness = .7f)
+                    Mode.DISABLED -> strip[0, STRIP_SIZE - 1] = PixelColor(Color.BLUE.darker(), brightness = 0.03f)
+                    else -> strip[0, STRIP_SIZE - 1] = PixelColor(PURPLE, brightness = .7f)
                 }
             }
         }
@@ -88,8 +88,8 @@ object TheStrip : AppCommon.Startable {
     override fun stop() {
         if (isRemote) return
 
-        if (::future.isInitialized) {
-            future.cancel()
+        if (::stripJob.isInitialized) {
+            stripJob.cancel()
         }
         try {
             strip.fill(Color.BLACK)
@@ -101,12 +101,12 @@ object TheStrip : AppCommon.Startable {
     }
 
     // run it all the way 'round
-    private val rainbowColors = colorIntervalFromHSB(0f, 359f, 30).map { PixelColor(it, brightness = .6f) }
+    private val rainbowColors = colorIntervalFromHSB(0f, 359f, STRIP_SIZE).map { PixelColor(it, brightness = .6f) }
     private val xmasColors =
-        List(30) { index -> if (index % 2 == 0) Color.RED else Color.GREEN }
+        List(STRIP_SIZE) { index -> if (index % 2 == 0) Color.RED else Color.GREEN }
             .map { PixelColor(it, brightness = .3f) }
     private val caseyColors =
-        List(30) { index ->
+        List(STRIP_SIZE) { index ->
             when (index % 3) {
                 0 -> Color.GRAY
                 1 -> PURPLE
@@ -122,19 +122,21 @@ object TheStrip : AppCommon.Startable {
             return when {
                 // casey's birthday
                 now.month == Month.DECEMBER && now.dayOfMonth == 31 -> caseyColors
+
                 // xmas day just because
                 now.month == Month.DECEMBER && now.dayOfMonth == 25 -> xmasColors
+
                 // otherwise rainbow
                 else -> rainbowColors
             }
         }
 
     private fun specialDaytimeEffect() {
-        for (count in stripOffset..stripLast) {
+        for (count in 0 until STRIP_SIZE) {
             AppCommon.applicationRunning || return
             strip[count] = whichColors[lastIndexUsed++]
             if (lastIndexUsed >= 30) lastIndexUsed = 0
-            350.milliseconds.sleep()
+            150.milliseconds.sleep()
         }
         lastIndexUsed++
         if (lastIndexUsed >= 30) lastIndexUsed = 0

@@ -16,7 +16,6 @@
 
 package crackers.kobots.buttonboard.buttons
 
-import crackers.kobots.app.AppCommon
 import crackers.kobots.buttonboard.GraphicsStuff
 import crackers.kobots.buttonboard.GraphicsStuff.IMAGE_SKULL
 import crackers.kobots.buttonboard.Mode

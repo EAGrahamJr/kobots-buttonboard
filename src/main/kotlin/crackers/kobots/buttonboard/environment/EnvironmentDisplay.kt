@@ -22,9 +22,9 @@ import crackers.kobots.app.AppCommon
 import crackers.kobots.app.AppCommon.whileRunning
 import crackers.kobots.buttonboard.currentMode
 import crackers.kobots.buttonboard.i2cMultiplexer
+import crackers.kobots.coroutine.AppScope
 import crackers.kobots.graphics.animation.MatrixRain
 import crackers.kobots.graphics.center
-import crackers.kobots.parts.movement.async.AppScope
 import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
 import java.awt.Color
@@ -128,10 +128,11 @@ object EnvironmentDisplay : AppCommon.Startable {
 
                 screenGraphics.clearRect(0, 0, MAX_W, MAX_H)
                 when (next) {
-                    RAIN ->
+                    RAIN -> {
                         rain.start {
                             runCatching { ::updateScreen }
                         }
+                    }
 
                     OUTSIDE -> {
                         outsideState.show()

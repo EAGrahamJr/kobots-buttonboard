@@ -66,15 +66,42 @@ object TheActions {
 
             with(AppCommon.hasskClient) {
                 when (action) {
-                    DAYTIME -> scene("daily") turn on
-                    MORNING -> scene("early_morning") turn on
-                    OFFICE -> group("office_group") turn !lightState("paper")
-                    BEDROOM -> group("bedroom_group") turn !lightState("shelf_lamp")
-                    KITCHEN -> light("pot_lights") turn !lightState("pot_lights")
-                    TV -> scene("daytime_tv") turn on
-                    MOVIE -> scene("movie_time") turn on
-                    BEDTIME -> scene("bed_time") turn on
-                    LATE_NIGHT -> scene("late_night") turn on
+                    DAYTIME -> {
+                        scene("daily") turn on
+                    }
+
+                    MORNING -> {
+                        scene("early_morning") turn on
+                    }
+
+                    OFFICE -> {
+                        group("office_group") turn !lightState("paper")
+                    }
+
+                    BEDROOM -> {
+                        group("bedroom_group") turn !lightState("shelf_lamp")
+                    }
+
+                    KITCHEN -> {
+                        light("pot_lights") turn !lightState("pot_lights")
+                    }
+
+                    TV -> {
+                        scene("daytime_tv") turn on
+                    }
+
+                    MOVIE -> {
+                        scene("movie_time") turn on
+                    }
+
+                    BEDTIME -> {
+                        scene("bed_time") turn on
+                    }
+
+                    LATE_NIGHT -> {
+                        scene("late_night") turn on
+                    }
+
                     NOT_ALL -> {
                         if (LocalTime.now().isAfter(TEN_THIRTY)) {
                             currentMode = Mode.NIGHT
@@ -82,11 +109,25 @@ object TheActions {
                         light("not_bedroom_group") turn off
                     }
 
-                    OFFICE_FAN -> switch("small_fan") turn !switchState("small_fan")
-                    THING_PRINTER -> switch("3d_printer_switch") turn !switchState("3d_printer_switch")
-                    TFE -> scene("tfe") turn on
-                    POST_TV -> scene("post_tv") turn on
-                    ALL_LIGHTS -> light("all_lights") turn on
+                    OFFICE_FAN -> {
+                        switch("small_fan") turn !switchState("small_fan")
+                    }
+
+                    THING_PRINTER -> {
+                        switch("3d_printer_switch") turn !switchState("3d_printer_switch")
+                    }
+
+                    TFE -> {
+                        scene("tfe") turn on
+                    }
+
+                    POST_TV -> {
+                        scene("post_tv") turn on
+                    }
+
+                    ALL_LIGHTS -> {
+                        light("all_lights") turn on
+                    }
                 }
             }
         }
